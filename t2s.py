@@ -5,16 +5,18 @@ import io
 
 
 class TextToSpeech:
-    def __init__(self, json=None):
+    def __init__(self, config):
+        json = config.get("SA_FILE")
         if json:
-            self.client = texttospeech.TextToSpeechClient.from_service_account_json(json)
+            self.client = texttospeech.TextToSpeechClient.from_service_account_json(
+                json)
         else:
             self.client = texttospeech.TextToSpeechClient()
 
-    def t2s(self, text):
+    def t2s(self, text, voice="en-US-Wavenet-A"):
         synthesis_input = texttospeech.SynthesisInput(ssml=text)
         voice = texttospeech.VoiceSelectionParams(
-            name="en-US-Wavenet-A", language_code="en-US"
+            name=voice, language_code="en-US"
         )
         audio_config = texttospeech.AudioConfig(
             audio_encoding=texttospeech.AudioEncoding.MP3
@@ -32,15 +34,3 @@ class TextToSpeech:
     def lines_to_speech(self, lines):
         snippets = [self.t2s(l) for l in lines]
         return reduce(lambda a, b: a + b, snippets)
-
-    def upload_lines(self, lines, blob_name):
-        content = self.lines_to_speech(lines)
-        return self.upload_bytes(blob_name, content)
-
-
-if __name__ == "__main__":
-    path = "ssml/The TechCrunch Exchange - Bootstrapping to $80M ARR.txt"
-    with open(path) as f:
-        lines = f.readlines()
-    t2s = TextToSpeech("autopodcast")
-    t2s.upload_lines(lines, "test_pod.mp3")

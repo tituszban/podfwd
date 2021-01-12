@@ -71,19 +71,23 @@ class Feed:
 
 
 class FeedProvider:
-    collection = "feeds"
 
-    def __init__(self, projectId="autopodcast", json=None):
+    def __init__(self, config):
+        self.collection = config.get("FEED_COLLECTION")
+        
+        json = config.get("SA_FILE")
+        project_id = config.get("PROJECT_ID")
+
         if json:
             cred = credentials.Certificate(json)
             firebase_admin.initialize_app(cred)
         elif firebase_admin._DEFAULT_APP_NAME not in firebase_admin._apps:
             cred = credentials.ApplicationDefault()
             firebase_admin.initialize_app(cred, options={
-                'projectId': projectId,
+                'projectId': project_id,
             })
 
-        self.db = db = firestore.client()
+        self.db = firestore.client()
 
     def get_feed(self, email):
         doc = self.db.collection(self.collection).document(email).get()

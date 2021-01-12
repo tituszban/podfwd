@@ -5,14 +5,18 @@ from storage import StorageProvider
 import datetime
 from feed_management import FeedProvider, Feed, Item
 from parsers import TcParser
+from config import Config
 
 
 def main(request):
+    config = Config()\
+        .add_env_variables("AP_")
+    
     feed_file_name = "feed.xml"
     sa_json = os.environ.get("SA_FILE", None)
-    t2s = TextToSpeech(json=sa_json)
-    storage = StorageProvider(json=sa_json)
-    feed_provider = FeedProvider(projectId="autopodcast", json=sa_json)
+    t2s = TextToSpeech(config)
+    storage = StorageProvider(config)
+    feed_provider = FeedProvider(config)
 
     def update_feed(email, items):
         feed = feed_provider.get_feed(email)
@@ -49,11 +53,11 @@ def main(request):
     for sender, item in process_inbox():
         parser = TcParser()
         item["content"] = list(parser.parse(item["soup"]))
-        # item["sound_data"] = t2s.lines_to_speech(item["content"])
+        item["sound_data"] = t2s.lines_to_speech(item["content"])
         items_by_sender[sender] = items_by_sender.get(sender, []) + [item]
 
-    # for sender, items in items_by_sender.items():
-    #     update_feed(sender, items)
+    for sender, items in items_by_sender.items():
+        update_feed(sender, items)
 
     return "Success"
 
