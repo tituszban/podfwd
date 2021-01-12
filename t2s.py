@@ -5,15 +5,11 @@ import io
 
 
 class TextToSpeech:
-    def __init__(self, bucket_name, json=None):
+    def __init__(self, json=None):
         if json:
             self.client = texttospeech.TextToSpeechClient.from_service_account_json(json)
-            self.storage_client = storage.Client.from_service_account_json(json)
         else:
             self.client = texttospeech.TextToSpeechClient()
-            self.storage_client = storage.Client()
-
-        self.bucket = self.storage_client.get_bucket(bucket_name)
 
     def t2s(self, text):
         synthesis_input = texttospeech.SynthesisInput(ssml=text)
@@ -36,24 +32,6 @@ class TextToSpeech:
     def lines_to_speech(self, lines):
         snippets = [self.t2s(l) for l in lines]
         return reduce(lambda a, b: a + b, snippets)
-
-    def upload_bytes(self, blob_name, content):
-        blob = self.bucket.blob(blob_name)
-        blob.upload_from_file(io.BytesIO(content))
-        return blob.public_url
-
-    def upload_xml(self, blob_name, content):
-        blob = self.bucket.blob(blob_name)
-        blob.upload_from_string(content, content_type='text/xml')
-        return blob.public_url
-
-    def download_xml(self, blob_name):
-        blob = self.bucket.blob(blob_name)
-        return blob.download_as_string().decode("utf-8")
-
-    def delete_blob(self, blob_name):
-        blob = self.bucket.blob(blob_name)
-        blob.delete()
 
     def upload_lines(self, lines, blob_name):
         content = self.lines_to_speech(lines)
