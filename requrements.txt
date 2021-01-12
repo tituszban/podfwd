@@ -1,0 +1,5 @@
+ssml_builder
+beautifulsoup4
+lxml
+google-cloud-texttospeech
+google-cloud-storage
