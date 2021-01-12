@@ -4,34 +4,15 @@ from t2s import TextToSpeech
 from storage import StorageProvider
 import datetime
 from feed_management import FeedProvider, Feed, Item
-
-
-def find_max_id(item):
-    return max([i["idx"] for i in item] + [0])
-
-
-def old_items(items, lifetime_days=7):
-    now = datetime.datetime.now()
-    for item in items:
-        date = datetime.datetime.strptime(
-            item["date"], "%a, %d %b %Y %H:%M:%S %z").replace(tzinfo=None)
-        age = now - date
-        print(age)
-        if age > datetime.timedelta(days=lifetime_days):
-            yield item
+from parsers import TcParser
 
 
 def main(request):
     feed_file_name = "feed.xml"
     sa_json = os.environ.get("SA_FILE", None)
-    if json:
-        t2s = TextToSpeech(json=json)
-        storage = StorageProvider(json=sa_json)
-        feed_provider = FeedProvider(json=sa_json)
-    else:
-        t2s = TextToSpeech()
-        storage = StorageProvider()
-        feed_provider = FeedProvider("autopodcast")
+    t2s = TextToSpeech(json=sa_json)
+    storage = StorageProvider(json=sa_json)
+    feed_provider = FeedProvider(projectId="autopodcast", json=sa_json)
 
     def update_feed(email, items):
         feed = feed_provider.get_feed(email)
@@ -63,18 +44,20 @@ def main(request):
         current_feed = bucket.download_xml(feed_file_name)
         updated_feed = feed.to_rss(current_feed)
         bucket.upload_xml(feed_file_name, updated_feed)
-
+    
     items_by_sender = {}
     for sender, item in process_inbox():
-        item["sound_data"] = t2s.lines_to_speech(item["content"])
+        parser = TcParser()
+        item["content"] = list(parser.parse(item["soup"]))
+        # item["sound_data"] = t2s.lines_to_speech(item["content"])
         items_by_sender[sender] = items_by_sender.get(sender, []) + [item]
 
-    for sender, items in items_by_sender.items():
-        update_feed(sender, items)
+    # for sender, items in items_by_sender.items():
+    #     update_feed(sender, items)
 
     return "Success"
 
 
-# if __name__ == "__main__":
-#     main(None)
-#     # blob_test()
+if __name__ == "__main__":
+    main(None)
+    # blob_test()
