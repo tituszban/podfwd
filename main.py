@@ -1,5 +1,5 @@
 import os
-from email_parser import process_inbox
+from email_parser import Inbox
 from t2s import TextToSpeech
 from storage import StorageProvider
 import datetime
@@ -17,6 +17,7 @@ def main(request):
     t2s = TextToSpeech(config)
     storage = StorageProvider(config)
     feed_provider = FeedProvider(config)
+    inbox = Inbox(config)
 
     def update_feed(email, items):
         feed = feed_provider.get_feed(email)
@@ -50,7 +51,7 @@ def main(request):
         bucket.upload_xml(feed_file_name, updated_feed)
     
     items_by_sender = {}
-    for sender, item in process_inbox():
+    for sender, item in inbox.process_inbox():
         parser = TcParser()
         item["content"] = list(parser.parse(item["soup"]))
         item["sound_data"] = t2s.lines_to_speech(item["content"])

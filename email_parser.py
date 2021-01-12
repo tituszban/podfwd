@@ -4,76 +4,69 @@ import email
 from bs4 import BeautifulSoup
 
 
-def get_message_data(message):
-    subject = message["Subject"].lstrip("Fwd: ")
-    sender = message["From"]
-    date = message["Date"]
+class Inbox:
+    def __init__(self, config):
+        self._server = config.get("EMAIL_SERVER")
+        self._login = config.get("EMAIL_LOGIN")
+        self._password = config.get("EMAIL_PASSWORD")
 
-    if (match := re.match(r".*<(?P<email>.*)>.*", sender)):
-        sender = match.group("email")
+    def _get_message_data(self, message):
+        subject = message["Subject"].lstrip("Fwd: ")
+        sender = message["From"]
+        date = message["Date"]
 
-    return subject, sender, date
+        if (match := re.match(r".*<(?P<email>.*)>.*", sender)):
+            sender = match.group("email")
 
+        return subject, sender, date
 
-def get_payload(message):
-    if message.is_multipart():
-        for m in message.get_payload():
-            for p in get_payload(m):
-                yield p
-    else:
-        yield message.get_payload(decode=True)
+    def _get_payload(self, message):
+        if message.is_multipart():
+            for m in message.get_payload():
+                for p in self._get_payload(m):
+                    yield p
+        else:
+            yield message.get_payload(decode=True)
 
+    def _to_soup(self, raw):
+        soup = BeautifulSoup(raw, 'html.parser')
+        if soup.find("p") is None:
+            return None
+        return soup
 
-def to_soup(raw):
-    soup = BeautifulSoup(raw, 'html.parser')
-    if soup.find("p") is None:
-        return None
-    return soup
+    def _process_email(self, message):
+        subject, sender, date = self._get_message_data(message)
+        mime = ""
+        html = ""
+        soup = None
 
+        for i, payload in enumerate(self._get_payload(message)):
+            soup = self._to_soup(payload)
+            if soup is None:
+                mime = payload.decode("utf-8")
+                continue
+            html = payload.decode("utf-8")
 
-def process_email(message):
-    subject, sender, date = get_message_data(message)
-    mime = ""
-    html = ""
-    soup = None
+        return sender, {
+            "title": subject,
+            "date": date,
+            "html": html,
+            "mime": mime,
+            "soup": soup
+        }
 
-    for i, payload in enumerate(get_payload(message)):
-        soup = to_soup(payload)
-        if soup is None:
-            mime = payload.decode("utf-8")
-            continue
-        html = payload.decode("utf-8")
+    def process_inbox(self):
+        mail = imaplib.IMAP4_SSL(self._server)
+        mail.login(self._login, self._password)
+        mail.select("inbox")
 
-    return sender, {
-        "title": subject,
-        "date": date,
-        "html": html,
-        "mime": mime,
-        "soup": soup
-    }
+        typ, ids = mail.uid('search', None, 'ALL')
+        ids = ids[0].decode().split()
+        for idx in ids:
+            typ, messageRaw = mail.uid('fetch', idx, '(RFC822)')
+            message = email.message_from_bytes(messageRaw[0][1])
 
+            yield self._process_email(message)
 
-def process_inbox():
-    mail = imaplib.IMAP4_SSL('imap.gmail.com')
-    mail.login('autopod.tb@gmail.com', 'dvzmtxmwknumipzr')
-    mail.select("inbox")
-
-    typ, ids = mail.uid('search', None, 'ALL')
-    ids = ids[0].decode().split()
-    for idx in ids:
-        typ, messageRaw = mail.uid('fetch', idx, '(RFC822)')
-        message = email.message_from_bytes(messageRaw[0][1])
-
-        yield process_email(message)
-
-        mov, data = mail.uid('STORE', idx, '+FLAGS', '(\Deleted)')
-        mail.expunge()
-
-
-def main():
-    result = list(process_inbox())
-    print(result)
-
-
-if __name__ == "__main__":
-    main()
+            mov, data = mail.uid('STORE', idx, '+FLAGS', '(\Deleted)')
+            mail.expunge()
