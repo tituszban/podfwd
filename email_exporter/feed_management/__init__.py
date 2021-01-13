@@ -1,1 +1,1 @@
-from .feed_management import FeedProvider
+from .feed_provider import FeedProvider

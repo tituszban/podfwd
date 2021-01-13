@@ -27,8 +27,8 @@ class FeedProvider:
     def get_feed(self, email):
         doc = self.db.collection(self.collection).document(email).get()
         if not doc.exists:
-            # TODO: bucket_name = secrets.token_hex(8); self.storage_provider.get_bucket
-            return Feed(email, [], "", None)
+            # TODO: Signup process to create feed
+            return None
 
         data = doc.to_dict()
 
