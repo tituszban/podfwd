@@ -31,15 +31,15 @@ class EmailExporter:
             self._logger.warn(f"No bucket found: [{owner}] has no allocated bucket")
             return False
 
-        content = list(self._parser.parse(item["soup"]))
-        sound_data = self._t2s.lines_to_speech(content)
+        ssml, description = list(zip(*list(self._parser.parse(item["soup"]))))
+        sound_data = self._t2s.lines_to_speech(ssml)
 
         idx = feed.next_id
         url = feed.bucket.upload_bytes(f"{idx}.mp3", sound_data)
 
         feed.add_item(
             item["title"],
-            "",
+            '\n'.join(description),
             item["date"],
             url,
             idx

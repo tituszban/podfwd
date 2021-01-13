@@ -1,6 +1,8 @@
 from .parser_abc import ParserABC
 from functools import reduce
 from ssml_builder.core import Speech
+import bleach
+
 
 class TextContent:
     @staticmethod
@@ -106,6 +108,17 @@ class TcParser(ParserABC):
                     speech.pause(time="0.5s")
             return speech
 
+        def clean_component(content):
+            removed_attributes = ["class", "id", "name", "style"]
+            components = []
+            for c in content:
+                components.append(bleach.clean(
+                    str(c.component),
+                    attributes=["href", "target", "alt", "src"],
+                    tags=bleach.sanitizer.ALLOWED_TAGS + ["a", "img", "p", "h1", "h2", "h3", "h4"]
+                ))
+            return '\n'.join(components)
+
         for td in tds:
             content = list(decompose_content(td))
             if not is_relevant(content):
@@ -113,5 +126,6 @@ class TcParser(ParserABC):
             content = remove_lines(content)
 
             ssml = to_ssml(content)
+            desc = clean_component(content)
 
-            yield ssml.speak()
+            yield ssml.speak(), desc
