@@ -8,14 +8,27 @@ class EmailExporter:
         self._logger = logger
         self._feed_cache = {}
 
-    def message_handler(self, sender, item):
-        if sender in self._feed_cache:
-            feed = feed_cache[sender]
+    def _get_feed(self, owner):
+        if owner in self._feed_cache:
+            return self._feed_cache[owner]
         else:
-            feed = self._feed_provider.get_feed(sender)
-            self._feed_cache[sender] = feed
+            feed = self._feed_provider.get_feed(owner)
+            if feed is not None:
+                self._feed_cache[owner] = feed
+            return feed
+        
+
+    def message_handler(self, addresses, item):
+        owner, sender = addresses
+
+        feed = self._get_feed(owner)
+
+        if feed is None:
+            self._logger.warn(f"Unrecognised email address: [{owner}] has no feed. Subject: [{item['title']}]; Sender: [{sender}]")
+            return True
 
         if feed.bucket is None:
+            self._logger.warn(f"No bucket found: [{owner}] has no allocated bucket")
             return False
 
         content = list(self._parser.parse(item["soup"]))
