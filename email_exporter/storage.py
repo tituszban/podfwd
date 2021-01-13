@@ -14,7 +14,7 @@ class StorageProvider:
         if not self.storage_client.bucket(bucket_name).exists():
             # TODO: self.storage_client.create_bucket(bucket_name, predefined_acl=publicRead)
             # https://cloud.google.com/storage/docs/access-control/lists#predefined-acl
-            raise Exception("Bucket does not exists")
+            return None
         return Storage(self.storage_client, bucket_name)
 
 

@@ -55,7 +55,7 @@ class Inbox:
             "soup": soup
         }
 
-    def process_inbox(self):
+    def process_inbox(self, callback):
         mail = imaplib.IMAP4_SSL(self._server)
         mail.login(self._login, self._password)
         mail.select("inbox")
@@ -66,7 +66,14 @@ class Inbox:
             typ, messageRaw = mail.uid('fetch', idx, '(RFC822)')
             message = email.message_from_bytes(messageRaw[0][1])
 
-            yield self._process_email(message)
+            processed = self._process_email(message)
 
-            mov, data = mail.uid('STORE', idx, '+FLAGS', '(\Deleted)')
-            mail.expunge()
+            discard_message = False
+            try:
+                discard_message = callback(*processed)
+            except Exception as e:
+                raise e
+
+            if discard_message:
+                mov, data = mail.uid('STORE', idx, '+FLAGS', '(\Deleted)')
+                mail.expunge()
