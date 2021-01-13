@@ -23,8 +23,8 @@ class TextContent:
 
 
 class TcParser(ParserABC):
-    def __init__(self):
-        pass
+    def __init__(self, logger):
+        self._logger = logger
 
     def parse(self, soup):
         table = soup.find("table")

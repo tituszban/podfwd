@@ -5,10 +5,11 @@ from bs4 import BeautifulSoup
 
 
 class Inbox:
-    def __init__(self, config):
+    def __init__(self, config, logger):
         self._server = config.get("EMAIL_SERVER")
         self._login = config.get("EMAIL_LOGIN")
         self._password = config.get("EMAIL_PASSWORD")
+        self._logger = logger
 
     def _get_message_data(self, message):
         subject = message["Subject"].lstrip("Fwd: ")
@@ -72,7 +73,9 @@ class Inbox:
             try:
                 discard_message = callback(*processed)
             except Exception as e:
-                raise e
+                self._logger.exception(
+                    f"While processing email {idx}, an exception occured"
+                )
 
             if discard_message:
                 mov, data = mail.uid('STORE', idx, '+FLAGS', '(\Deleted)')
