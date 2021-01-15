@@ -1,2 +1,1 @@
-from .parser_abc import ParserABC
-from .tc_parser import TcParser
+from .parser_selector import ParserSelector

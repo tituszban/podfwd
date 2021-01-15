@@ -1,5 +1,5 @@
 import logging
-from email_exporter import EmailExporter, Inbox, TextToSpeech, StorageProvider, FeedProvider, TcParser, Config
+from email_exporter import EmailExporter, Inbox, TextToSpeech, StorageProvider, FeedProvider, ParserSelector, Config
 
 
 def main(request):
@@ -8,16 +8,17 @@ def main(request):
 
     logger_name = config.get("LOGGER_NAME", "email_exporter")
     logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.INFO)
 
     t2s = TextToSpeech(config)
     storage = StorageProvider(config)
     feed_provider = FeedProvider(config, storage)
     inbox = Inbox(config, logger)
-    parser = TcParser(logger)
+    parser_selector = ParserSelector(logger)
 
     email_exporter = EmailExporter(
         config, feed_provider, t2s,
-        parser, logger
+        parser_selector, logger
     )
 
     inbox.process_inbox(email_exporter.message_handler)

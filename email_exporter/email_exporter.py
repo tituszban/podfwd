@@ -4,7 +4,7 @@ class EmailExporter:
         self._config = config
         self._feed_provider = feed_provider
         self._t2s = t2s
-        self._parser = parser
+        self._parser_selector = parser
         self._logger = logger
         self._feed_cache = {}
 
@@ -16,7 +16,6 @@ class EmailExporter:
             if feed is not None:
                 self._feed_cache[owner] = feed
             return feed
-        
 
     def message_handler(self, addresses, item):
         owner, sender = addresses
@@ -24,14 +23,18 @@ class EmailExporter:
         feed = self._get_feed(owner)
 
         if feed is None:
-            self._logger.warn(f"Unrecognised email address: [{owner}] has no feed. Subject: [{item['title']}]; Sender: [{sender}]")
+            self._logger.warn(
+                f"Unrecognised email address: [{owner}] has no feed. Subject: [{item['title']}]; Sender: [{sender}]")
             return True
 
         if feed.bucket is None:
-            self._logger.warn(f"No bucket found: [{owner}] has no allocated bucket")
+            self._logger.warn(
+                f"No bucket found: [{owner}] has no allocated bucket")
             return False
 
-        ssml, description, voice = self._parser.parse(**item)
+        parser = self._parser_selector.get_parser(sender)
+        ssml, description, voice = parser.parse(**item)
+
         sound_data = self._t2s.lines_to_speech(ssml, voice)
 
         idx = feed.next_id
@@ -58,4 +61,5 @@ class EmailExporter:
 
     def __del__(self):
         if len(self._feed_cache) > 0:
-            self._logger.error(f"Feeds not flushed. Dropping {len(self._feed_cache)} feeds")
+            self._logger.error(
+                f"Feeds not flushed. Dropping {len(self._feed_cache)} feeds")
