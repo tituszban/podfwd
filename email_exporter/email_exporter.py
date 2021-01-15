@@ -38,11 +38,12 @@ class EmailExporter:
         url = feed.bucket.upload_bytes(f"{idx}.mp3", sound_data)
 
         feed.add_item(
-            item["title"],
-            '\n'.join(description),
-            item["date"],
-            url,
-            idx
+            title=item["title"],
+            description='\n'.join(description),
+            date=item["date"],
+            url=url,
+            idx=idx,
+            sender=sender
         )
 
         return True

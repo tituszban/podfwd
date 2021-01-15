@@ -18,11 +18,10 @@ class Feed:
             storage_provider.get_bucket(d["bucket_name"])
         )
 
-    def add_item(self, title, description, date, url, idx):
-        self.items.append(Item(
-            title, description, date,
-            url, idx
-        ))
+    def add_item(self, **kwargs):
+        item = Item(**kwargs)
+        self.items.append(item)
+        return item
 
     def to_dict(self):
         return {
