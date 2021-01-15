@@ -28,7 +28,8 @@ class TcParser(ParserABC):
     def __init__(self, logger):
         self._logger = logger
 
-    def parse(self, soup):
+    def parse(self, soup=None, title="", **kwargs):
+        assert soup is not None, "Soup not provided"
         table = soup.find("table")
 
         def find_tds_with_p(root):
@@ -119,6 +120,14 @@ class TcParser(ParserABC):
                 ))
             return '\n'.join(components)
 
+        def select_voice():
+            if "startups weekly" in title.lower():
+                return "en-US-Wavenet-H"
+            return None # use default
+
+        ssmls = []
+        descriptions = []
+
         for td in tds:
             content = list(decompose_content(td))
             if not is_relevant(content):
@@ -126,6 +135,8 @@ class TcParser(ParserABC):
             content = remove_lines(content)
 
             ssml = to_ssml(content)
+            ssmls.append(ssml.speak())
             desc = clean_component(content)
+            descriptions.append(desc)
 
-            yield ssml.speak(), desc
+        return ssmls, descriptions, select_voice()
