@@ -1,12 +1,14 @@
 from .parser_abc import ParserABC
 from .tc_parser import TcParser
+from .substack_parser import SubstackParser
 
 
 class ParserSelector:
     def __init__(self, logger):
         self.logger = logger
         self.parsers_by_domain = {
-            "techcrunch.com": TcParser
+            "techcrunch.com": TcParser,
+            "substack.com": SubstackParser
         }
 
     def get_parser(self, sender):

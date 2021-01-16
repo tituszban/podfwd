@@ -13,7 +13,7 @@ class Feed:
     def from_dict(email, d, storage_provider):
         return Feed(
             email,
-            list(map(Item.from_dict, d["items"])),
+            list(map(Item.from_dict, d.get("items", []))),
             d["bucket_name"],
             storage_provider.get_bucket(d["bucket_name"])
         )

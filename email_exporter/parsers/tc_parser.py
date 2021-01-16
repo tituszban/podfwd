@@ -1,27 +1,10 @@
 from .parser_abc import ParserABC
-from functools import reduce
+from .text_content import TextContent
 from ssml_builder.core import Speech
 import bleach
 
 
-class TextContent:
-    @staticmethod
-    def get_text_content(n):
-        return reduce(
-            lambda txt, c: txt.replace(*c),
-            [
-                ("\n", ""), ("\r", ""),
-                ("—", "-"), ("\xa0", " "), ("–", "-"),
-                ("”", '"'), ("“", '"'),
-                ("‘", "'"), ("’", "'"),
-                ("…", "...")
-            ],
-            n.get_text()).strip()
 
-    def __init__(self, component):
-        self.component = component
-        self.name = component.name
-        self.text = TextContent.get_text_content(component)
 
 
 class TcParser(ParserABC):
@@ -41,18 +24,6 @@ class TcParser(ParserABC):
         tds = list(find_tds_with_p(table))
 
         def decompose_content(td):
-            def get_text_content(n):
-                return reduce(
-                    lambda txt, c: txt.replace(*c),
-                    [
-                        ("\n", ""), ("\r", ""),
-                        ("—", "-"), ("\xa0", " "), ("–", "-"),
-                        ("”", '"'), ("“", '"'),
-                        ("‘", "'"), ("’", "'"),
-                        ("…", "...")
-                    ],
-                    n.get_text()).strip()
-
             for child in td:
                 if child == "\n":
                     continue
