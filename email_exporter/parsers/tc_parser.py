@@ -1,11 +1,7 @@
 from .parser_abc import ParserABC
-from .text_content import TextContent
+from .content_item import ContentItem
 from ssml_builder.core import Speech
 import bleach
-
-
-
-
 
 class TcParser(ParserABC):
     def __init__(self, logger):
@@ -30,9 +26,9 @@ class TcParser(ParserABC):
 
                 if child.name == "ul":
                     for li in child.find_all("li"):
-                        yield TextContent(li)
+                        yield ContentItem.to_item(li)
                 else:
-                    yield TextContent(child)
+                    yield ContentItem.to_item(child)
 
         def is_relevant(content):
             title_separator = "•"
@@ -60,14 +56,14 @@ class TcParser(ParserABC):
 
         def remove_lines(content):
             def remove_line(line):
-                if "read more" in line.lower():
+                if "read more" in line.text.lower() and line.is_only_link:
                     return True
-                if "membership program" in line.lower():
+                if "membership program" in line.text.lower():
                     return True
                 if line == "":
                     return True
                 return False
-            return [c for c in content if not remove_line(c.text)]
+            return [c for c in content if not remove_line(c)]
 
         def to_ssml(content):
             speech = Speech()
@@ -87,7 +83,7 @@ class TcParser(ParserABC):
                 components.append(bleach.clean(
                     str(c.component),
                     attributes=["href", "target", "alt", "src"],
-                    tags=bleach.sanitizer.ALLOWED_TAGS + ["a", "img", "p", "h1", "h2", "h3", "h4"]
+                    tags=bleach.sanitizer.ALLOWED_TAGS + ["a", "img", "p", "h1", "h2", "h3", "h4", "span"]
                 ))
             return '\n'.join(components)
 

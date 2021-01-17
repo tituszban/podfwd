@@ -1,5 +1,5 @@
 from .parser_abc import ParserABC
-from .text_content import TextContent
+from .content_item import ContentItem
 from ssml_builder.core import Speech
 import bleach
 from bs4 import BeautifulSoup
@@ -13,7 +13,8 @@ class SubstackParser(ParserABC):
         parents = []
         for p in root.find_all(["p", "h1", "h2", "h3", "h4"]):
             parent = p.find_parent("div")
-            if parent not in parents:
+            all_parents = p.find_parents("div")
+            if all(p not in parents for p in all_parents):
                 parents.append(parent)
         return parents
 
@@ -24,9 +25,9 @@ class SubstackParser(ParserABC):
 
             if child.name == "ul":
                 for li in child.find_all("li"):
-                    yield TextContent(li)
+                    yield ContentItem.to_item(li)
             else:
-                yield TextContent(child)
+                yield ContentItem.to_item(child)
 
     def _is_section_relevant(self, content):
         free_list = "become a paying subscriber"

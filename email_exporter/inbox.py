@@ -64,7 +64,7 @@ class Inbox:
         errors = []
         for encoding in encodings:
             try:
-                return payload.decode(encoding)
+                return payload.decode(encoding), encoding
             except UnicodeDecodeError as e:
                 errors.append(str(e))
         raise UnicodeDecodeError("None of the known encodings were able to decode this payload; {}".format('; '.join(errors)))
@@ -76,11 +76,12 @@ class Inbox:
         soup = None
 
         for i, payload in enumerate(self._get_payload(message)):
-            soup = self._to_soup(payload)
+            decode, _ = self._try_decode(payload)
+            soup = self._to_soup(decode)
             if soup is None:
-                mime = self._try_decode(payload)
-                continue
-            html = self._try_decode(payload)
+                mime = decode
+            else:
+                html = decode
 
         addresses = self._identify_participants(sender, recipient, mime)
 
