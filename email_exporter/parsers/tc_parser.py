@@ -83,7 +83,7 @@ class TcParser(ParserABC):
                 components.append(bleach.clean(
                     str(c.component),
                     attributes=["href", "target", "alt", "src"],
-                    tags=bleach.sanitizer.ALLOWED_TAGS + ["a", "img", "p", "h1", "h2", "h3", "h4", "span"]
+                    tags=bleach.sanitizer.ALLOWED_TAGS + ["a", "img", "p", "h1", "h2", "h3", "h4", "span", "br"]
                 ))
             return '\n'.join(components)
 

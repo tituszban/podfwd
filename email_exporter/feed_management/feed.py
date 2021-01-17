@@ -1,13 +1,15 @@
 from . import rss_gen
 from .item import Item
+import datetime
 
 
 class Feed:
-    def __init__(self, email, items, bucket_name, bucket):
+    def __init__(self, email, items, bucket_name, bucket, item_lifetime_days):
         self.email = email
         self.items = items
         self.bucket_name = bucket_name
         self.bucket = bucket
+        self.item_lifetime_days = item_lifetime_days
 
     @staticmethod
     def from_dict(email, d, storage_provider):
@@ -15,7 +17,8 @@ class Feed:
             email,
             list(map(Item.from_dict, d.get("items", []))),
             d["bucket_name"],
-            storage_provider.get_bucket(d["bucket_name"])
+            storage_provider.get_bucket(d["bucket_name"]),
+            d.get("item_lifetime_days", 7)
         )
 
     def add_item(self, **kwargs):
@@ -26,7 +29,8 @@ class Feed:
     def to_dict(self):
         return {
             "items": [item.to_dict() for item in self.items],
-            "bucket_name": self.bucket_name
+            "bucket_name": self.bucket_name,
+            "item_lifetime_days": self.item_lifetime_days
         }
 
     def to_rss(self, feed):
@@ -51,3 +55,16 @@ class Feed:
         if len(self.items) <= 0:
             return 0
         return max([item.idx for item in self.items]) + 1
+
+    def prune(self):
+        old_items = set()
+        now = datetime.datetime.now()
+        for item in self.items:
+            date = item.try_get_date().replace(tzinfo=None)
+            age = now - date
+            if age.days >= self.item_lifetime_days:
+                old_items.add(item)
+
+        for item in old_items:
+            self.items.remove(item)
+            self.bucket.delete_blob(item.file_name)

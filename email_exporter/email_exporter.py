@@ -38,26 +38,36 @@ class EmailExporter:
         sound_data = self._t2s.lines_to_speech(ssml, voice)
 
         idx = feed.next_id
-        url = feed.bucket.upload_bytes(f"{idx}.mp3", sound_data)
 
-        feed.add_item(
+        item = feed.add_item(
             title=item["title"],
             description='\n'.join(description),
             date=item["date"],
-            url=url,
+            url="",
             idx=idx,
             sender=sender
         )
+
+        item.url = feed.bucket.upload_bytes(item.file_name, sound_data)
 
         return True
 
     def apply_feeds(self):
         self._logger.info(f"Applying {len(self._feed_cache)} feeds")
-        for feed in self._feed_cache.values():
-            self._feed_provider.push_feed(feed)
-            feed.update_rss(self._feed_file_name)
-        self._feed_cache = {}
-        self._logger.info("Feeds applied")
+        applied_fileds = set()
+        for key, feed in self._feed_cache.items():
+            try:
+                feed.prune()
+                self._feed_provider.push_feed(feed)
+                feed.update_rss(self._feed_file_name)
+                applied_fileds.add(key)
+            except:
+                self._logger.exception(f"While applying feed [{key}] an error occured")
+        
+        for key in applied_fileds:
+            self._feed_cache.pop(key)
+
+        self._logger.info(f"Feeds applied: {len(applied_fileds)} feeds updated")
 
     def __del__(self):
         if len(self._feed_cache) > 0:
