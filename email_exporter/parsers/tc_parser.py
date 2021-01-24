@@ -2,10 +2,52 @@ from .parser_abc import ParserABC
 from .content_item import ContentItem
 from ssml_builder.core import Speech
 import bleach
+from bs4 import NavigableString
 
 class TcParser(ParserABC):
     def __init__(self, logger):
         self._logger = logger
+        self.speech_limit = 5000
+
+    def _split_long_content(self, content):
+        def split_at_tag(l, tag):
+            accum = []
+            for c in l:
+                if c.name == tag and len(accum) > 0:
+                    yield accum
+                    accum = []
+                accum.append(c)
+            yield accum
+        
+        split_tags = ["h1", "h2", "h3", "h4"]
+
+        for tag in split_tags:
+            if any([c.name == tag and i != 0 for i, c in enumerate(content)]):
+                return list(split_at_tag(content, tag))
+
+        if len(content) > 1:
+            half = len(content) // 2
+            return [content[:half], content[half:]]
+
+        raise Exception("Failed to split long content")
+
+    def _to_ssml(self, content):
+        speech = Speech()
+
+        for c in content:
+            speech.add_text(c.text)
+            if "h" in c.name:
+                speech.pause(time="0.75s")
+            else:
+                speech.pause(time="0.5s")
+        text = speech.speak()
+        if len(text) < self.speech_limit:
+            return [text]
+
+        sub_sections = self._split_long_content(content)
+        
+        return [part for section in sub_sections for part in self._to_ssml(section)]
+
 
     def parse(self, soup=None, title="", **kwargs):
         assert soup is not None, "Soup not provided"
@@ -28,7 +70,13 @@ class TcParser(ParserABC):
                     for li in child.find_all("li"):
                         yield ContentItem.to_item(li)
                 else:
-                    yield ContentItem.to_item(child)
+                    if any(isinstance(c, NavigableString) and c.strip() != '' for c in child.children) or not any(c.name == "p" for c in child.children):
+                        yield ContentItem.to_item(child)
+                    else:
+                        for c in child.children:
+                            if isinstance(c, NavigableString) and c.strip() == "":
+                                continue
+                            yield ContentItem.to_item(c)
 
         def is_relevant(content):
             title_separator = "•"
@@ -65,16 +113,7 @@ class TcParser(ParserABC):
                 return False
             return [c for c in content if not remove_line(c)]
 
-        def to_ssml(content):
-            speech = Speech()
-
-            for c in content:
-                speech.add_text(c.text)
-                if "h" in c.name:
-                    speech.pause(time="0.75s")
-                else:
-                    speech.pause(time="0.5s")
-            return speech
+        
 
         def clean_component(content):
             removed_attributes = ["class", "id", "name", "style"]
@@ -101,8 +140,7 @@ class TcParser(ParserABC):
                 continue
             content = remove_lines(content)
 
-            ssml = to_ssml(content)
-            ssmls.append(ssml.speak())
+            ssmls += self._to_ssml(content)
             desc = clean_component(content)
             descriptions.append(desc)
 
