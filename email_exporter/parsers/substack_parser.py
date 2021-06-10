@@ -4,6 +4,7 @@ from ssml_builder.core import Speech
 import bleach
 from bs4 import BeautifulSoup
 
+
 class SubstackParser(ParserABC):
     def __init__(self, logger):
         self._logger = logger
@@ -51,7 +52,7 @@ class SubstackParser(ParserABC):
             if any(c.text.lower().startswith(cta) for cta in cta_start):
                 return True
             return False
-        
+
         def remove_in_case_you_missed_list(ctnt):
             in_list = False
             for c in ctnt:
@@ -77,7 +78,7 @@ class SubstackParser(ParserABC):
                     yield c
                 else:
                     yield c
-        
+
         content = list(remove_in_case_you_missed_list(content))
         content = list(remove_references(content))
 
@@ -92,7 +93,22 @@ class SubstackParser(ParserABC):
                     accum = []
                 accum.append(c)
             yield accum
-        
+
+        def split_text(text, split_characters=("\n", ".", " ")):
+            for ch in split_characters:
+                if ch not in text:
+                    continue
+                split = text.split(ch)
+                if len(split) < 1:
+                    continue
+                half = len(split) // 2
+                return [
+                    [ContentItem.to_item(ch.join(split[:half]))],
+                    [ContentItem.to_item(ch.join(split[half:]))],
+                ]
+
+            return []
+
         split_tags = ["h1", "h2", "h3", "h4"]
 
         for tag in split_tags:
@@ -102,6 +118,9 @@ class SubstackParser(ParserABC):
         if len(content) > 1:
             half = len(content) // 2
             return [content[:half], content[half:]]
+
+        if len(text_split := split_text(content[0].text)) > 0:
+            return text_split
 
         raise Exception("Failed to split long content")
 
@@ -121,7 +140,7 @@ class SubstackParser(ParserABC):
             return [text]
 
         sub_sections = self._split_long_content(content)
-        
+
         return [part for section in sub_sections for part in self._to_ssml(section)]
 
     def parse(self, soup=None, title="", **kwargs):
@@ -129,10 +148,9 @@ class SubstackParser(ParserABC):
         table = soup.find("table")
 
         parents = self._find_ph_parents(table)
-        
+
         ssmls = []
         descriptions = []       # TODO: Create link collection
-        # TODO: Do something about tweets
 
         for p in parents:
             content = list(self._decompose_component(p))
@@ -141,6 +159,5 @@ class SubstackParser(ParserABC):
             content = self._remove_lines(content)
 
             ssmls += self._to_ssml(content)
-
 
         return ssmls, descriptions, None
