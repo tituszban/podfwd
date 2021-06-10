@@ -1,3 +1,8 @@
 {
-    "python.pythonPath": "c:\\Users\\tituszban\\Projects\\rss\\env\\Scripts\\python.exe"
+  "python.pythonPath": "c:\\Users\\tituszban\\Projects\\rss\\env\\Scripts\\python.exe",
+  "python.formatting.provider": "autopep8",
+  "python.formatting.autopep8Args": [
+    "--max-line-length",
+    "120"
+  ]
 }

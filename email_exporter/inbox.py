@@ -90,7 +90,9 @@ class Inbox:
             "date": date,
             "html": html,
             "mime": mime,
-            "soup": soup
+            "soup": soup,
+            "owner": addresses[0],
+            "sender": addresses[1]
         }
 
     def process_inbox(self, callback):
