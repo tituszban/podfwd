@@ -15,6 +15,7 @@ def handle_request():
 def get_fingerprint():
     return os.environ.get("FINGERPRINT", "")
 
+
 @app.route("/k")
 def get_cloud_run_config():
     return jsonify({
