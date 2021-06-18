@@ -1,25 +1,13 @@
+from email_exporter.dependencies import Dependencies
 import logging
-from email_exporter import EmailExporter, Inbox, TextToSpeech, StorageProvider, FeedProvider, ParserSelector, Config
+from email_exporter import EmailExporter, Inbox, TextToSpeech, StorageProvider, FeedProvider, ParserSelector, Config, Dependencies
 
 
 def main(request):
-    config = Config()\
-        .add_env_variables("AP_")
+    deps = Dependencies()
 
-    logger_name = config.get("LOGGER_NAME", "email_exporter")
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.INFO)
-
-    t2s = TextToSpeech(config)
-    storage = StorageProvider(config)
-    feed_provider = FeedProvider(config, storage)
-    inbox = Inbox(config, logger)
-    parser_selector = ParserSelector(logger)
-
-    email_exporter = EmailExporter(
-        config, feed_provider, t2s,
-        parser_selector, logger
-    )
+    email_exporter = deps.get(EmailExporter)
+    inbox = deps.get(Inbox)
 
     inbox.process_inbox(email_exporter.message_handler)
 
