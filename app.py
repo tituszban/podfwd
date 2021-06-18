@@ -1,7 +1,7 @@
 import os
 from email_exporter import export_inbox
 
-from flask import Flask
+from flask import Flask, jsonify
 
 app = Flask(__name__)
 
@@ -14,6 +14,13 @@ def handle_request():
 @app.route("/fingerprint")
 def get_fingerprint():
     return os.environ.get("FINGERPRINT", "")
+
+@app.route("/k")
+def get_cloud_run_config():
+    return jsonify({
+        key: os.environ.get(key, "")
+        for key in ("K_SERVICE", "K_REVISION", "K_CONFIGURATION")
+    })
 
 
 if __name__ == "__main__":
