@@ -3,6 +3,9 @@ stages:
   - deploy
   - cleanup
 
+variables:
+  - CONTAINER_NAME: gcr.io/$PROJECT_ID/$CI_COMMIT_BRANCH/$IMAGE_NAME:latest
+
 
 before_script:
   - echo $GCP_SA_KEY | base64 -d > sa.json
@@ -19,9 +22,9 @@ build:
     # Login to Google Container Registry
     - cat sa.json | docker login -u _json_key --password-stdin https://gcr.io
     # Build and tag image for both GCR and Gitlab registries
-    - docker build --cache-from gcr.io/$PROJECT_ID/$CI_COMMIT_BRANCH/$IMAGE_NAME:latest -t gcr.io/$PROJECT_ID/$CI_COMMIT_BRANCH/$IMAGE_NAME:latest -t $IMAGE_NAME:latest .
+    - docker build --cache-from $CONTAINER_NAME -t $CONTAINER_NAME -t $IMAGE_NAME:latest .
     # Push image to GCR
-    - docker push gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
+    - docker push $CONTAINER_NAME
 
 deploy:
   image: google/cloud-sdk:latest
@@ -35,7 +38,7 @@ deploy:
     # Push container to Cloud Run
     - >-
         gcloud run deploy $CR_SERVICE_NAME
-        --image gcr.io/$PROJECT_ID/$CI_COMMIT_BRANCH/$IMAGE_NAME:latest
+        --image $CONTAINER_NAME
         --region $CR_REGION --project $PROJECT_ID
         --no-allow-unauthenticated --update-env-vars FINGERPRINT=$CI_COMMIT_SHORT_SHA
 
@@ -65,5 +68,5 @@ prune_containers:
     # Authenticate with service account
     - gcloud auth activate-service-account $GCP_SA_NAME --key-file sa.json
     # Delete older containers
-    - python3 ci/prune_containers.py $PROJECT_ID $CR_SERVICE_NAME $CR_REGION gcr.io/$PROJECT_ID/$CI_COMMIT_BRANCH/$IMAGE_NAME
+    - python3 ci/prune_containers.py $PROJECT_ID $CR_SERVICE_NAME $CR_REGION $CONTAINER_NAME
   
