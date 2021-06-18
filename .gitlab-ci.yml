@@ -4,7 +4,7 @@ stages:
   - cleanup
 
 variables:
-  - CONTAINER_NAME: gcr.io/$PROJECT_ID/$CI_COMMIT_BRANCH/$IMAGE_NAME:latest
+  CONTAINER_NAME: gcr.io/$PROJECT_ID/$CI_COMMIT_BRANCH/$IMAGE_NAME:latest
 
 
 before_script:
