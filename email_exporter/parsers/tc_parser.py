@@ -119,8 +119,7 @@ class TcParser(ParserABC):
 
         def find_tds_with_p(root):
             for td in root.find_all("td"):
-                p = td.find("p", recursive=False)
-                if p is not None:
+                if any([td.find(e, recursive=False) for e in ["p", "h1", "h2", "h3", "ul"]]):
                     yield td
 
         tds = list(find_tds_with_p(table))
