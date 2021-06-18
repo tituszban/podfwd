@@ -43,6 +43,7 @@ def delete_container(container_name, digest):
 
 
 def prune_containers(project, container_name, service, region):
+    container_name = container_name.split(":")[0]
     service_info = describe_service(project, service, region)
 
     active_revisions = [service["revisionName"]

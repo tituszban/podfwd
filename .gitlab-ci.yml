@@ -52,11 +52,7 @@ verify:
     # Authenticate with service account
     - gcloud auth activate-service-account $GCP_SA_NAME --key-file sa.json
     # Find run endpoint, call the fingerprint path and check against expected commit signature
-    - >- 
-        gcloud run services describe $CR_SERVICE_NAME --region $CR_REGION --project $PROJECT_ID --format=\"value(status.url)\" |
-        sed 's/$/\\/fingerprint/'|
-        xargs -n 1 curl -H \"Authorization: Bearer $(gcloud auth print-identity-token)\" |
-        grep \"$CI_COMMIT_SHORT_SHA\"
+    - "gcloud run services describe $CR_SERVICE_NAME --region $CR_REGION --project $PROJECT_ID --format=\"value(status.url)\" | sed 's/$/\\/fingerprint/'| xargs -n 1 curl -H \"Authorization: Bearer $(gcloud auth print-identity-token)\" | grep \"$CI_COMMIT_SHORT_SHA\""
 
 prune_containers:
   image: google/cloud-sdk:latest
