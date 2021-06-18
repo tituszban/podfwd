@@ -5,3 +5,5 @@ google-cloud-texttospeech
 google-cloud-storage
 firebase-admin
 bleach
+Flask
+gunicorn
