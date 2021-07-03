@@ -6,6 +6,7 @@ from .storage import StorageProvider
 from .feed_management import FeedProvider
 from .parsers import ParserSelector
 from .config import Config
+from .voice_provider import VoiceProvider
 from firebase_admin import firestore
 from firebase_admin import credentials
 import firebase_admin
@@ -31,7 +32,8 @@ def email_exporter_resolver(deps):
         deps.get(FeedProvider),
         deps.get(TextToSpeech),
         deps.get(ParserSelector),
-        deps.get(logging.Logger)
+        deps.get(logging.Logger),
+        deps.get(VoiceProvider)
     )
 
 def firestore_client_resolver(deps):
@@ -62,7 +64,8 @@ class Dependencies:
             Inbox: lambda deps: Inbox(deps.get(Config), deps.get(logging.Logger)),
             ParserSelector: lambda deps: ParserSelector(deps.get(logging.Logger)),
             EmailExporter: email_exporter_resolver,
-            firestore.Client: firestore_client_resolver
+            firestore.Client: firestore_client_resolver,
+            VoiceProvider: lambda deps: VoiceProvider(deps.get(Config), deps.get(logging.Logger), deps.get(firestore.Client))
         }
         self._instances = {}
 
@@ -73,4 +76,6 @@ class Dependencies:
         if t not in self._resolvers:
             raise KeyError(f"Could not find resolver for {t}")
 
-        return self._resolvers[t](self)
+        instance = self._resolvers[t](self)
+        self._instances[t] = instance
+        return instance

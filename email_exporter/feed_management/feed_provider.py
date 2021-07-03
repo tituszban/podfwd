@@ -5,8 +5,6 @@ class FeedProvider:
 
     def __init__(self, config, firestore_client, storage_provider):
         self.collection = config.get("FEED_COLLECTION")
-
-
         self.db = firestore_client
         self.storage_provider = storage_provider
 
