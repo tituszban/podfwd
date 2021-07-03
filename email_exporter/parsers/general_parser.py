@@ -62,11 +62,6 @@ class GeneralParser(ParserABC):
                 last_built = i
         yield build_speech(lines[last_built:]).speak()
 
-    def _select_voice(self, sender):
-        if "elenahandtrack" in sender:
-            return "en-US-Wavenet-H"
-        return None
-
     def parse(self, soup=None, sender="", **kwargs):
         assert soup is not None
 
@@ -86,4 +81,4 @@ class GeneralParser(ParserABC):
 
         ssmls = list(self._to_ssms(all_text, headers))
 
-        return ssmls, [], self._select_voice(sender)
+        return ssmls, []

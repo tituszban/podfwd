@@ -34,7 +34,7 @@ class EmailExporter:
             return False
 
         parser = self._parser_selector.get_parser(sender)
-        ssml, description, voice = parser.parse(**item)
+        ssml, description = parser.parse(**item)
         voice = self._voice_provider.get_voice(item)
 
         sound_data = self._t2s.lines_to_speech(ssml, voice)

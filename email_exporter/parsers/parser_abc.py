@@ -6,4 +6,4 @@ class ParserABC(ABC):
         pass
 
     def parse(self, **kwargs):
-        return [], [], None
+        return [], []

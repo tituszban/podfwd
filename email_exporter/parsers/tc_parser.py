@@ -124,11 +124,6 @@ class TcParser(ParserABC):
 
         tds = list(find_tds_with_p(table))
 
-        def select_voice():
-            if "startups weekly" in title.lower():
-                return "en-US-Wavenet-H"
-            return None  # use default
-
         ssmls = []
         descriptions = []
         ignored = []
@@ -145,4 +140,4 @@ class TcParser(ParserABC):
             desc = self._to_description(content)
             descriptions.append(desc)
 
-        return ssmls, descriptions, select_voice()
+        return ssmls, descriptions
