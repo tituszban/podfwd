@@ -9,6 +9,7 @@ class Inbox:
         self._server = config.get("EMAIL_SERVER")
         self._login = config.get("EMAIL_LOGIN")
         self._password = config.get("EMAIL_PASSWORD")
+        self._disable_discard = config.get_bool("DISABLE_DISCARDING")
         self._logger = logger
 
     def _decode_header(self, header):
@@ -116,5 +117,5 @@ class Inbox:
                     f"While processing email {idx}, an exception occured"
                 )
 
-            if discard_message:
+            if discard_message and not self._disable_discard:
                 _, data = mail.uid('STORE', idx, '+FLAGS', '(\\FLAGGED)')

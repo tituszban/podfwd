@@ -1,11 +1,12 @@
 class EmailExporter:
-    def __init__(self, config, feed_provider, t2s, parser, logger):
+    def __init__(self, config, feed_provider, t2s, parser, logger, voice_provider):
         self._feed_file_name = config.get("FEED_FILE_NAME")
         self._config = config
         self._feed_provider = feed_provider
         self._t2s = t2s
         self._parser_selector = parser
         self._logger = logger
+        self._voice_provider = voice_provider
         self._feed_cache = {}
 
     def _get_feed(self, owner):
@@ -33,13 +34,14 @@ class EmailExporter:
             return False
 
         parser = self._parser_selector.get_parser(sender)
-        ssml, description, voice = parser.parse(**item)
+        ssml, description = parser.parse(**item)
+        voice = self._voice_provider.get_voice(item)
 
         sound_data = self._t2s.lines_to_speech(ssml, voice)
 
         idx = feed.next_id
 
-        item = feed.add_item(
+        feed_item = feed.add_item(
             title=item["title"],
             description='\n'.join(description),
             date=item["date"],
@@ -48,7 +50,7 @@ class EmailExporter:
             sender=sender
         )
 
-        item.url = feed.bucket.upload_bytes(item.file_name, sound_data)
+        feed_item.url = feed.bucket.upload_bytes(feed_item.file_name, sound_data)
 
         return True
 

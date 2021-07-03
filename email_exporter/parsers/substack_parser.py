@@ -160,4 +160,4 @@ class SubstackParser(ParserABC):
 
             ssmls += self._to_ssml(content)
 
-        return ssmls, descriptions, None
+        return ssmls, descriptions

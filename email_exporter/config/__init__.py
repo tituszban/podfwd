@@ -44,3 +44,9 @@ class Config:
 
     def get(self, key, default=None):
         return self._data.get(key, default)
+
+    def get_bool(self, key, default=False):
+        value = self._data.get(key, default)
+        if type(value) == bool:
+            return value
+        return value == "true"
