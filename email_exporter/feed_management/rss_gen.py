@@ -10,6 +10,7 @@ item_template = """
 	xmlns:creativeCommons="http://backend.userland.com/creativeCommonsRssModule"
 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
 	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+    xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0"
 	xmlns:rawvoice="http://www.rawvoice.com/rawvoiceRssModule/" version="2.0">
 <item>
     <title></title>
@@ -22,6 +23,8 @@ item_template = """
     <itunes:explicit>clean</itunes:explicit>
     <itunes:subtitle></itunes:subtitle>
     <itunes:keywords>Autopod</itunes:keywords>
+    <googleplay:block>yes</googleplay:block>
+    <itunes:block>Yes</itunes:block>
     <description>
     </description>
     <itunes:summary>
