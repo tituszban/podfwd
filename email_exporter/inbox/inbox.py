@@ -2,6 +2,7 @@ import re
 import imaplib
 import email
 from bs4 import BeautifulSoup
+from .content_item import ContentItem
 
 
 class Inbox:
@@ -86,15 +87,7 @@ class Inbox:
 
         addresses = self._identify_participants(sender, recipient, mime)
 
-        return addresses, {
-            "title": subject,
-            "date": date,
-            "html": html,
-            "mime": mime,
-            "soup": soup,
-            "owner": addresses[0],
-            "sender": addresses[1]
-        }
+        return ContentItem(subject, date, html, mime, soup, addresses)
 
     def process_inbox(self, callback):
         mail = imaplib.IMAP4_SSL(self._server)
@@ -107,11 +100,11 @@ class Inbox:
             _, messageRaw = mail.uid('fetch', idx, '(RFC822)')
             message = email.message_from_bytes(messageRaw[0][1])
 
-            processed = self._process_email(message)
+            content_item = self._process_email(message)
 
             discard_message = False
             try:
-                discard_message = callback(*processed)
+                discard_message = callback(content_item)
             except Exception as e:
                 self._logger.exception(
                     f"While processing email {idx}, an exception occured"

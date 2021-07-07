@@ -143,9 +143,9 @@ class SubstackParser(ParserABC):
 
         return [part for section in sub_sections for part in self._to_ssml(section)]
 
-    def parse(self, soup=None, title="", **kwargs):
-        assert soup is not None, "Soup not provided"
-        table = soup.find("table")
+    def parse(self, content_item):
+        assert content_item.soup is not None, "Soup not provided"
+        table = content_item.soup.find("table")
 
         parents = self._find_ph_parents(table)
 

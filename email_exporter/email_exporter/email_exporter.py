@@ -18,36 +18,36 @@ class EmailExporter:
                 self._feed_cache[owner] = feed
             return feed
 
-    def message_handler(self, addresses, item):
-        owner, sender = addresses
+    def message_handler(self, content_item):
+        # owner, sender = addresses
 
-        feed = self._get_feed(owner)
+        feed = self._get_feed(content_item.owner)
 
         if feed is None:
             self._logger.warn(
-                f"Unrecognised email address: [{owner}] has no feed. Subject: [{item['title']}]; Sender: [{sender}]")
+                f"Unrecognised email address: [{content_item.owner}] has no feed. Subject: [{content_item['title']}]; Sender: [{content_item.sender}]")
             return True
 
         if feed.bucket is None:
             self._logger.warn(
-                f"No bucket found: [{owner}] has no allocated bucket")
+                f"No bucket found: [{content_item.owner}] has no allocated bucket")
             return False
 
-        parser = self._parser_selector.get_parser(sender)
-        ssml, description = parser.parse(**item)
-        voice = self._voice_provider.get_voice(item)
+        parser = self._parser_selector.get_parser(content_item.sender)
+        ssml, description = parser.parse(content_item)
+        voice = self._voice_provider.get_voice(content_item)
 
         sound_data = self._t2s.lines_to_speech(ssml, voice)
 
         idx = feed.next_id
 
         feed_item = feed.add_item(
-            title=item["title"],
+            title=content_item.title,
             description='\n'.join(description),
-            date=item["date"],
+            date=content_item.date,
             url="",
             idx=idx,
-            sender=sender
+            sender=content_item.sender
         )
 
         feed_item.url = feed.bucket.upload_bytes(feed_item.file_name, sound_data)

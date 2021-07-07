@@ -113,9 +113,9 @@ class TcParser(ParserABC):
             ))
         return '\n'.join(components)
 
-    def parse(self, soup=None, title="", **kwargs):
-        assert soup is not None, "Soup not provided"
-        table = soup.find("table")
+    def parse(self, content_item):
+        assert content_item.soup is not None, "Soup not provided"
+        table = content_item.soup.find("table")
 
         def find_tds_with_p(root):
             for td in root.find_all("td"):

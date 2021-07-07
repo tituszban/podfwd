@@ -5,8 +5,8 @@ class VoiceProvider:
         self._db = firestore_client
 
     def get_voice(self, item):
-        owner = item["owner"]
-        sender = item["sender"]
+        owner = item.owner
+        sender = item.sender
         sender_domain = sender.split("@")[-1]
 
         voice_collection = self._db.collection(self.collection)
@@ -42,13 +42,13 @@ class VoiceProvider:
             return bool(value)
 
         def rule_sender(value, _item):
-            return _item["sender"].split("@")[0] == value
+            return _item.sender.split("@")[0] == value
 
         def rule_sender_contains(value, _item):
-            return value in _item["sender"].split("@")[0]
+            return value in _item.sender.split("@")[0]
 
         def rule_subject_contains(value, _item):
-            return value in _item["title"].lower()
+            return value in _item.title.lower()
 
         def rule_default(value, _item):
             self._logger.error(f"Unknown voice provider rule: '{value}'")

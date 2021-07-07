@@ -62,14 +62,18 @@ class GeneralParser(ParserABC):
                 last_built = i
         yield build_speech(lines[last_built:]).speak()
 
-    def parse(self, soup=None, sender="", **kwargs):
-        assert soup is not None
+    def parse(self, content_item):
+        assert content_item.soup is not None
 
         headers = [self._sanitise(text)
-                   for item in soup.findAll(["h1", "h2", "h3", "h4", "h5", "h6"])
+                   for item in content_item.soup.findAll(["h1", "h2", "h3", "h4", "h5", "h6"])
                    for text in item.get_text().split("\n")]
 
-        all_text = [sanitised for item in soup.findAll(text=True) if (sanitised := self._sanitise(item)) != ""]
+        all_text = [
+            sanitised
+            for item in content_item.soup.findAll(text=True)
+            if (sanitised := self._sanitise(item)) != ""
+        ]
 
         processors = [
             self._remove_forward_header,
