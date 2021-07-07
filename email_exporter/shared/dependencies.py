@@ -52,7 +52,7 @@ def firestore_client_resolver(deps):
 
 
 class Dependencies:
-    def __init__(self):
+    def __init__(self, overrides={}):
         self._resolvers = {
             Config: config_resolver,
             logging.Logger: logger_resolver,
@@ -63,7 +63,8 @@ class Dependencies:
             ParserSelector: lambda deps: ParserSelector(deps.get(logging.Logger)),
             EmailExporter: email_exporter_resolver,
             firestore.Client: firestore_client_resolver,
-            VoiceProvider: lambda deps: VoiceProvider(deps.get(Config), deps.get(logging.Logger), deps.get(firestore.Client))
+            VoiceProvider: lambda deps: VoiceProvider(deps.get(Config), deps.get(logging.Logger), deps.get(firestore.Client)),
+            **overrides
         }
         self._instances = {}
 

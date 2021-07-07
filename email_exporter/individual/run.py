@@ -1,6 +1,6 @@
 from ..email_exporter import EmailExporter
 from ..inbox import Inbox
-from .dependencies import Dependencies
+from ..shared import Dependencies
 from firebase_admin import firestore
 
 
