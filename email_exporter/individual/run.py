@@ -1,5 +1,5 @@
-from .email_exporter import EmailExporter
-from .inbox import Inbox
+from ..email_exporter import EmailExporter
+from ..inbox import Inbox
 from .dependencies import Dependencies
 from firebase_admin import firestore
 
