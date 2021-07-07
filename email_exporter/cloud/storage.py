@@ -11,6 +11,8 @@ class StorageProvider:
             self.storage_client = storage.Client()
 
     def get_bucket(self, bucket_name):
+        if not bucket_name:
+            raise KeyError("Bucket name is missing")
         if not self.storage_client.bucket(bucket_name).exists():
             # TODO: self.storage_client.create_bucket(bucket_name, predefined_acl=publicRead)
             # https://cloud.google.com/storage/docs/access-control/lists#predefined-acl

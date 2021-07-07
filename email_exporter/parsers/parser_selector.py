@@ -12,7 +12,10 @@ class ParserSelector:
             "substack.com": SubstackParser
         }
 
-    def get_parser(self, sender):
+    def get_parser(self, content_item):
+        return self._get_parser(content_item.sender)
+
+    def _get_parser(self, sender):
         sender_domain = sender.split("@")[-1]
         if sender_domain in self.parsers_by_domain:
             return self.parsers_by_domain[sender_domain](self.logger)

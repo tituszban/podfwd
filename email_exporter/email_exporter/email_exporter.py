@@ -19,13 +19,11 @@ class EmailExporter:
             return feed
 
     def message_handler(self, content_item):
-        # owner, sender = addresses
-
         feed = self._get_feed(content_item.owner)
 
         if feed is None:
             self._logger.warn(
-                f"Unrecognised email address: [{content_item.owner}] has no feed. Subject: [{content_item['title']}]; Sender: [{content_item.sender}]")
+                f"Unrecognised email address: [{content_item.owner}] has no feed. Subject: [{content_item.title}]; Sender: [{content_item.sender}]")
             return True
 
         if feed.bucket is None:
@@ -33,7 +31,7 @@ class EmailExporter:
                 f"No bucket found: [{content_item.owner}] has no allocated bucket")
             return False
 
-        parser = self._parser_selector.get_parser(content_item.sender)
+        parser = self._parser_selector.get_parser(content_item)
         ssml, description = parser.parse(content_item)
         voice = self._voice_provider.get_voice(content_item)
 

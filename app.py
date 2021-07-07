@@ -1,5 +1,5 @@
 import os
-from email_exporter import export_inbox
+from email_exporter.individual import export_inbox
 
 from flask import Flask, jsonify
 

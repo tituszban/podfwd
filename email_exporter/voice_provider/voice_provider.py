@@ -1,3 +1,5 @@
+VOICE_DEFAULT = "en-US-Wavenet-A"
+
 class VoiceProvider:
     def __init__(self, config, logger, firestore_client):
         self.collection = config.get("VOICES_COLLECTION")
@@ -24,7 +26,7 @@ class VoiceProvider:
 
         return self._match_source(sources, item)
 
-    def _match_source(self, sources, item, default="en-US-Wavenet-A"):
+    def _match_source(self, sources, item, default=VOICE_DEFAULT):
         for source in sources:
             for voice, criteria in source.items():
                 if self._match_criteria(criteria, item):
