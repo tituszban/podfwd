@@ -1,6 +1,7 @@
 from google.cloud import storage
 import io
 
+
 class StorageProvider:
     def __init__(self, config):
         json = config.get("SA_FILE")
@@ -34,9 +35,15 @@ class Storage:
         blob.upload_from_string(content, content_type='text/xml')
         return blob.public_url
 
+    def upload_file_from_path(self, blob_name, file_path):
+        blob = self.bucket.blob(blob_name)
+        with open(file_path, "rb") as f:
+            blob.upload_from_file(f)
+        return blob.public_url
+
     def download_xml(self, blob_name):
         blob = self.bucket.blob(blob_name)
-        return blob.download_as_string() #.decode("utf-8")
+        return blob.download_as_string()  # .decode("utf-8")
 
     def delete_blob(self, blob_name):
         blob = self.bucket.blob(blob_name)
