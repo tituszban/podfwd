@@ -1,0 +1,39 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:media="http://search.yahoo.com/mrss/"
+	xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+	xmlns:creativeCommons="http://backend.userland.com/creativeCommonsRssModule"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+    xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0"
+	xmlns:rawvoice="http://www.rawvoice.com/rawvoiceRssModule/" version="2.0">
+<item>
+    <title></title>
+    <itunes:title></itunes:title>
+    <itunes:episodeType>full</itunes:episodeType>
+    <pubDate></pubDate>
+    <itunes:episode></itunes:episode>
+    <itunes:author>TB</itunes:author>
+    <category>Tech News</category>
+    <itunes:explicit>clean</itunes:explicit>
+    <itunes:subtitle></itunes:subtitle>
+    <itunes:keywords>Autopod</itunes:keywords>
+    <googleplay:block>yes</googleplay:block>
+    <itunes:block>Yes</itunes:block>
+    <description>
+    </description>
+    <itunes:summary>
+    </itunes:summary>
+    <content:encoded>
+    </content:encoded>
+    <guid isPermaLink="false"></guid>
+    <enclosure url="" length="0" type="audio/mpeg"/>
+    <media:content url="" type="audio/mpeg" medium="audio">
+        <media:title type="plain"></media:title>
+        <media:description type="plain"></media:description>
+        <media:keywords>Autopod</media:keywords>
+        <media:rating scheme="urn:simple">nonadult</media:rating>
+        <media:rating scheme="urn:v-chip">tv-g</media:rating>
+        <media:category scheme="urn:iab:categories" label="Technology">IAB19</media:category>
+    </media:content>
+</item>
+</rss>
