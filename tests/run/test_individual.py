@@ -18,8 +18,8 @@ def test_export_inbox():
     deps = Mock()
     deps.get = MagicMock(side_effect=side_effect)
 
-    with patch("email_exporter.individual.run.Dependencies", MagicMock(return_value=deps)) as p:
-        result = export_inbox()
+    with patch("email_exporter.individual.run.Dependencies", MagicMock(return_value=deps)):
+        export_inbox()
 
     mock_inbox.process_inbox.assert_called_once()
     mock_email_exporter.apply_feeds.assert_called_once()

@@ -9,7 +9,7 @@ def test_email_exporter_message_handler_returns_true_if_feed_is_None():
 
     dut = EmailExporter(
         Mock(), feed_provider, Mock(), parser_selector, Mock(), Mock())
-    
+
     owner = "content_item_owner"
     content_item = Mock()
     content_item.owner = owner
@@ -19,7 +19,8 @@ def test_email_exporter_message_handler_returns_true_if_feed_is_None():
     feed_provider.get_feed.assert_called_once_with(owner)
     parser_selector.get_parser.assert_not_called()
 
-    assert result == True
+    assert result is True
+
 
 def test_email_exporter_message_handler_returns_false_if_feed_bucket_is_None():
     feed = Mock()
@@ -30,7 +31,7 @@ def test_email_exporter_message_handler_returns_false_if_feed_bucket_is_None():
 
     dut = EmailExporter(
         Mock(), feed_provider, Mock(), parser_selector, Mock(), Mock())
-    
+
     owner = "content_item_owner"
     content_item = Mock()
     content_item.owner = owner
@@ -40,7 +41,8 @@ def test_email_exporter_message_handler_returns_false_if_feed_bucket_is_None():
     feed_provider.get_feed.assert_called_once_with(owner)
     parser_selector.get_parser.assert_not_called()
 
-    assert result == False
+    assert result is False
+
 
 def test_email_exporter_message_handler_calls_dependencies():
     feed = Mock()
@@ -72,9 +74,9 @@ def test_email_exporter_message_handler_calls_dependencies():
     content_item.title = "content_item_title"
     content_item.date = "content_item_date"
     content_item.sender = "content_item_sender"
-    
+
     result = dut.message_handler(content_item)
-    
+
     feed_provider.get_feed.assert_called_once_with(content_item.owner)
 
     parser_selector.get_parser.assert_called_once_with(content_item)
@@ -89,6 +91,4 @@ def test_email_exporter_message_handler_calls_dependencies():
         data=sound_data
     )
 
-    assert result
-
-    
+    assert result is True
