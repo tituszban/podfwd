@@ -18,6 +18,17 @@ flake8:
     - pip3 install flake8
     - python -m flake8
 
+pytest:
+  stage: test
+  image: python:3.8
+  script:
+    - pip install -r requirements.txt
+    - pip install -r test_requirements.txt
+    - pytest --junitxml=report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
 
 build:
   image: docker:latest

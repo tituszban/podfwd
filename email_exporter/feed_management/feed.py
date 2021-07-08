@@ -68,7 +68,8 @@ class Branding:
             "keywords": self.keywords,
             "subtitle": self.subtitle,
             "summary": self.summary,
-            "categories": self.categories
+            "categories": self.categories,
+            "logo": self.logo.to_dict()
         }
 
 
