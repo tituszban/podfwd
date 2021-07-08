@@ -18,12 +18,26 @@ class StorageProvider:
             # TODO: self.storage_client.create_bucket(bucket_name, predefined_acl=publicRead)
             # https://cloud.google.com/storage/docs/access-control/lists#predefined-acl
             return None
-        return Storage(self.storage_client, bucket_name)
+        return Storage.from_client_and_name(self.storage_client, bucket_name)
+
+    def create_bucket(self, bucket_name, public=False):
+        bucket = self.storage_client.create_bucket(
+            bucket_name,
+            location="EU",
+            predefined_acl="publicRead" if public else "private",
+            predefined_default_object_acl="publicRead" if public else "private"
+        )
+        return Storage(bucket)
 
 
 class Storage:
-    def __init__(self, client, bucket_name):
-        self.bucket = client.get_bucket(bucket_name)
+    def __init__(self, bucket):
+        self.bucket = bucket
+
+    @staticmethod
+    def from_client_and_name(client, bucket_name):
+        bucket = client.get_bucket(bucket_name)
+        return Storage(bucket)
 
     def upload_bytes(self, blob_name, content):
         blob = self.bucket.blob(blob_name)
