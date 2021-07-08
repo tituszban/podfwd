@@ -58,7 +58,7 @@ class Dependencies:
             logging.Logger: logger_resolver,
             TextToSpeech: lambda deps: TextToSpeech(deps.get(Config)),
             StorageProvider: lambda deps: StorageProvider(deps.get(Config)),
-            FeedProvider: lambda deps: FeedProvider(deps.get(Config), deps.get(firestore.Client), deps.get(StorageProvider)),
+            FeedProvider: lambda deps: FeedProvider(deps.get(Config), deps.get(firestore.Client), deps.get(StorageProvider), deps.get(logging.Logger)),
             Inbox: lambda deps: Inbox(deps.get(Config), deps.get(logging.Logger)),
             ParserSelector: lambda deps: ParserSelector(deps.get(logging.Logger)),
             EmailExporter: email_exporter_resolver,
