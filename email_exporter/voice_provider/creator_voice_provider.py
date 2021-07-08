@@ -1,5 +1,6 @@
 from .voice_provider import VoiceProvider, VOICE_DEFAULT
 
+
 class CreatorVoiceProvider(VoiceProvider):
     def get_voice(self, item):
         owner = item.owner

@@ -45,7 +45,7 @@ class FeedProvider:
                 self.push_feed(feed)
                 feed.update_rss()
                 applied_fileds.add(key)
-            except:
+            except Exception:
                 self._logger.exception(f"While applying feed [{key}] an error occured")
 
         for key in applied_fileds:

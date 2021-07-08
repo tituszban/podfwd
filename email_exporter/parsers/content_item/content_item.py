@@ -12,4 +12,3 @@ class ContentItem:
         if is_tweet(component):
             return TweetItem(component)
         return TextItem(component)
-

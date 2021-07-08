@@ -11,13 +11,13 @@ class TcParser(ParserABC):
         self.speech_limit = 5000
 
     def _split_long_content(self, content):
-        def split_at_tag(l, tag):
+        def split_at_tag(line, tag):
             accum = []
-            for c in l:
-                if c.name == tag and len(accum) > 0:
+            for comp in line:
+                if comp.name == tag and len(accum) > 0:
                     yield accum
                     accum = []
-                accum.append(c)
+                accum.append(comp)
             yield accum
 
         split_tags = ["h1", "h2", "h3", "h4"]
@@ -82,7 +82,8 @@ class TcParser(ParserABC):
                 for li in child.find_all("li"):
                     yield ContentItem.to_item(li)
             else:
-                if any(isinstance(c, NavigableString) and c.strip() != '' for c in child.children) or not any(c.name == "p" for c in child.children):
+                if any(isinstance(c, NavigableString) and c.strip() != '' for c in child.children) or\
+                        not any(c.name == "p" for c in child.children):
                     yield ContentItem.to_item(child)
                 else:
                     for c in child.children:
@@ -102,7 +103,7 @@ class TcParser(ParserABC):
         return [c for c in content if not remove_line(c)]
 
     def _to_description(self, content):
-        removed_attributes = ["class", "id", "name", "style"]
+        # removed_attributes = ["class", "id", "name", "style"]
         components = []
         for c in content:
             components.append(bleach.clean(

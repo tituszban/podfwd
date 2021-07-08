@@ -1,8 +1,8 @@
 from .parser_abc import ParserABC
 from .content_item import ContentItem
 from ssml_builder.core import Speech
-import bleach
-from bs4 import BeautifulSoup
+# import bleach
+# from bs4 import BeautifulSoup
 
 
 class SubstackParser(ParserABC):
@@ -85,13 +85,13 @@ class SubstackParser(ParserABC):
         return [c for c in content if not remove_line(c)]
 
     def _split_long_content(self, content):
-        def split_at_tag(l, tag):
+        def split_at_tag(line, tag):
             accum = []
-            for c in l:
-                if c.name == tag and len(accum) > 0:
+            for comp in line:
+                if comp.name == tag and len(accum) > 0:
                     yield accum
                     accum = []
-                accum.append(c)
+                accum.append(comp)
             yield accum
 
         def split_text(text, split_characters=("\n", ".", " ")):

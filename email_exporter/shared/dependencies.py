@@ -34,6 +34,7 @@ def email_exporter_resolver(deps):
         deps.get(VoiceProvider)
     )
 
+
 def firestore_client_resolver(deps):
     config = deps.get(Config)
     json = config.get("SA_FILE")
@@ -51,6 +52,21 @@ def firestore_client_resolver(deps):
     return firestore.client()
 
 
+def feed_provider_resolver(deps):
+    return FeedProvider(
+        deps.get(Config),
+        deps.get(firestore.Client),
+        deps.get(StorageProvider),
+        deps.get(logging.Logger)
+    )
+
+
+def general_resolver(cls, dep_cls):
+    def resolver(deps):
+        return cls(*[deps.get(c) for c in dep_cls])
+    return resolver
+
+
 class Dependencies:
     def __init__(self, overrides={}):
         self._resolvers = {
@@ -58,12 +74,12 @@ class Dependencies:
             logging.Logger: logger_resolver,
             TextToSpeech: lambda deps: TextToSpeech(deps.get(Config)),
             StorageProvider: lambda deps: StorageProvider(deps.get(Config)),
-            FeedProvider: lambda deps: FeedProvider(deps.get(Config), deps.get(firestore.Client), deps.get(StorageProvider), deps.get(logging.Logger)),
+            FeedProvider: general_resolver(FeedProvider, (Config, firestore.Client, StorageProvider, logging.Logger)),
             Inbox: lambda deps: Inbox(deps.get(Config), deps.get(logging.Logger)),
             ParserSelector: lambda deps: ParserSelector(deps.get(logging.Logger)),
             EmailExporter: email_exporter_resolver,
             firestore.Client: firestore_client_resolver,
-            VoiceProvider: lambda deps: VoiceProvider(deps.get(Config), deps.get(logging.Logger), deps.get(firestore.Client)),
+            VoiceProvider: general_resolver(VoiceProvider, (Config, logging.Logger, firestore.Client)),
             **overrides
         }
         self._instances = {}

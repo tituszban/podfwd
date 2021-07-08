@@ -79,4 +79,3 @@ class Item:
                 errors.append(str(e))
         raise ValueError(
             f"Unable to process date {self.date}: {';'.join(errors)}")
-

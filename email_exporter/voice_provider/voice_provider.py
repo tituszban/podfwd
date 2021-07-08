@@ -1,5 +1,6 @@
 VOICE_DEFAULT = "en-US-Wavenet-A"
 
+
 class VoiceProvider:
     def __init__(self, config, logger, firestore_client):
         self.collection = config.get("VOICES_COLLECTION")

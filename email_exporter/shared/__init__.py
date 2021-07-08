@@ -1,1 +1,1 @@
-from .dependencies import Dependencies
+from .dependencies import Dependencies      # noqa: F401

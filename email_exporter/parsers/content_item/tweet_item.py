@@ -1,6 +1,7 @@
 from functools import reduce
 import re
 
+
 class TweetItem:
     def __init__(self, component):
         spans = [s.get_text() for s in component.find_all("span")]

@@ -60,7 +60,9 @@ def prune_containers(project, container_name, service, region):
                           if not container.startswith(container_name)]
     if len(invalid_containers) > 0:
         raise Exception(
-            f"Invalid revision container name. Base container name {container_name} not found in {','.join(invalid_containers)}")
+            "Invalid revision container name. Base container name {} not found in {}".format(
+                container_name, ','.join(invalid_containers)
+            ))
 
     container_digests = [container[len(container_name) + 1:]
                          for container in revision_containers]

@@ -1,1 +1,1 @@
-from .inbox import Inbox
+from .inbox import Inbox        # noqa: F401

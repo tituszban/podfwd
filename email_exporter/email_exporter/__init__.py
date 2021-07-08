@@ -1,1 +1,1 @@
-from .email_exporter import EmailExporter
+from .email_exporter import EmailExporter       # noqa: F401

@@ -1,5 +1,6 @@
 from .util import get_text_content, is_only_link, get_link_texts
 
+
 class TextItem:
     def __init__(self, component):
         self.component = component

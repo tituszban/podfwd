@@ -1,4 +1,5 @@
 stages:
+  - test
   - build
   - deploy
   - cleanup
@@ -9,6 +10,14 @@ variables:
 
 before_script:
   - echo $GCP_SA_KEY | base64 -d > sa.json
+
+flake8:
+  image: python:3.9
+  stage: test
+  script:
+    - pip3 install flake8
+    - python -m flake8
+
 
 build:
   image: docker:latest

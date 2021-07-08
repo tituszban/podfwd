@@ -41,10 +41,10 @@ class Inbox:
     def _identify_participants(self, sender, recipient, mime):
         if recipient != self._login:
             return (recipient, sender)
-        
+
         if (res := re.findall(r"From:.*<(?P<email>.*)>", mime)):
             return (sender, res[0])
-        
+
         return (sender, None)
 
     def _get_payload(self, message):
@@ -69,7 +69,8 @@ class Inbox:
                 return payload.decode(encoding), encoding
             except UnicodeDecodeError as e:
                 errors.append(str(e))
-        raise UnicodeDecodeError("None of the known encodings were able to decode this payload; {}".format('; '.join(errors)))
+        raise UnicodeDecodeError(
+            "None of the known encodings were able to decode this payload; {}".format('; '.join(errors)))
 
     def _process_email(self, message):
         subject, sender, recipient, date = self._get_message_data(message)
@@ -105,7 +106,7 @@ class Inbox:
             discard_message = False
             try:
                 discard_message = callback(content_item)
-            except Exception as e:
+            except Exception:
                 self._logger.exception(
                     f"While processing email {idx}, an exception occured"
                 )

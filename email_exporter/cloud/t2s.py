@@ -1,7 +1,7 @@
 from google.cloud import texttospeech
 from functools import reduce
-from google.cloud import storage
-import io
+# from google.cloud import storage
+# import io
 
 
 class TextToSpeech:
@@ -53,5 +53,5 @@ class TextToSpeech:
             return self.t2s(f.read())
 
     def lines_to_speech(self, lines, voice=None):
-        snippets = [self.t2s(l, voice) for l in lines]
+        snippets = [self.t2s(line, voice) for line in lines]
         return reduce(lambda a, b: a + b, snippets)

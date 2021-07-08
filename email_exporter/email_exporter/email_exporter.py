@@ -12,7 +12,9 @@ class EmailExporter:
 
         if feed is None:
             self._logger.warn(
-                f"Unrecognised email address: [{content_item.owner}] has no feed. Subject: [{content_item.title}]; Sender: [{content_item.sender}]")
+                "Unrecognised email address: [{}] has no feed. Subject: [{}]; Sender: [{}]".format(
+                    content_item.owner, content_item.title, content_item.sender
+                ))
             return True
 
         if feed.bucket is None:
@@ -38,4 +40,3 @@ class EmailExporter:
 
     def apply_feeds(self):
         self._feed_provider.apply_feeds()
-
