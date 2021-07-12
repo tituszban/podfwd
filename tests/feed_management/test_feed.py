@@ -1,6 +1,7 @@
 from mock import Mock, MagicMock, patch
 import pytest
 from email_exporter.feed_management.feed import Feed, Branding, Logo
+from email_exporter.feed_management.item import Item
 
 
 def test_branding_from_dict_loads_fields():
@@ -118,6 +119,7 @@ def test_feed_from_dict_fetches_bucket():
 
     storage_provider.get_bucket.assert_called_once_with(bucket_name)
 
+
 def test_feed_to_dict_converts_fields():
     feed_key = "feed_key_value"
     bucket_name = "bucket_name"
@@ -146,4 +148,51 @@ def test_feed_to_dict_converts_fields():
     assert "branding" in result
     assert "feed_file_name" in result
     assert result["feed_file_name"] == feed_file_name
-    
+
+
+def test_next_id_is_zero_if_no_items():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    assert feed.next_id == 0
+
+
+def test_next_id_is_greater_than_existing_ids():
+    feed_key = "feed_key_value"
+    idx = 99
+    feed_data = {
+        "items": [{"id": idx}],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    assert feed.next_id > idx
+
+
+def test_add_item_bytes_calls_bucket():
+    feed_key = "feed_key_value"
+    bucket_name = "bucket_name"
+    feed_data = {
+        "items": [],
+        "bucket_name": bucket_name,
+    }
+
+    raw_data = "raw_data_value"
+    bucket = Mock()
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    next_idx = feed.next_id
+    file_name = Item.filename_from_id(next_idx)
+
+    feed.add_item_bytes("title", "description", "date", "sender", raw_data)
+
+    bucket.upload_bytes.assert_called_once_with(file_name, raw_data)
