@@ -1,4 +1,6 @@
-from mock import Mock, MagicMock
+from mock import Mock, MagicMock, patch
+from freezegun import freeze_time
+import datetime
 from email_exporter.feed_management.feed import Feed, Branding, Logo
 from email_exporter.feed_management.item import Item
 
@@ -176,10 +178,9 @@ def test_next_id_is_greater_than_existing_ids():
 
 def test_add_item_bytes_calls_bucket():
     feed_key = "feed_key_value"
-    bucket_name = "bucket_name"
     feed_data = {
         "items": [],
-        "bucket_name": bucket_name,
+        "bucket_name": "bucket_name",
     }
 
     raw_data = "raw_data_value"
@@ -195,3 +196,319 @@ def test_add_item_bytes_calls_bucket():
     feed.add_item_bytes("title", "description", "date", "sender", raw_data)
 
     bucket.upload_bytes.assert_called_once_with(file_name, raw_data)
+
+
+def test_add_item_bytes_uses_bucket_url():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    raw_data = "raw_data_value"
+    bucket_url = "bucket_url_value"
+    bucket = Mock()
+    bucket.upload_bytes = MagicMock(return_value=bucket_url)
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    next_idx = feed.next_id
+    file_name = Item.filename_from_id(next_idx)
+
+    item = feed.add_item_bytes("title", "description", "date", "sender", raw_data)
+
+    assert item.file_info.url == bucket_url
+    assert item.file_info.file_name == file_name
+    assert item.file_info.is_external is False
+
+
+def test_add_item_bytes_uses_passed_in_values():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    title = "title_value"
+    description = "description_value"
+    date = "date_value"
+    sender = "sender_value"
+
+    item = feed.add_item_bytes(title, description, date, sender, "raw_data_value")
+
+    assert item.title == title
+    assert item.description == description
+    assert item.date == date
+    assert item.sender == sender
+
+
+def test_add_item_bytes_created_date_is_now():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    date_now = datetime.datetime(2021, 7, 1)
+    with freeze_time(date_now):
+        item = feed.add_item_bytes("title", "description", "date", "sender", "raw_data_value")
+
+    assert item.created_date == date_now
+
+
+def test_add_item_bytes_item_added_to_items():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    next_idx = feed.next_id
+
+    item = feed.add_item_bytes("title", "description", "date", "sender", "raw_data_value")
+
+    assert item.idx == next_idx
+    assert item in feed.items
+
+
+def test_add_item_url_uses_specified_url():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    item_url = "bucket_url_value"
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    item = feed.add_item_url("title", "description", "date", "sender", item_url)
+
+    assert item.file_info.url == item_url
+    assert item.file_info.is_external is True
+
+
+def test_add_item_url_uses_passed_in_values():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    title = "title_value"
+    description = "description_value"
+    date = "date_value"
+    sender = "sender_value"
+
+    item = feed.add_item_url(title, description, date, sender, "item_url")
+
+    assert item.title == title
+    assert item.description == description
+    assert item.date == date
+    assert item.sender == sender
+
+
+def test_add_item_url_created_date_is_now():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    date_now = datetime.datetime(2021, 7, 1)
+    with freeze_time(date_now):
+        item = feed.add_item_url("title", "description", "date", "sender", "item_url")
+
+    assert item.created_date == date_now
+
+
+def test_add_item_url_item_added_to_items():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    next_idx = feed.next_id
+
+    item = feed.add_item_url("title", "description", "date", "sender", "item_url")
+
+    assert item.idx == next_idx
+    assert item in feed.items
+
+
+def test_add_item_file_path_calls_bucket():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    file_name = "file_name_value"
+    file_path = f"path/to/file/{file_name}"
+    bucket = Mock()
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    feed.add_item_file_path("title", "description", "date", "sender", file_path)
+
+    bucket.upload_from_file_path.assert_called_once_with(file_name, file_path)
+
+
+def test_add_item_file_path_uses_bucket_url():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    file_name = "file_name_value"
+    file_path = f"path/to/file/{file_name}"
+    bucket_url = "bucket_url_value"
+    bucket = Mock()
+    bucket.upload_from_file_path = MagicMock(return_value=bucket_url)
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    item = feed.add_item_file_path("title", "description", "date", "sender", file_path)
+
+    assert item.file_info.url == bucket_url
+    assert item.file_info.file_name == file_name
+    assert item.file_info.is_external is False
+
+
+def test_add_item_file_path_uses_passed_in_values():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    title = "title_value"
+    description = "description_value"
+    date = "date_value"
+    sender = "sender_value"
+
+    item = feed.add_item_file_path(title, description, date, sender, "file_path")
+
+    assert item.title == title
+    assert item.description == description
+    assert item.date == date
+    assert item.sender == sender
+
+
+def test_add_item_file_path_created_date_is_now():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    date_now = datetime.datetime(2021, 7, 1)
+    with freeze_time(date_now):
+        item = feed.add_item_file_path("title", "description", "date", "sender", "file_path")
+
+    assert item.created_date == date_now
+
+
+def test_add_item_file_path_item_added_to_items():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    next_idx = feed.next_id
+
+    item = feed.add_item_file_path("title", "description", "date", "sender", "file_path")
+
+    assert item.idx == next_idx
+    assert item in feed.items
+
+
+def test_to_rss_calls_rss_gen():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    feed = Feed.from_dict(feed_key, feed_data, Mock())
+
+    rss_value = "rss_value"
+    generate_feed = MagicMock(return_value=rss_value)
+
+    with patch("email_exporter.feed_management.rss_gen.generate_feed", generate_feed):
+        result = feed.to_rss()
+
+    generate_feed.assert_called_once()
+    assert result == rss_value
+
+def test_update_rss_uploads_to_bucket():
+    feed_key = "feed_key_value"
+    feed_file_name = "feed_file_name"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+        "feed_file_name": feed_file_name
+    }
+
+    bucket = Mock()
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    rss_value = "rss_value"
+    generate_feed = MagicMock(return_value=rss_value)
+
+    with patch("email_exporter.feed_management.rss_gen.generate_feed", generate_feed):
+        feed.update_rss()
+
+    generate_feed.assert_called_once()
+    bucket.upload_xml.assert_called_once_with(feed_file_name, rss_value)
+
+def test_update_rss_no_bucket_no_conversion():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name"
+    }
+
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=None)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    rss_value = "rss_value"
+    generate_feed = MagicMock(return_value=rss_value)
+
+    with patch("email_exporter.feed_management.rss_gen.generate_feed", generate_feed):
+        feed.update_rss()
+
+    generate_feed.assert_not_called()
+    

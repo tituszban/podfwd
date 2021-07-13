@@ -37,7 +37,7 @@ pytest-coverage:
     - pip install -r requirements.txt
     - pip install -r test_requirements.txt
     - pip install pytest-cov
-    - pytest --cov=email_exporter/ tests/ --cov-report=xml --cov-fail-under=50
+    - pytest --cov=email_exporter/ tests/ --cov-fail-under=50
     - coverage xml
   artifacts:
     reports:
