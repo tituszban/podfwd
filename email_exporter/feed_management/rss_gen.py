@@ -92,6 +92,7 @@ def generate_feed(feed):
 
     ts = get_current_date_formatted()
 
+    title = feed.branding.title
     author = feed.branding.author
     block = feed.block
     link = feed.branding.link
@@ -106,7 +107,7 @@ def generate_feed(feed):
     feed_url = f"https://storage.googleapis.com/{feed.bucket_name}/{feed.feed_file_name}"
 
     channel_fields = (
-        ("title", "PODFWD", {}),
+        ("title", title, {}),
         ("link", link, {}),
         ("generator", "rss_gen", {}),
         ("docs", "http://blogs.law.harvard.edu/tech/rss", {}),
@@ -141,7 +142,7 @@ def generate_feed(feed):
         add_category(channel, category)
 
     image = add_subelement(channel, "image")
-    add_subelement(image, "title", author)
+    add_subelement(image, "title", title)
     add_subelement(image, "url", logo_url)
     add_subelement(image, "link", link)
     add_subelement(image, "width", str(logo_size[0]))

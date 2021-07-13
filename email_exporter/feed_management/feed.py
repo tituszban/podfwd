@@ -31,6 +31,7 @@ class Logo:
 class Branding:
     def __init__(
         self,
+        title="PODFWD",
         author="PODFWD",
         link="https://podfwd.com",
         email="autopod.tb@gmail.com",
@@ -44,6 +45,7 @@ class Branding:
         ],
         logo=Logo()
     ):
+        self.title = title
         self.author = author
         self.link = link
         self.email = email
@@ -62,6 +64,7 @@ class Branding:
 
     def to_dict(self):
         return {
+            "title": self.title,
             "author": self.author,
             "link": self.link,
             "email": self.email,
