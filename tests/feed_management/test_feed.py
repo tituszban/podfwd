@@ -1,5 +1,4 @@
-from mock import Mock, MagicMock, patch
-import pytest
+from mock import Mock, MagicMock
 from email_exporter.feed_management.feed import Feed, Branding, Logo
 from email_exporter.feed_management.item import Item
 
