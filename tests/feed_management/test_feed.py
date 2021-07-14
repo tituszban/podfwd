@@ -468,6 +468,7 @@ def test_to_rss_calls_rss_gen():
     generate_feed.assert_called_once()
     assert result == rss_value
 
+
 def test_update_rss_uploads_to_bucket():
     feed_key = "feed_key_value"
     feed_file_name = "feed_file_name"
@@ -492,6 +493,7 @@ def test_update_rss_uploads_to_bucket():
     generate_feed.assert_called_once()
     bucket.upload_xml.assert_called_once_with(feed_file_name, rss_value)
 
+
 def test_update_rss_no_bucket_no_conversion():
     feed_key = "feed_key_value"
     feed_data = {
@@ -511,4 +513,128 @@ def test_update_rss_no_bucket_no_conversion():
         feed.update_rss()
 
     generate_feed.assert_not_called()
-    
+
+
+def test_prune_calls_bucket_delete():
+    feed_key = "feed_key_value"
+    deleted_file_name = "deleted_file_name"
+    feed_data = {
+        "items": [
+            {
+                "id": 1,
+                "date": "Wed, 7 Jul 2021 08:00:00 +0000",
+                "file_info": {
+                    "file_name": deleted_file_name
+                }
+            }
+        ],
+        "bucket_name": "bucket_name",
+        "item_lifetime_days": 7
+    }
+
+    bucket = Mock()
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    assert len(feed.items) > 0
+    assert feed.items[0].file_info.is_removed is False
+
+    with freeze_time("2021-07-15"):
+        feed.prune()
+
+    bucket.delete_blob.assert_called_once_with(deleted_file_name)
+    assert feed.items[0].file_info.is_removed is True
+
+
+def test_prune_skips_files_within_lifetime():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [
+            {
+                "id": 1,
+                "date": "Wed, 7 Jul 2021 08:00:00 +0000",
+            }
+        ],
+        "bucket_name": "bucket_name",
+        "item_lifetime_days": 7
+    }
+
+    bucket = Mock()
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    assert len(feed.items) > 0
+    assert feed.items[0].file_info.is_removed is False
+
+    with freeze_time("2021-07-08"):
+        feed.prune()
+
+    bucket.delete_blob.assert_not_called()
+    assert feed.items[0].file_info.is_removed is False
+
+
+def test_prune_skips_external_files():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [
+            {
+                "id": 1,
+                "date": "Wed, 7 Jul 2021 08:00:00 +0000",
+                "file_info": {
+                    "is_external": True
+                }
+            }
+        ],
+        "bucket_name": "bucket_name",
+        "item_lifetime_days": 7
+    }
+
+    bucket = Mock()
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    assert len(feed.items) > 0
+    assert feed.items[0].file_info.is_removed is False
+
+    with freeze_time("2021-07-15"):
+        feed.prune()
+
+    bucket.delete_blob.assert_not_called()
+    assert feed.items[0].file_info.is_removed is False
+
+
+def test_prune_skips_removed_files():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [
+            {
+                "id": 1,
+                "date": "Wed, 7 Jul 2021 08:00:00 +0000",
+                "file_info": {
+                    "is_removed": True
+                }
+            }
+        ],
+        "bucket_name": "bucket_name",
+        "item_lifetime_days": 7
+    }
+
+    bucket = Mock()
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    assert len(feed.items) > 0
+    assert feed.items[0].file_info.is_removed is True
+
+    with freeze_time("2021-07-15"):
+        feed.prune()
+
+    bucket.delete_blob.assert_not_called()

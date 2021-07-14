@@ -176,7 +176,7 @@ class Feed:
         old_items = set()
         now = datetime.datetime.now()
         for item in self.items:
-            if item.file_info.is_removed:
+            if item.file_info.is_removed or item.file_info.is_external:
                 continue
             date = item.try_get_date().replace(tzinfo=None)
             age = now - date
@@ -184,7 +184,5 @@ class Feed:
                 old_items.add(item)
 
         for item in old_items:
-            if item.file_info.is_external:
-                continue
             self.bucket.delete_blob(item.file_info.file_name)
             item.file_info.is_removed = True
