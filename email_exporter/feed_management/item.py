@@ -74,7 +74,8 @@ class Item:
         date = re.sub(r"\s*\(.*\)", "", self.date)
         for f in formats:
             try:
-                return datetime.datetime.strptime(date, f)
+                dt = datetime.datetime.strptime(date, f)
+                return dt.replace(tzinfo=None)
             except ValueError as e:
                 errors.append(str(e))
         raise ValueError(
