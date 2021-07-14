@@ -1,6 +1,4 @@
 import pytest
-from mock import Mock, MagicMock, patch
-from freezegun import freeze_time
 import datetime
 from email_exporter.feed_management.item import Item, FileInfo
 
@@ -47,6 +45,7 @@ def test_from_dict_loads_file_info_fields():
 
     dut = Item.from_dict(item_dict)
 
+    assert isinstance(dut.file_info, FileInfo)
     assert dut.file_info.url == item_url
     assert dut.file_info.file_name == file_name
     assert dut.file_info.is_external is False
@@ -105,6 +104,7 @@ def test_try_get_date_correct_formats_handled(date):
 
     assert result == datetime.datetime(2021, 7, 7, 8)
 
+
 def test_try_get_date_incorrect_format_throws():
     item_dict = {
         "date": "2021-07-07T08:00:00Z"
@@ -114,4 +114,3 @@ def test_try_get_date_incorrect_format_throws():
 
     with pytest.raises(ValueError):
         dut.try_get_date()
-

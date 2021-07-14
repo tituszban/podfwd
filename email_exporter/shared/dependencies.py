@@ -1,5 +1,5 @@
 from ..email_exporter import EmailExporter
-from ..inbox import Inbox
+from ..inbox import Inbox, InboxProcessor
 from ..cloud import TextToSpeech, StorageProvider
 from ..feed_management import FeedProvider
 from ..parsers import ParserSelector
@@ -76,6 +76,7 @@ class Dependencies:
             StorageProvider: lambda deps: StorageProvider(deps.get(Config)),
             FeedProvider: general_resolver(FeedProvider, (Config, firestore.Client, StorageProvider, logging.Logger)),
             Inbox: lambda deps: Inbox(deps.get(Config), deps.get(logging.Logger)),
+            InboxProcessor: general_resolver(InboxProcessor, (Config, logging.Logger, Inbox)),
             ParserSelector: lambda deps: ParserSelector(deps.get(logging.Logger)),
             EmailExporter: email_exporter_resolver,
             firestore.Client: firestore_client_resolver,

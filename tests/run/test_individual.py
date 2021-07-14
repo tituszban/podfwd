@@ -1,6 +1,6 @@
 from mock import patch, MagicMock, Mock
 from email_exporter.individual.run import export_inbox
-from email_exporter.inbox import Inbox
+from email_exporter.inbox import InboxProcessor
 from email_exporter.email_exporter import EmailExporter
 
 
@@ -9,7 +9,7 @@ def test_export_inbox():
     mock_email_exporter = Mock()
 
     def side_effect(t):
-        if t == Inbox:
+        if t == InboxProcessor:
             return mock_inbox
         if t == EmailExporter:
             return mock_email_exporter
