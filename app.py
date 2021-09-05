@@ -6,7 +6,12 @@ from flask import Flask, jsonify
 app = Flask(__name__)
 
 
-@app.route("/")
+@app.route("/", methods=["GET"])
+def index():
+    return "Email exporter must be invoked with POST"
+
+
+@app.route("/", methods=["POST"])
 def handle_request():
     return export_inbox()
 
