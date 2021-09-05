@@ -89,11 +89,11 @@ class InboxProcessor:
 
     def process_inbox(self, callback):
         for idx, message in self._inbox.get_messages():
-            content_item = self._process_email(message)
+            inbox_item = self._process_email(message)
 
             discard_message = False
             try:
-                discard_message = callback(content_item)
+                discard_message = callback(inbox_item)
             except Exception:
                 self._logger.exception(
                     f"While processing email {idx}, an exception occured"
