@@ -1,7 +1,7 @@
 import re
 import email
 from bs4 import BeautifulSoup
-from .content_item import ContentItem
+from .inbox_item import InboxItem
 
 
 class InboxProcessor:
@@ -85,15 +85,15 @@ class InboxProcessor:
 
         addresses = self._identify_participants(sender, recipient, mime)
 
-        return ContentItem(subject, date, html, mime, soup, addresses)
+        return InboxItem(subject, date, html, mime, soup, addresses)
 
     def process_inbox(self, callback):
         for idx, message in self._inbox.get_messages():
-            content_item = self._process_email(message)
+            inbox_item = self._process_email(message)
 
             discard_message = False
             try:
-                discard_message = callback(content_item)
+                discard_message = callback(inbox_item)
             except Exception:
                 self._logger.exception(
                     f"While processing email {idx}, an exception occured"

@@ -1,4 +1,4 @@
-class ContentItem:
+class InboxItem:
     def __init__(self, subject, date, html, mime, soup, addresses):
         self.title = subject
         self.date = date

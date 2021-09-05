@@ -1,20 +1,25 @@
 import imaplib
 import email
+from .inbox_abc import InboxABC
 
 
-class Inbox:
+class GmailInbox(InboxABC):
     def __init__(self, config, logger):
         self._server = config.get("EMAIL_SERVER")
-        self.email_address = config.get("EMAIL_LOGIN")
+        self._email_address = config.get("EMAIL_LOGIN")
         self._password = config.get("EMAIL_PASSWORD")
         self._disable_discard = config.get_bool("DISABLE_DISCARDING")
         self._logger = logger
 
         self._mail = None
 
-    def login(self):
+    def _login(self):
         self._mail = imaplib.IMAP4_SSL(self._server)
         self._mail.login(self.email_address, self._password)
+
+    @property
+    def email_address(self):
+        return self._email_address
 
     def discard_message(self, idx):
         if self._disable_discard:
@@ -24,9 +29,9 @@ class Inbox:
 
     def get_messages(self):
         if self._mail is None:
-            self.login()
+            self._login()
 
-        self._mail.select('"[Gmail]/All Mail"')
+        self._mail.select('"[Gmail]/All mail"')
 
         _, ids = self._mail.uid('search', None, 'UNFLAGGED')
         ids = ids[0].decode().split()
