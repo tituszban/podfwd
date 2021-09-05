@@ -1,4 +1,6 @@
 VOICE_DEFAULT = "en-US-Wavenet-A"
+GLOBAL_DOCUMENT = "global"
+GLOBAL_DOMAIN = "global"
 
 
 class VoiceProvider:
@@ -13,14 +15,14 @@ class VoiceProvider:
         sender_domain = sender.split("@")[-1]
 
         voice_collection = self._db.collection(self.collection)
-        global_settings = voice_collection.document("global").get()
+        global_settings = voice_collection.document(GLOBAL_DOCUMENT).get()
         owner_settings = voice_collection.document(owner).get()
 
         setting_providers = [provider.to_dict() for provider in [owner_settings, global_settings] if provider.exists]
 
         sources = []
 
-        for key in [sender_domain, "global"]:
+        for key in [sender_domain, GLOBAL_DOMAIN]:
             for provider in setting_providers:
                 if key in provider:
                     sources.append(provider[key])

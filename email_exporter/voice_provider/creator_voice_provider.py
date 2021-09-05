@@ -1,5 +1,7 @@
 from .voice_provider import VoiceProvider, VOICE_DEFAULT
 
+VOICE_KEY = "voice"
+
 
 class CreatorVoiceProvider(VoiceProvider):
     def get_voice(self, item):
@@ -10,4 +12,4 @@ class CreatorVoiceProvider(VoiceProvider):
         if not settings.exists:
             return VOICE_DEFAULT
 
-        return settings.to_dict().get("voice", VOICE_DEFAULT)
+        return settings.to_dict().get(VOICE_KEY, VOICE_DEFAULT)

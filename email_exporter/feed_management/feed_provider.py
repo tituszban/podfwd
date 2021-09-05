@@ -37,21 +37,21 @@ class FeedProvider:
     def apply_feeds(self, prune=True):
         self._logger.info(f"Applying {len(self._feed_cache)} feeds")
 
-        applied_fileds = set()
+        applied_feeds = set()
         for key, feed in self._feed_cache.items():
             try:
                 if prune:
                     feed.prune()
                 self.push_feed(feed)
                 feed.update_rss()
-                applied_fileds.add(key)
+                applied_feeds.add(key)
             except Exception:
                 self._logger.exception(f"While applying feed [{key}] an error occured")
 
-        for key in applied_fileds:
+        for key in applied_feeds:
             self._feed_cache.pop(key)
 
-        self._logger.info(f"Feeds applied: {len(applied_fileds)} feeds updated")
+        self._logger.info(f"Feeds applied: {len(applied_feeds)} feeds updated")
 
     def __del__(self):
         if len(self._feed_cache) > 0:

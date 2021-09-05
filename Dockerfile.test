@@ -1,0 +1,9 @@
+FROM python:3.9
+
+WORKDIR /setup
+
+COPY ./requirements.txt /setup
+COPY ./test_requirements.txt /setup
+RUN pip install -r requirements.txt -r test_requirements.txt
+
+WORKDIR /app
