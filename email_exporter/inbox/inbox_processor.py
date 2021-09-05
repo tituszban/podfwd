@@ -1,7 +1,7 @@
 import re
 import email
 from bs4 import BeautifulSoup
-from .content_item import ContentItem
+from .inbox_item import InboxItem
 
 
 class InboxProcessor:
@@ -85,7 +85,7 @@ class InboxProcessor:
 
         addresses = self._identify_participants(sender, recipient, mime)
 
-        return ContentItem(subject, date, html, mime, soup, addresses)
+        return InboxItem(subject, date, html, mime, soup, addresses)
 
     def process_inbox(self, callback):
         for idx, message in self._inbox.get_messages():
