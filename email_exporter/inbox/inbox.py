@@ -26,7 +26,7 @@ class Inbox:
         if self._mail is None:
             self.login()
 
-        self._mail.select('"[Gmail]/All Mail"')
+        self._mail.select('"[Gmail]/All mail"')
 
         _, ids = self._mail.uid('search', None, 'UNFLAGGED')
         ids = ids[0].decode().split()
