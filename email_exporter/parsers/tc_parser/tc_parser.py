@@ -1,8 +1,20 @@
-from .parser_abc import ParserABC
-from .content_item import ContentItem
+from ..parser_abc import ParserABC
+from ..content_item import ContentItem
 from ssml_builder.core import Speech
 import bleach
 from bs4 import NavigableString
+from ..item_emitter import ItemEmitter
+from .tc_table import TcTable
+
+class TcItemEmitter(ItemEmitter):
+    def get_items(self, content_item):
+        trs = content_item.soup.table.find_all("tr", recursive=False)
+
+        tables = [TcTable.get_table(tr.td.table, content_item) for tr in trs]
+
+        for table in tables:
+            for item in table.get_items():
+                yield item
 
 
 class TcParser(ParserABC):
@@ -116,6 +128,9 @@ class TcParser(ParserABC):
 
     def parse(self, content_item):
         assert content_item.soup is not None, "Soup not provided"
+
+        items = list(TcItemEmitter().get_items(content_item))
+
         table = content_item.soup.find("table")
 
         def find_tds_with_p(root):

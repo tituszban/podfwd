@@ -1,8 +1,17 @@
 from .parser_abc import ParserABC
+from .item_emitter import ItemEmitter
 from .content_item import ContentItem
 from ssml_builder.core import Speech
-# import bleach
-# from bs4 import BeautifulSoup
+import re
+
+
+class SubstackItemEmitter(ItemEmitter):
+    def get_items(self, content_item):
+        post_components = content_item.soup.find_all("div", class_=re.compile(r"post$"))
+
+        for post_component in post_components:
+            for component in post_component.div.children:
+                yield ContentItem.to_item(component)
 
 
 class SubstackParser(ParserABC):
@@ -145,6 +154,8 @@ class SubstackParser(ParserABC):
 
     def parse(self, content_item):
         assert content_item.soup is not None, "Soup not provided"
+        items = list(SubstackItemEmitter().get_items(content_item))
+
         table = content_item.soup.find("table")
 
         parents = self._find_ph_parents(table)
