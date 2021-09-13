@@ -6,6 +6,7 @@ from bs4 import NavigableString
 from ..item_emitter import ItemEmitter
 from .tc_table import TcTable
 
+
 class TcItemEmitter(ItemEmitter):
     def get_items(self, content_item):
         trs = content_item.soup.table.find_all("tr", recursive=False)
@@ -128,8 +129,6 @@ class TcParser(ParserABC):
 
     def parse(self, content_item):
         assert content_item.soup is not None, "Soup not provided"
-
-        items = list(TcItemEmitter().get_items(content_item))
 
         table = content_item.soup.find("table")
 

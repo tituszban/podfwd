@@ -154,7 +154,6 @@ class SubstackParser(ParserABC):
 
     def parse(self, content_item):
         assert content_item.soup is not None, "Soup not provided"
-        items = list(SubstackItemEmitter().get_items(content_item))
 
         table = content_item.soup.find("table")
 
