@@ -36,7 +36,7 @@ class GmailInbox(InboxABC):
 
     def _get_all_mail_folder(self):
         result = self._ensure_success(self._mail.list())
-        
+
         result_list = list(map(lambda b: b.decode(), result))
         inbox_folder_re = re.compile(r"^\((?P<tags>(\\\w*\s?)*)\)\s\"/\"\s(?P<name>\".*\")$")
         folder_matches = list(map(inbox_folder_re.match, result_list))
@@ -45,7 +45,7 @@ class GmailInbox(InboxABC):
                 tuple(map(lambda tag: tag.lstrip("\\").lower(), m.group("tags").split())),
                 m.group("name")),
             folder_matches))
-        
+
         all_folder = list(filter(lambda folder: "all" in folder[0], folders))
 
         if len(all_folder) <= 0:
@@ -54,8 +54,6 @@ class GmailInbox(InboxABC):
             raise Exception("More than one folder found with 'All' tag")
 
         return all_folder[0][1]
-
-
 
     def get_messages(self):
         if self._mail is None:
