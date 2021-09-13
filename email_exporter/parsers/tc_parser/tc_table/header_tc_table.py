@@ -1,6 +1,7 @@
 from .tc_table_abc import TcTableABC
 from ...content_item import ContentItem
 
+
 class HeaderTcTable(TcTableABC):
     def get_items(self):
         return [

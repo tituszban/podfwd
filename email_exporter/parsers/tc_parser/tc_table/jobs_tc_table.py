@@ -1,6 +1,7 @@
 from .null_tc_table import NullTcTable
 from .tc_table_abc import TcTableABC
 
+
 class JobsTcTable(NullTcTable):
     @staticmethod
     def match_component(component):

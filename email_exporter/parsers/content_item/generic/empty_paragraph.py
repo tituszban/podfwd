@@ -1,7 +1,8 @@
 from ..content_item_abc import ContentItemABC
 
+
 class EmptyParagraph(ContentItemABC):
-    
+
     def get_ssml(self):
         return super().get_ssml()
 
@@ -11,4 +12,3 @@ class EmptyParagraph(ContentItemABC):
     @staticmethod
     def match_component(component):
         return component.name == "p" and component.text.strip() == ""
-

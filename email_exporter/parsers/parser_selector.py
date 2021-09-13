@@ -4,7 +4,6 @@ from .general_parser import GeneralParser
 from .emitter_parser import EmitterParser
 
 
-
 class ParserSelector:
     def __init__(self, logger):
         self.logger = logger

@@ -1,5 +1,4 @@
 from ..content_item_abc import ContentItemABC
-import re
 
 
 class Header(ContentItemABC):

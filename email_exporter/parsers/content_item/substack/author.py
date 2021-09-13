@@ -16,7 +16,10 @@ class Author(ContentItemABC):
             return True
         try:
             if component.name == "table" and \
-                    len(component.tbody.tr.find_all("td", recursive=False)[-1].div.find_all("td", class_=re.compile(r"post-meta-item$"))) > 0:
+                    len(
+                        component.tbody.tr.find_all("td", recursive=False)[-1]
+                        .div.find_all("td", class_=re.compile(r"post-meta-item$"))
+                    ) > 0:
                 # Author fingerprint: Forwarded, gmail sanitised
                 return True
         except AttributeError:

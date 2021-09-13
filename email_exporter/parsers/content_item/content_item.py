@@ -1,10 +1,3 @@
-from email_exporter.parsers.content_item.tc.content_image import ContentImage
-from .text_item import TextItem
-from .tweet_item import TweetItem
-from .string_item import StringItem
-from .util import is_tweet
-
-
 from . import generic
 from . import substack
 from . import tc
@@ -28,9 +21,3 @@ class ContentItem:
         @staticmethod
         def to_tc_header(component, content_item):
             return tc.Header(component, content_item)
-
-        # if type(component) == str:
-        #     return StringItem(component)
-        # if is_tweet(component):
-        #     return TweetItem(component)
-        # return TextItem(component)

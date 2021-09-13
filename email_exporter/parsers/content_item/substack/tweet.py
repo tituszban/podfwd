@@ -15,9 +15,9 @@ class Tweet(ContentItemABC):
             return True
 
         if any([
-            img["alt"].startswith("Twitter avatar for")
-            for img in component.find_all("img")
-            if "alt" in img.attrs and img["alt"]]):
+                img["alt"].startswith("Twitter avatar for")
+                for img in component.find_all("img")
+                if "alt" in img.attrs and img["alt"]]):
             return True
 
         return False

@@ -16,7 +16,8 @@ class Button(ContentItemABC):
         if len(component.find_all("a", class_=re.compile(r"button$"))) != 0:
             return True
 
-        if component.name == "div" and "class" in component.attrs and any(class_.endswith("subscribe-widget") for class_ in component["class"]):
+        if component.name == "div" and "class" in component.attrs and\
+                any(class_.endswith("subscribe-widget") for class_ in component["class"]):
             return True
 
         if component.name == "p" and len(component.contents) == 1 and\

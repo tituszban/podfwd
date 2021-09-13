@@ -1,7 +1,8 @@
 from ..content_item_abc import ContentItemABC
 
+
 class NullContentItem(ContentItemABC):
-    
+
     def get_ssml(self):
         return []
 
@@ -11,4 +12,3 @@ class NullContentItem(ContentItemABC):
     @staticmethod
     def match_component(component):
         return True
-

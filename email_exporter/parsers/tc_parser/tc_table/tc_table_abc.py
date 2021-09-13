@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class TcTableABC(ABC):
     def __init__(self, component, content_item):
         self._component = component

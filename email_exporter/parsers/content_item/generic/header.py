@@ -1,7 +1,8 @@
 from ..content_item_abc import ContentItemABC
 
+
 class Header(ContentItemABC):
-    
+
     def get_ssml(self):
         return super().get_ssml()
 

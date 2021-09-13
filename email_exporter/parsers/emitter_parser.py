@@ -1,5 +1,6 @@
 from .parser_abc import ParserABC
 
+
 class EmitterParser(ParserABC):
     def __init__(self, logger, emitter):
         self._logger = logger
@@ -11,4 +12,3 @@ class EmitterParser(ParserABC):
         items = list(self._emitter.get_items(content_item))
 
         return [], []
-        
