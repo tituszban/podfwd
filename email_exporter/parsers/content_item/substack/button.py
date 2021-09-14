@@ -1,4 +1,3 @@
-from ..content_item_abc import ContentItemABC
 from ..generic import NullContentItem
 from ..util import is_only_link
 import re

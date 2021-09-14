@@ -12,7 +12,6 @@ class Youtube(ContentItemABC):
         })
         return res.json()
 
-
     def get_ssml(self):
         try:
             video_id = self._component.img["src"].split("/")[-1]
@@ -25,13 +24,13 @@ class Youtube(ContentItemABC):
         except:
             return []
 
-
     def get_description(self):
         return super().get_description()
 
     @staticmethod
     def match_component(component):
-        if component.name == "a" and "class" in component.attrs and any(class_.endswith("youtube-wrap") for class_ in component["class"]):
+        if component.name == "a" and "class" in component.attrs and\
+                any(class_.endswith("youtube-wrap") for class_ in component["class"]):
             return True
 
         return False
