@@ -7,32 +7,32 @@ class EmailExporter:
         self._logger = logger
         self._voice_provider = voice_provider
 
-    def message_handler(self, content_item):
-        feed = self._feed_provider.get_feed(content_item.owner)
+    def message_handler(self, inbox_item):
+        feed = self._feed_provider.get_feed(inbox_item.owner)
 
         if feed is None:
             self._logger.warn(
                 "Unrecognised email address: [{}] has no feed. Subject: [{}]; Sender: [{}]".format(
-                    content_item.owner, content_item.title, content_item.sender
+                    inbox_item.owner, inbox_item.title, inbox_item.sender
                 ))
             return True
 
         if feed.bucket is None:
             self._logger.warn(
-                f"No bucket found: [{content_item.owner}] has no allocated bucket")
+                f"No bucket found: [{inbox_item.owner}] has no allocated bucket")
             return False
 
-        parser = self._parser_selector.get_parser(content_item)
-        ssml, description = parser.parse(content_item)
-        voice = self._voice_provider.get_voice(content_item)
+        parser = self._parser_selector.get_parser(inbox_item)
+        ssml, description = parser.parse(inbox_item)
+        voice = self._voice_provider.get_voice(inbox_item)
 
         sound_data = self._t2s.lines_to_speech(ssml, voice)
 
         feed.add_item_bytes(
-            title=content_item.title,
+            title=inbox_item.title,
             description='\n'.join(description),
-            date=content_item.date,
-            sender=content_item.sender,
+            date=inbox_item.date,
+            sender=inbox_item.sender,
             data=sound_data
         )
 

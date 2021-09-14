@@ -21,7 +21,7 @@ class Youtube(ContentItemABC):
                 speech_item.Paragraph(f"YouTube video {info['title']} by {info['author_name']}.")
             ]
 
-        except:
+        except:     # noqa: E722
             return []
 
     def get_description(self):

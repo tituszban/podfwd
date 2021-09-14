@@ -2,17 +2,23 @@ from functools import reduce
 import re
 
 
-def get_text_content(component):
+def sanitise(text, nl_char):
     return reduce(
         lambda txt, c: txt.replace(*c),
         [
-            ("\n", ""), ("\r", ""),
+            ("\n", nl_char), ("\r", ""),
             ("—", "-"), ("\xa0", " "), ("–", "-"),
             ("”", '"'), ("“", '"'),
             ("‘", "'"), ("’", "'"),
             ("…", "...")
         ],
-        component.get_text(" ", strip=True)).strip()
+        text).strip()
+
+
+def get_text_content(component, nl_char=""):
+    if not hasattr(component, "get_text"):
+        return sanitise(component, nl_char=nl_char)
+    return sanitise(component.get_text(" ", strip=True), nl_char=nl_char)
 
 
 def is_only_link(component):
