@@ -1,4 +1,5 @@
 from .parser_abc import ParserABC
+from functools import reduce
 
 
 class EmitterParser(ParserABC):
@@ -10,5 +11,7 @@ class EmitterParser(ParserABC):
         assert content_item.soup is not None, "Soup not provided"
 
         items = list(self._emitter.get_items(content_item))
+
+        audio_items = reduce(lambda arr, item: [*arr, *item.get_ssml()], items, [])
 
         return [], []

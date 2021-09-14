@@ -1,5 +1,6 @@
 from .speech_item_abc import SpeechItemABC
 
+
 class Emphasis(SpeechItemABC):
     strong = "strong"
     moderate = "moderate"
@@ -19,3 +20,6 @@ class Emphasis(SpeechItemABC):
     def add_to_speech(self, speech):
         speech.emphasis(self._text, self._level)
         return super().add_to_speech(speech)
+
+    def __repr__(self):
+        return f"speech_item.{type(self).__name__}({self._text}, {self._level})"

@@ -30,3 +30,6 @@ class SayAs(SpeechItemABC):
     def add_to_speech(self, speech):
         speech.say_as(value=self._text, interpret_as=self._interpret_as)
         return super().add_to_speech(speech)
+
+    def __repr__(self):
+        return f"speech_item.{type(self).__name__}({self._text}, {self._interpret_as})"
