@@ -1,13 +1,7 @@
-from ..content_item_abc import ContentItemABC
+from ..generic import NullContentItem
 
 
-class HorizontalRule(ContentItemABC):
-
-    def get_ssml(self):
-        return super().get_ssml()
-
-    def get_description(self):
-        return super().get_description()
+class HorizontalRule(NullContentItem):
 
     @staticmethod
     def match_component(component):

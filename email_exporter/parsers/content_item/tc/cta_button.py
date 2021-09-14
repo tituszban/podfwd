@@ -1,14 +1,9 @@
 from ..content_item_abc import ContentItemABC
+from ..generic import NullContentItem
 from ..util import is_only_link
 
 
-class CtaButton(ContentItemABC):
-
-    def get_ssml(self):
-        return super().get_ssml()
-
-    def get_description(self):
-        return super().get_description()
+class CtaButton(NullContentItem):
 
     @staticmethod
     def match_component(component):

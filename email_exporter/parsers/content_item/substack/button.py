@@ -1,15 +1,10 @@
 from ..content_item_abc import ContentItemABC
+from ..generic import NullContentItem
 from ..util import is_only_link
 import re
 
 
-class Button(ContentItemABC):
-
-    def get_ssml(self):
-        return super().get_ssml()
-
-    def get_description(self):
-        return super().get_description()
+class Button(NullContentItem):
 
     @staticmethod
     def match_component(component):

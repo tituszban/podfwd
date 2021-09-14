@@ -4,7 +4,7 @@ from ..content_item_abc import ContentItemABC
 class CaptionedImage(ContentItemABC):
 
     def get_ssml(self):
-        return super().get_ssml()
+        return []
 
     def get_description(self):
         return super().get_description()

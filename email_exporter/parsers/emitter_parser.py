@@ -7,10 +7,10 @@ class EmitterParser(ParserABC):
         self._logger = logger
         self._emitter = emitter
 
-    def parse(self, content_item):
-        assert content_item.soup is not None, "Soup not provided"
+    def parse(self, inbox_item):
+        assert inbox_item.soup is not None, "Soup not provided"
 
-        items = list(self._emitter.get_items(content_item))
+        items = list(self._emitter.get_items(inbox_item))
 
         audio_items = reduce(lambda arr, item: [*arr, *item.get_ssml()], items, [])
 
