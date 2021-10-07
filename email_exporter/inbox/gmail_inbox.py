@@ -26,7 +26,7 @@ class GmailInbox(InboxABC):
         if self._disable_discard:
             return
 
-        _, data = self._mail.uid('STORE', idx, '+FLAGS', '(\\FLAGGED)')
+        _ = self._ensure_success(self._mail.uid('STORE', idx, '+FLAGS', '(\\FLAGGED)'))
 
     def _ensure_success(self, action_result, success="OK"):
         status, result = action_result
