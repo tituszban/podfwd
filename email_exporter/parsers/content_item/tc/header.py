@@ -1,4 +1,4 @@
-from ..content_item_abc import ContentItemABC
+from ..content_item_abc import ContentItemABC, ContentType
 from ... import speech_item
 
 
@@ -7,18 +7,27 @@ class Header(ContentItemABC):
         super().__init__(component, to_item)
         assert inbox_item, "Header requires inbox_item parameter"
         self._inbox_item = inbox_item
+        self._title = self._inbox_item.title.replace("\r\n", "")
+        self._author = self._get_text_content().replace("•", ";")
 
     def get_ssml(self):
-        title = self._inbox_item.title.replace("\r\n", "")
-        author = self._get_text_content().replace("•", ";")
+        
         return [
-            speech_item.Paragraph(title),
-            speech_item.Paragraph(author),
+            speech_item.Paragraph(self._title),
+            speech_item.Paragraph(self._author),
             speech_item.Pause("750ms")
         ]
-
+    
     def get_description(self):
-        return super().get_description()
+        return [
+            self._component.find("img"),
+            f"<p>{self._title}</p>",
+            f"<p>{self._author}</p>"
+        ]
+
+    @property
+    def content_type(self):
+        return ContentType.text
 
     @staticmethod
     def match_component(component):

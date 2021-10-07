@@ -1,4 +1,4 @@
-from ..content_item_abc import ContentItemABC
+from ..content_item_abc import ContentItemABC, ContentType
 import requests
 from ... import speech_item
 
@@ -26,6 +26,10 @@ class Youtube(ContentItemABC):
 
     def get_description(self):
         return super().get_description()
+
+    @property
+    def content_type(self):
+        return ContentType.embed
 
     @staticmethod
     def match_component(component):

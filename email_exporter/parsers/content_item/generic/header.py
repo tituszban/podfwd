@@ -1,4 +1,4 @@
-from ..content_item_abc import ContentItemABC
+from ..content_item_abc import ContentItemABC, ContentType
 from ... import speech_item
 
 
@@ -21,6 +21,10 @@ class Header(ContentItemABC):
 
     def get_description(self):
         return super().get_description()
+
+    @property
+    def content_type(self):
+        return ContentType.text
 
     @staticmethod
     def match_component(component):

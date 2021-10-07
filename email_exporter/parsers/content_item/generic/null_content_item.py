@@ -1,4 +1,4 @@
-from ..content_item_abc import ContentItemABC
+from ..content_item_abc import ContentItemABC, ContentType
 
 
 class NullContentItem(ContentItemABC):
@@ -8,6 +8,10 @@ class NullContentItem(ContentItemABC):
 
     def get_description(self):
         return []
+
+    @property
+    def content_type(self):
+        return ContentType.null
 
     @staticmethod
     def match_component(component):

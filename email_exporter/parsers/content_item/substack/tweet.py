@@ -1,4 +1,4 @@
-from ..content_item_abc import ContentItemABC
+from ..content_item_abc import ContentItemABC, ContentType
 from ... import speech_item
 from abc import ABC, abstractmethod
 from ..util import get_text_content
@@ -34,12 +34,18 @@ class Footer(NullComponent):
     @staticmethod
     def match_component(component):
         try:
-            return component.name == "a" and len(component.contents) == 1 and \
-                tuple([c.name for c in component.div.contents]) in [
+            if component.name not in ("div", "a"):
+                return False
+            if component.name == "a" and len(component.contents) != 1:
+                return False
+
+            div = component if component.name == "div" else component.div
+
+            return tuple([c.name for c in div.contents]) in [
                     ("p", "span", "span"),
                     ("p", "span"),
                     ("p",)
-            ] and len(component.div.p.contents) == 1
+            ] and len(div.p.contents) == 1
         except AttributeError:
             return False
 
@@ -330,6 +336,10 @@ class Tweet(ContentItemABC):
 
     def get_description(self):
         return super().get_description()
+
+    @property
+    def content_type(self):
+        return ContentType.embed
 
     @staticmethod
     def match_component(component):

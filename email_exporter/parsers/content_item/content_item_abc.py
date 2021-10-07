@@ -2,6 +2,14 @@ from abc import ABC, abstractmethod
 from .util import get_text_content
 
 
+class ContentType:
+    text = "ContentType.text"
+    image = "ContentType.image"
+    null = "ContentType.null"
+    util = "ContentType.util"
+    embed = "ContentType.embed"
+
+
 class ContentItemABC(ABC):
 
     def __init__(self, component, to_item):
@@ -14,6 +22,11 @@ class ContentItemABC(ABC):
 
     @abstractmethod
     def get_description(self):
+        return [self._component]
+
+    @property
+    @abstractmethod
+    def content_type(self):
         raise NotImplementedError()
 
     @staticmethod
