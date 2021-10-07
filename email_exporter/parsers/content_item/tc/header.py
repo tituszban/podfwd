@@ -27,7 +27,7 @@ class Header(ContentItemABC):
 
     @property
     def content_type(self):
-        return ContentType.text
+        return ContentType.util
 
     @staticmethod
     def match_component(component):
