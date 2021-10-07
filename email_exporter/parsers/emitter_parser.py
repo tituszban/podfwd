@@ -31,7 +31,7 @@ class EmitterParser(ParserABC):
             yield convert(speech_items[i:j-1])
             i = j
 
-    def _content_items_to_description(self, content_items):
+    def _content_items_to_description(self, content_items, remove_href=False):
         description_items = []
 
         for i, item in enumerate(content_items):
@@ -39,17 +39,13 @@ class EmitterParser(ParserABC):
                 description_items.append((d, i))
 
         def remove_attrs(component, attrs_to_keep=("alt", "src", "href")):
+            attrs_to_keep = [attr for attr in attrs_to_keep if attr != "href" or not remove_href]
             for attr in [attr for attr in component.attrs if attr not in attrs_to_keep]:
                 del component[attr]
-
-        attrs = set({})
 
         def transform():
             for item, i in description_items:
                 if isinstance(item, bs4.element.PageElement):
-
-                    for attr in item.attrs:
-                        attrs.add(attr)
 
                     children = [item, *item.findChildren(recursive=True)]
                     for child in children:
@@ -66,7 +62,7 @@ class EmitterParser(ParserABC):
 
         for desc, i in annotated_descriptions:
             annotation[i] += len(desc)
-        
+
         return description, annotation
 
     def _get_description(self, content_items, inbox_item):
@@ -74,18 +70,25 @@ class EmitterParser(ParserABC):
 
         title = f"<h1>{inbox_item.title}</h1>"
 
+        remove_href = False
+
         while len(_content_items) > 0:
-            descriptions, annotation = self._content_items_to_description(_content_items)
+            descriptions, annotation = self._content_items_to_description(_content_items, remove_href)
 
             description = [title, *descriptions]
 
             if len('\n'.join(description)) <= self.description_limit:
                 return description
-            
+
             len_by_content_type = reduce(lambda d, i: {**d, i.content_type: 0}, _content_items, {})
 
             for i, l in annotation.items():
                 len_by_content_type[_content_items[i].content_type] += l
+
+            remove_href = not remove_href
+
+            if remove_href:
+                continue
 
             content_type_to_remove = max(len_by_content_type, key=lambda k: len_by_content_type[k])
 
