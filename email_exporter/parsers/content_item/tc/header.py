@@ -11,13 +11,13 @@ class Header(ContentItemABC):
         self._author = self._get_text_content().replace("•", ";")
 
     def get_ssml(self):
-        
+
         return [
             speech_item.Paragraph(self._title),
             speech_item.Paragraph(self._author),
             speech_item.Pause("750ms")
         ]
-    
+
     def get_description(self):
         return [
             self._component.find("img"),
