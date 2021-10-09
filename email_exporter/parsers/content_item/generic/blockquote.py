@@ -8,6 +8,8 @@ class Blockquote(ContentItemABC):
         yield speech_item.Paragraph("Quote.")
 
         for component in self._component.contents:
+            if component == "\n":
+                continue
             yield from self._to_item(component).get_ssml()
 
         yield speech_item.Paragraph("End quote.")

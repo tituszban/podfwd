@@ -29,7 +29,7 @@ class EmitterParser(ParserABC):
             if i == j:
                 raise Exception("speech item is too long")
             yield convert(speech_items[i:j-1])
-            i = j
+            i = j-1
 
     def _content_items_to_description(self, content_items, remove_href=False):
         description_items = []
