@@ -1,5 +1,6 @@
-from ..content_item_abc import ContentItemABC, ContentType
+from ..content_item_abc import ContentItemABC
 from ... import speech_item
+from ... import description_item
 
 
 class Paragraph(ContentItemABC):
@@ -10,11 +11,9 @@ class Paragraph(ContentItemABC):
         ]
 
     def get_description(self):
-        return super().get_description()
-
-    @property
-    def content_type(self):
-        return ContentType.text
+        return [
+            description_item.Text(self._component)
+        ]
 
     @staticmethod
     def match_component(component):

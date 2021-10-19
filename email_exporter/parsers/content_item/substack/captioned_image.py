@@ -1,4 +1,5 @@
-from ..content_item_abc import ContentItemABC, ContentType
+from ..content_item_abc import ContentItemABC
+from ... import description_item
 
 
 class CaptionedImage(ContentItemABC):
@@ -8,13 +9,9 @@ class CaptionedImage(ContentItemABC):
 
     def get_description(self):
         return [
-            self._component.find("img"),
-            f"<p>{self._get_text_content()}</p>"
+            description_item.Image(self._component.find("img")),
+            description_item.Image(f"<p>{self._get_text_content()}</p>")
         ]
-
-    @property
-    def content_type(self):
-        return ContentType.image
 
     @staticmethod
     def match_component(component):

@@ -1,4 +1,5 @@
-from ..content_item_abc import ContentItemABC, ContentType
+from ..content_item_abc import ContentItemABC
+from ... import description_item
 
 
 class Image(ContentItemABC):
@@ -6,11 +7,9 @@ class Image(ContentItemABC):
         return []
 
     def get_description(self):
-        return [self._component.find("img")]
-
-    @property
-    def content_type(self):
-        return ContentType.image
+        return [
+            description_item.Image(self._component.find("img"))
+        ]
 
     @staticmethod
     def match_component(component):
