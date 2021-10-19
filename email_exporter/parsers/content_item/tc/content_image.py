@@ -1,4 +1,3 @@
-from email_exporter.parsers.content_item.substack.tweet import Image
 from ..content_item_abc import ContentItemABC
 from ... import description_item
 
