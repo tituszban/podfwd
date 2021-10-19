@@ -1,8 +1,6 @@
 from .parser_abc import ParserABC
 from functools import reduce
 from ssml_builder.core import Speech
-import bs4
-from collections import defaultdict
 
 
 class EmitterParser(ParserABC):

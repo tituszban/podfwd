@@ -13,7 +13,8 @@ class DescriptionItemABC(ABC):
         for attr in [attr for attr in component.attrs if attr not in attrs_to_keep]:
             del component[attr]
 
-    def to_text(self, remove_href=False):   # TODO: this is not great. Replace with building up components, instead of deleting
+    def to_text(self, remove_href=False):
+        # TODO: this is not great. Replace with building up components, instead of deleting
         if isinstance(self._content, bs4.element.PageElement):
             children = [self._content, *self._content.findChildren(recursive=True)]
             for child in children:
