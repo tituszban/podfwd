@@ -1,6 +1,7 @@
-from ..content_item_abc import ContentItemABC, ContentType
+from ..content_item_abc import ContentItemABC
 import re
 from ... import speech_item
+from ... import description_item
 
 
 class Author(ContentItemABC):
@@ -13,12 +14,8 @@ class Author(ContentItemABC):
 
     def get_description(self):
         return [
-            f"<p>{self._get_text_content()}</p>"
+            description_item.Util(f"<p>{self._get_text_content()}</p>")
         ]
-
-    @property
-    def content_type(self):
-        return ContentType.util
 
     @staticmethod
     def match_component(component):

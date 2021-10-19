@@ -1,5 +1,6 @@
-from ..content_item_abc import ContentItemABC, ContentType
+from ..content_item_abc import ContentItemABC
 from ... import speech_item
+from ... import description_item
 
 
 class Header(ContentItemABC):
@@ -20,14 +21,10 @@ class Header(ContentItemABC):
 
     def get_description(self):
         return [
-            self._component.find("img"),
-            f"<p>{self._title}</p>",
-            f"<p>{self._author}</p>"
+            description_item.Util(self._component.find("img")),
+            description_item.Util(f"<p>{self._title}</p>"),
+            description_item.Util(f"<p>{self._author}</p>")
         ]
-
-    @property
-    def content_type(self):
-        return ContentType.util
 
     @staticmethod
     def match_component(component):

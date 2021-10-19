@@ -1,8 +1,9 @@
-from ..content_item_abc import ContentItemABC, ContentType
+from ..content_item_abc import ContentItemABC
 from ... import speech_item
 from abc import ABC, abstractmethod
 from ..util import get_text_content
 import re
+from ... import description_item
 
 
 class TweetComponent(ABC):
@@ -335,18 +336,16 @@ class Tweet(ContentItemABC):
         return tweet.to_ssml()
 
     def get_description(self):
-        return super().get_description()
-
-    @property
-    def content_type(self):
-        return ContentType.embed
+        return [
+            description_item.Embed(self._component)
+        ]
 
     @staticmethod
     def match_component(component):
         if "class" in component.attrs and "tweet" in component["class"]:    # Directly received
             return True
 
-        if any([
+        if component.name == "div" and any([
                 img["alt"].startswith("Twitter avatar for")
                 for img in component.find_all("img")
                 if "alt" in img.attrs and img["alt"]]):

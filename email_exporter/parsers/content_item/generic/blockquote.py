@@ -1,4 +1,4 @@
-from ..content_item_abc import ContentItemABC, ContentType
+from ..content_item_abc import ContentItemABC
 from ... import speech_item
 
 
@@ -15,11 +15,10 @@ class Blockquote(ContentItemABC):
         yield speech_item.Paragraph("End quote.")
 
     def get_description(self):
-        return super().get_description()
-
-    @property
-    def content_type(self):
-        return ContentType.text
+        for component in self._component.contents:
+            if component == "\n":
+                continue
+            yield from self._to_item(component).get_description()
 
     @staticmethod
     def match_component(component):
