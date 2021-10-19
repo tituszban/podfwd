@@ -346,7 +346,7 @@ class Tweet(ContentItemABC):
         if "class" in component.attrs and "tweet" in component["class"]:    # Directly received
             return True
 
-        if any([
+        if component.name == "div" and any([
                 img["alt"].startswith("Twitter avatar for")
                 for img in component.find_all("img")
                 if "alt" in img.attrs and img["alt"]]):
