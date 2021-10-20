@@ -38,7 +38,7 @@ class InboxProcessor:
         if recipient != self._inbox.email_address:
             return (recipient, sender)
 
-        if (res := re.findall(r"From:.*<(?P<email>.*)>", mime)):
+        if (res := re.findall(r"From:.*<\s*(?P<email>.*)>", mime)):
             return (sender, res[0])
 
         return (sender, None)
