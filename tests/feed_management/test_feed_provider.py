@@ -19,12 +19,12 @@ def test_get_feed_returns_from_collection():
     config = Mock()
     config.get = MagicMock(return_value=collection_name)
 
-    dut = FeedProvider(
+    sut = FeedProvider(
         config, firestore_client,
         Mock(), Mock()
     )
 
-    feed = dut.get_feed(feed_name)
+    feed = sut.get_feed(feed_name)
 
     firestore_client.collection.assert_called_once_with(collection_name)
     db_client.document.assert_called_once_with(feed_name)
@@ -49,13 +49,13 @@ def test_get_feed_document_doesnt_exist_throws():
     config = Mock()
     config.get = MagicMock(return_value=collection_name)
 
-    dut = FeedProvider(
+    sut = FeedProvider(
         config, firestore_client,
         Mock(), Mock()
     )
 
     with pytest.raises(KeyError):
-        _ = dut.get_feed(feed_name)
+        _ = sut.get_feed(feed_name)
 
 
 def test_get_feed_called_again_returns_from_cache():
@@ -74,13 +74,13 @@ def test_get_feed_called_again_returns_from_cache():
     config = Mock()
     config.get = MagicMock(return_value=collection_name)
 
-    dut = FeedProvider(
+    sut = FeedProvider(
         config, firestore_client,
         Mock(), Mock()
     )
 
-    feed = dut.get_feed(feed_name)
-    feed2 = dut.get_feed(feed_name)
+    feed = sut.get_feed(feed_name)
+    feed2 = sut.get_feed(feed_name)
 
     firestore_client.collection.assert_called_once_with(collection_name)
     db_client.document.assert_called_once_with(feed_name)
@@ -108,12 +108,12 @@ def test_push_feed_calls_collection_set():
     config = Mock()
     config.get = MagicMock(return_value=collection_name)
 
-    dut = FeedProvider(
+    sut = FeedProvider(
         config, firestore_client,
         Mock(), Mock()
     )
 
-    dut.push_feed(feed)
+    sut.push_feed(feed)
 
     firestore_client.collection.assert_called_once_with(collection_name)
     db_client.document.assert_called_once_with(feed_name)
@@ -140,7 +140,7 @@ def test_apply_feed_pushes_all_cached_feeds():
 
     feed_names = ["feed_name_1", "feed_name_2", "feed_name_3"]
 
-    dut = FeedProvider(
+    sut = FeedProvider(
         Mock(), firestore_client,
         Mock(), Mock()
     )
@@ -150,10 +150,10 @@ def test_apply_feed_pushes_all_cached_feeds():
         feed_mock.key = feed_name
         feeds[feed_name] = feed_mock
         with patch("email_exporter.feed_management.feed.Feed.from_dict", MagicMock(return_value=feed_mock)):
-            feed = dut.get_feed(feed_name)
+            feed = sut.get_feed(feed_name)
         assert feed == feed_mock
 
-    dut.apply_feeds()
+    sut.apply_feeds()
 
     for feed in feeds.values():
         feed.update_rss.assert_called_once()
@@ -184,7 +184,7 @@ def test_apply_feed_feed_throws_pushes_all_other_feeds():
     exception_feed_name = "exception_feed_name"
     feed_names = ["feed_name_1", exception_feed_name, "feed_name_2", "feed_name_3"]
 
-    dut = FeedProvider(
+    sut = FeedProvider(
         Mock(), firestore_client,
         Mock(), Mock()
     )
@@ -196,10 +196,10 @@ def test_apply_feed_feed_throws_pushes_all_other_feeds():
         if feed_name == exception_feed_name:
             feed_mock.update_rss = MagicMock(side_effect=Exception("Test"))
         with patch("email_exporter.feed_management.feed.Feed.from_dict", MagicMock(return_value=feed_mock)):
-            feed = dut.get_feed(feed_name)
+            feed = sut.get_feed(feed_name)
         assert feed == feed_mock
 
-    dut.apply_feeds()
+    sut.apply_feeds()
 
     for feed in feeds.values():
         feed.update_rss.assert_called_once()
@@ -226,7 +226,7 @@ def test_apply_feed_with_prune_prunes_all_feeds():
 
     feed_names = ["feed_name_1", "feed_name_2", "feed_name_3"]
 
-    dut = FeedProvider(
+    sut = FeedProvider(
         Mock(), firestore_client,
         Mock(), Mock()
     )
@@ -236,10 +236,10 @@ def test_apply_feed_with_prune_prunes_all_feeds():
         feeds[feed_name] = feed_mock
 
         with patch("email_exporter.feed_management.feed.Feed.from_dict", MagicMock(return_value=feed_mock)):
-            feed = dut.get_feed(feed_name)
+            feed = sut.get_feed(feed_name)
         assert feed == feed_mock
 
-    dut.apply_feeds(prune=True)
+    sut.apply_feeds(prune=True)
 
     for feed in feeds.values():
         feed.prune.assert_called_once()
@@ -260,7 +260,7 @@ def test_apply_feed_without_prune_doesnt_prune_feeds():
 
     feed_names = ["feed_name_1", "feed_name_2", "feed_name_3"]
 
-    dut = FeedProvider(
+    sut = FeedProvider(
         Mock(), firestore_client,
         Mock(), Mock()
     )
@@ -270,10 +270,10 @@ def test_apply_feed_without_prune_doesnt_prune_feeds():
         feeds[feed_name] = feed_mock
 
         with patch("email_exporter.feed_management.feed.Feed.from_dict", MagicMock(return_value=feed_mock)):
-            feed = dut.get_feed(feed_name)
+            feed = sut.get_feed(feed_name)
         assert feed == feed_mock
 
-    dut.apply_feeds(prune=False)
+    sut.apply_feeds(prune=False)
 
     for feed in feeds.values():
         feed.prune.assert_not_called()
@@ -284,16 +284,16 @@ def test_delete_logs_error_if_not_flushed():
 
     feed_name = "feed_name"
 
-    dut = FeedProvider(
+    sut = FeedProvider(
         Mock(), Mock(),
         Mock(), logger
     )
 
     with patch("email_exporter.feed_management.feed.Feed.from_dict", Mock()):
-        dut.get_feed(feed_name)
+        sut.get_feed(feed_name)
 
     logger.error.assert_not_called()
 
-    del dut
+    del sut
 
     logger.error.assert_called()

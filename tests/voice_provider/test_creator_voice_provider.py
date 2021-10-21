@@ -21,9 +21,9 @@ def test_get_voice_loads_documents():
     item.owner = owner
     item.sender = "sender"
 
-    dut = CreatorVoiceProvider(config, Mock(), firestore_client)
+    sut = CreatorVoiceProvider(config, Mock(), firestore_client)
 
-    dut.get_voice(item)
+    sut.get_voice(item)
 
     firestore_client.collection.assert_called_once_with(collection_name)
     db_client.document.assert_called_once_with(owner)
@@ -43,9 +43,9 @@ def test_get_voice_document_doesnt_exists_return_default():
     item = Mock()
     item.owner = "owner"
 
-    dut = CreatorVoiceProvider(Mock(), Mock(), firestore_client)
+    sut = CreatorVoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == VOICE_DEFAULT
 
@@ -69,9 +69,9 @@ def test_get_voice_uses_voice_in_document():
     item = Mock()
     item.owner = "owner"
 
-    dut = CreatorVoiceProvider(Mock(), Mock(), firestore_client)
+    sut = CreatorVoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -92,8 +92,8 @@ def test_get_voice_no_voice_in_document_uses_default():
     item = Mock()
     item.owner = "owner"
 
-    dut = CreatorVoiceProvider(Mock(), Mock(), firestore_client)
+    sut = CreatorVoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == VOICE_DEFAULT
