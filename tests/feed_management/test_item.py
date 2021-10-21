@@ -13,11 +13,11 @@ def test_from_dict_loads_fields():
         "id": idx
     }
 
-    dut = Item.from_dict(item_dict)
+    sut = Item.from_dict(item_dict)
 
-    assert dut.title == title
-    assert dut.sender == sender
-    assert dut.idx == idx
+    assert sut.title == title
+    assert sut.sender == sender
+    assert sut.idx == idx
 
 
 def test_from_dict_default_is_None():
@@ -28,9 +28,9 @@ def test_from_dict_default_is_None():
         "sender": sender
     }
 
-    dut = Item.from_dict(item_dict)
+    sut = Item.from_dict(item_dict)
 
-    assert dut.description is None
+    assert sut.description is None
 
 
 def test_from_dict_loads_file_info_fields():
@@ -43,13 +43,13 @@ def test_from_dict_loads_file_info_fields():
         }
     }
 
-    dut = Item.from_dict(item_dict)
+    sut = Item.from_dict(item_dict)
 
-    assert isinstance(dut.file_info, FileInfo)
-    assert dut.file_info.url == item_url
-    assert dut.file_info.file_name == file_name
-    assert dut.file_info.is_external is False
-    assert dut.file_info.is_removed is False
+    assert isinstance(sut.file_info, FileInfo)
+    assert sut.file_info.url == item_url
+    assert sut.file_info.file_name == file_name
+    assert sut.file_info.is_external is False
+    assert sut.file_info.is_removed is False
 
 
 def test_from_dict_loads_file_info_from_url():
@@ -59,10 +59,10 @@ def test_from_dict_loads_file_info_from_url():
         "url": item_url
     }
 
-    dut = Item.from_dict(item_dict)
+    sut = Item.from_dict(item_dict)
 
-    assert dut.file_info.url == item_url
-    assert dut.file_info.file_name == file_name
+    assert sut.file_info.url == item_url
+    assert sut.file_info.file_name == file_name
 
 
 def test_to_dict_converts_fields():
@@ -79,9 +79,9 @@ def test_to_dict_converts_fields():
         }
     }
 
-    dut = Item.from_dict(item_dict)
+    sut = Item.from_dict(item_dict)
 
-    result = dut.to_dict()
+    result = sut.to_dict()
 
     assert result["title"] == title
     assert result["sender"] == sender
@@ -98,9 +98,9 @@ def test_try_get_date_correct_formats_handled(date):
         "date": date
     }
 
-    dut = Item.from_dict(item_dict)
+    sut = Item.from_dict(item_dict)
 
-    result = dut.try_get_date()
+    result = sut.try_get_date()
 
     assert result == datetime.datetime(2021, 7, 7, 8)
 
@@ -110,7 +110,7 @@ def test_try_get_date_incorrect_format_throws():
         "date": "2021-07-07T08:00:00Z"
     }
 
-    dut = Item.from_dict(item_dict)
+    sut = Item.from_dict(item_dict)
 
     with pytest.raises(ValueError):
-        dut.try_get_date()
+        sut.try_get_date()

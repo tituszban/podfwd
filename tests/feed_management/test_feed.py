@@ -13,10 +13,10 @@ def test_branding_from_dict_loads_fields():
         "email": email
     }
 
-    dut = Branding.from_dict(branding_dict)
+    sut = Branding.from_dict(branding_dict)
 
-    assert dut.author == author
-    assert dut.email == email
+    assert sut.author == author
+    assert sut.email == email
 
 
 def test_branding_from_dict_fills_in_values():
@@ -27,10 +27,10 @@ def test_branding_from_dict_fills_in_values():
         "email": email
     }
 
-    dut = Branding.from_dict(branding_dict)
+    sut = Branding.from_dict(branding_dict)
 
-    assert dut.link is not None
-    assert len(dut.link) > 0
+    assert sut.link is not None
+    assert len(sut.link) > 0
 
 
 def test_branding_from_dict_loads_nested_logo():
@@ -41,10 +41,10 @@ def test_branding_from_dict_loads_nested_logo():
         }
     }
 
-    dut = Branding.from_dict(branding_dict)
+    sut = Branding.from_dict(branding_dict)
 
-    assert isinstance(dut.logo, Logo)
-    assert dut.logo.url == logo_url
+    assert isinstance(sut.logo, Logo)
+    assert sut.logo.url == logo_url
 
 
 def test_branding_to_dict_converts_fields():
@@ -55,8 +55,8 @@ def test_branding_to_dict_converts_fields():
         "email": email
     }
 
-    dut = Branding.from_dict(branding_dict)
-    result = dut.to_dict()
+    sut = Branding.from_dict(branding_dict)
+    result = sut.to_dict()
 
     assert "author" in result
     assert result["author"] == author
@@ -72,8 +72,8 @@ def test_branding_to_dict_converts_logo_fields():
         }
     }
 
-    dut = Branding.from_dict(branding_dict)
-    result = dut.to_dict()
+    sut = Branding.from_dict(branding_dict)
+    result = sut.to_dict()
 
     assert "logo" in result
     assert "url" in result["logo"]
@@ -96,14 +96,14 @@ def test_feed_from_dict_loads_fields():
         "feed_file_name": feed_file_name
     }
 
-    dut = Feed.from_dict(feed_key, feed_data, Mock())
+    sut = Feed.from_dict(feed_key, feed_data, Mock())
 
-    assert dut.key == feed_key
-    assert dut.bucket_name == bucket_name
-    assert dut.item_lifetime_days == item_lifetime_days
-    assert isinstance(dut.branding, Branding)
-    assert dut.branding.author == author
-    assert dut.feed_file_name == feed_file_name
+    assert sut.key == feed_key
+    assert sut.bucket_name == bucket_name
+    assert sut.item_lifetime_days == item_lifetime_days
+    assert isinstance(sut.branding, Branding)
+    assert sut.branding.author == author
+    assert sut.feed_file_name == feed_file_name
 
 
 def test_feed_from_dict_fetches_bucket():
@@ -137,8 +137,8 @@ def test_feed_to_dict_converts_fields():
         "feed_file_name": feed_file_name
     }
 
-    dut = Feed.from_dict(feed_key, feed_data, Mock())
-    result = dut.to_dict()
+    sut = Feed.from_dict(feed_key, feed_data, Mock())
+    result = sut.to_dict()
 
     assert "items" in result
     assert len(result["items"]) == 0

@@ -26,9 +26,9 @@ def test_get_voice_loads_documents():
     item.owner = owner
     item.sender = "sender"
 
-    dut = VoiceProvider(config, Mock(), firestore_client)
+    sut = VoiceProvider(config, Mock(), firestore_client)
 
-    dut.get_voice(item)
+    sut.get_voice(item)
 
     assert owner in documents
     assert GLOBAL_DOCUMENT in documents
@@ -52,9 +52,9 @@ def test_get_voice_no_data_returns_default():
     item.owner = "owner"
     item.sender = "sender"
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == VOICE_DEFAULT
 
@@ -92,9 +92,9 @@ def test_get_voice_falls_back_to_global_document_domain():
     item.owner = "owner"
     item.sender = "sender"
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -124,9 +124,9 @@ def test_get_voice_finds_global_domain_in_owner_document():
     item.owner = owner
     item.sender = "sender"
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -154,9 +154,9 @@ def test_get_voice_global_document_sender_domain_always():
     item.owner = "owner"
     item.sender = f"sender@{sender_domain}"
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -187,9 +187,9 @@ def test_get_voice_global_document_sender_domain_ignore_always_false():
     item.owner = "owner"
     item.sender = f"sender@{sender_domain}"
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -218,9 +218,9 @@ def test_get_voice_global_document_rule_sender():
     item.owner = "owner"
     item.sender = f"{sender_name}@{sender_domain}"
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -249,9 +249,9 @@ def test_get_voice_global_document_rule_sender_contains():
     item.owner = "owner"
     item.sender = f"{sender_name}@{sender_domain}"
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -281,9 +281,9 @@ def test_get_voice_global_document_rule_subject_contains():
     item.sender = f"sender@{sender_domain}"
     item.title = subject
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -316,9 +316,9 @@ def test_get_voice_global_document_rule_object_is_and():
     item.sender = f"sender@{sender_domain}"
     item.title = subject
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -347,9 +347,9 @@ def test_get_voice_global_document_rule_collection_is_or():
     item.owner = "owner"
     item.sender = f"sender@{sender_domain}"
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -391,9 +391,9 @@ def test_get_voice_owner_document_rule_sender():
     item.owner = owner
     item.sender = f"{sender_name}@{sender_domain}"
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
 
@@ -424,8 +424,8 @@ def test_get_voice_global_document_default_rule_is_false():
     item.owner = "owner"
     item.sender = f"sender@{sender_domain}"
 
-    dut = VoiceProvider(Mock(), Mock(), firestore_client)
+    sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
-    result = dut.get_voice(item)
+    result = sut.get_voice(item)
 
     assert result == voice
