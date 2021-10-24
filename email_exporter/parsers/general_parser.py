@@ -4,6 +4,7 @@ from ssml_builder.core import Speech
 # import bleach
 # from bs4 import BeautifulSoup
 from functools import reduce
+from .parsed_item import ParsedItem
 
 
 class GeneralParser(ParserABC):
@@ -85,4 +86,4 @@ class GeneralParser(ParserABC):
 
         ssmls = list(self._to_ssms(all_text, headers))
 
-        return ssmls, []
+        return ParsedItem(ssmls)

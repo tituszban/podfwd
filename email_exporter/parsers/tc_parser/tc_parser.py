@@ -5,6 +5,7 @@ import bleach
 from bs4 import NavigableString
 from ..item_emitter import ItemEmitter
 from .tc_table import TcTable
+from ..parsed_item import ParsedItem
 
 
 class TcItemEmitter(ItemEmitter):
@@ -155,4 +156,4 @@ class TcParser(ParserABC):
             desc = self._to_description(content)
             descriptions.append(desc)
 
-        return ssmls, descriptions
+        return ParsedItem(ssmls, descriptions)
