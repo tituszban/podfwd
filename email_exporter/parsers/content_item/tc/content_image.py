@@ -7,10 +7,10 @@ class ContentImage(ContentItemABC):
         return []
 
     def get_description(self):
-        return [
-            description_item.Image(self._component.find("img")),
-            description_item.Image(self._component.find("p"))
-        ]
+        if (img := self._component.find("img")):
+            yield description_item.Image(img)
+        if (p := self._component.find("p")):
+            yield description_item.Image(p)
 
     @staticmethod
     def match_component(component):

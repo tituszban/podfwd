@@ -75,4 +75,4 @@ class EmitterParser(ParserABC):
 
         description = self._get_description(items, inbox_item)
 
-        return ssml, description
+        return ssml, description        # TODO: return object
