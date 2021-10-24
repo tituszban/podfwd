@@ -39,6 +39,13 @@ class FeedProvider:
 
         data = doc.to_dict()
 
+        while "alias" in data:
+            doc = data["alias"].get()
+            if not doc.exists:
+                raise KeyError(f"Feed not found for key: {key}; Invalid alias")
+            key = doc.id
+            data = doc.to_dict()
+
         return Feed.from_dict(key, data, self.storage_provider)
 
     def push_feed(self, feed):

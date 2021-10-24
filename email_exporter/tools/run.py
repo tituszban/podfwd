@@ -54,3 +54,11 @@ def create_creator_feed(email, start_item={}, voice=""):
 def create_example_creator_feed():
     email = "example@creator.com"
     create_creator_feed(email)
+
+
+def test_feed_alias():
+    deps = Dependencies.default()
+
+    feed_provider = deps.get(FeedProvider)
+
+    feed_provider.get_feed("tituszban")

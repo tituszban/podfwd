@@ -1,4 +1,4 @@
-from . import create_example_creator_feed
+from . import test_feed_alias
 
 if __name__ == "__main__":
-    create_example_creator_feed()
+    test_feed_alias()
