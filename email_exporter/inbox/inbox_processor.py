@@ -46,8 +46,7 @@ class InboxProcessor:
     def _get_payload(self, message):
         if message.is_multipart():
             for m in message.get_payload():
-                for p in self._get_payload(m):
-                    yield p
+                yield from self._get_payload(m)
         else:
             yield message.get_payload(decode=True)
 
