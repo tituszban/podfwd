@@ -21,6 +21,14 @@ def logger_resolver(dependencies):
     logger_name = config.get("LOGGER_NAME", "email_exporter")
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    stream_formatter = logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s")
+    stream_handler.setFormatter(stream_formatter)
+
+    logger.addHandler(stream_handler)
+
     return logger
 
 
@@ -72,7 +80,7 @@ class Dependencies:
         self._resolvers = {
             Config: config_resolver,
             logging.Logger: logger_resolver,
-            TextToSpeech: lambda deps: TextToSpeech(deps.get(Config)),
+            TextToSpeech: lambda deps: TextToSpeech(deps.get(Config), deps.get(logging.Logger)),
             StorageProvider: lambda deps: StorageProvider(deps.get(Config)),
             FeedProvider: general_resolver(FeedProvider, (Config, firestore.Client, StorageProvider, logging.Logger)),
             Inbox: lambda deps: Inbox(deps.get(Config), deps.get(logging.Logger)),

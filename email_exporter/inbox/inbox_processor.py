@@ -87,8 +87,11 @@ class InboxProcessor:
         return InboxItem(subject, date, html, mime, soup, addresses)
 
     def process_inbox(self, callback):
+        self._logger.info("Processing inbox")
         for idx, message in self._inbox.get_messages():
+            self._logger.info(f"Processing email {idx}")
             inbox_item = self._process_email(message)
+            self._logger.info(f"Email {idx} processed: {inbox_item}")
 
             discard_message = False
             try:
@@ -99,4 +102,5 @@ class InboxProcessor:
                 )
 
             if discard_message:
+                self._logger.info(f"Discarding message {idx}")
                 self._inbox.discard_message(idx)

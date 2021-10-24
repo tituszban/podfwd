@@ -69,10 +69,18 @@ class EmitterParser(ParserABC):
     def parse(self, inbox_item):
         assert inbox_item.soup is not None, "Soup not provided"
 
+        self._logger.info(f"Getting items for {inbox_item}")
+
         items = list(self._emitter.get_items(inbox_item))
+
+        self._logger.info(f"Created {len(items)} content items")
 
         ssml = list(self._speech_items_to_ssml(items))
 
+        self._logger.info(f"Created {len(ssml)} SSML lines; total length: {sum(map(lambda s: len(s), ssml))}")
+
         description = self._get_description(items, inbox_item)
+
+        self._logger.info(f"Created {len(description)} description lines; total length: {sum(map(lambda s: len(s), description))}")
 
         return ssml, description        # TODO: return object

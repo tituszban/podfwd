@@ -10,6 +10,7 @@ class VoiceProvider:
         self._db = firestore_client
 
     def get_voice(self, item):
+        self._logger.info(f"Selecting voide for {item}")
         owner = item.owner
         sender = item.sender
         sender_domain = sender.split("@")[-1]
@@ -26,8 +27,14 @@ class VoiceProvider:
             for provider in setting_providers:
                 if key in provider:
                     sources.append(provider[key])
+        
+        self._logger.info(f"Voice provider sources identified: {[s for source in sources for s in source.keys()]}")
 
-        return self._match_source(sources, item)
+        voice = self._match_source(sources, item)
+
+        self._logger.info(f"Voice selected: {voice}")
+
+        return voice
 
     def _match_source(self, sources, item, default=VOICE_DEFAULT):
         for source in sources:

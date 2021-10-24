@@ -8,6 +8,7 @@ class EmailExporter:
         self._voice_provider = voice_provider
 
     def message_handler(self, inbox_item):
+        self._logger.info(f"Handling message: {inbox_item}")
         feed = self._feed_provider.get_feed(inbox_item.owner)
 
         if feed is None:
@@ -21,6 +22,7 @@ class EmailExporter:
             self._logger.warn(
                 f"No bucket found: [{inbox_item.owner}] has no allocated bucket")
             return False
+        self._logger.info(f"Feed found: {feed.key}")
 
         parser = self._parser_selector.get_parser(inbox_item)
         ssml, description = parser.parse(inbox_item)

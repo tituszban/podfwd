@@ -23,17 +23,21 @@ class TextToSpeech:
         "en-GB-Wavenet-F",  # Female
     ]
 
-    def __init__(self, config):
+    def __init__(self, config, logger):
         json = config.get("SA_FILE")
         if json:
             self.client = texttospeech.TextToSpeechClient.from_service_account_json(
                 json)
         else:
             self.client = texttospeech.TextToSpeechClient()
+        self._logger = logger
 
     def t2s(self, text, voice=None):
         if voice not in self.supported_languages:
             voice = "en-US-Wavenet-A"
+
+        self._logger.info(f"Converting {len(text)} characters of text to speech, using voice: {voice}")
+
         language_code = '-'.join(voice.split("-")[:2])
         synthesis_input = texttospeech.SynthesisInput(ssml=text)
         voice = texttospeech.VoiceSelectionParams(
@@ -46,12 +50,18 @@ class TextToSpeech:
             input=synthesis_input, voice=voice, audio_config=audio_config
         )
 
-        return response.audio_content
+        audio_content = response.audio_content
+
+        self._logger.info(f"Received {len(audio_content)} bytes of audio content")
+
+        return audio_content
 
     def f2s(self, path):
+        self._logger.info(f"Converting file {path} to speech")
         with open(path, encoding="utf-8") as f:
             return self.t2s(f.read())
 
     def lines_to_speech(self, lines, voice=None):
+        self._logger.info(f"Converting {len(lines)} blocks of text to speech")
         snippets = [self.t2s(line, voice) for line in lines]
         return reduce(lambda a, b: a + b, snippets)

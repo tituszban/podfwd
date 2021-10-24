@@ -11,9 +11,12 @@ class FeedProvider:
         self._feed_cache = {}
 
     def get_feed(self, key):
+        self._logger.info(f"Getting feed for key: {key}")
         if key in self._feed_cache:
+            self._logger.info(f"Key {key} found in feed cache. Using cached feed")
             return self._feed_cache[key]
         else:
+            self._logger.info(f"Key {key} not found in feed cache. Feching feed")
             feed = self._get_feed(key)
             if feed is not None:
                 self._feed_cache[key] = feed
