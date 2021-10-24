@@ -9,11 +9,9 @@ from ..voice_provider import VoiceProvider, CreatorVoiceProvider
 
 
 def export_inbox():
-    deps = Dependencies({
-        ParserSelector: lambda deps: CreatorParserSelector(deps.get(logging.Logger)),
-        VoiceProvider: lambda deps: CreatorVoiceProvider(
-            deps.get(Config), deps.get(logging.Logger), deps.get(firestore.Client))
-    })
+    deps = Dependencies.default()\
+        .add_override(ParserSelector, CreatorParserSelector)\
+        .add_override(VoiceProvider, CreatorVoiceProvider)
 
     email_exporter = deps.get(EmailExporter)
     inbox = deps.get(InboxProcessor)

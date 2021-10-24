@@ -1,3 +1,6 @@
+from email_exporter.config import Config
+from email_exporter.inbox import Inbox
+from logging import Logger
 import re
 import email
 from bs4 import BeautifulSoup
@@ -5,7 +8,7 @@ from .inbox_item import InboxItem
 
 
 class InboxProcessor:
-    def __init__(self, config, logger, inbox):
+    def __init__(self, config: Config, logger: Logger, inbox: Inbox):
         self._logger = logger
         self._inbox = inbox
 

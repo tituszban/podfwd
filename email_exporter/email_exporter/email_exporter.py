@@ -1,9 +1,24 @@
+from email_exporter.config import Config
+from email_exporter.feed_management import FeedProvider
+from email_exporter.cloud import TextToSpeech
+from email_exporter.parsers import ParserSelector
+from email_exporter.voice_provider import VoiceProvider
+from logging import Logger
+
+
 class EmailExporter:
-    def __init__(self, config, feed_provider, t2s, parser, logger, voice_provider):
+    def __init__(
+            self,
+            config: Config,
+            feed_provider: FeedProvider,
+            t2s: TextToSpeech,
+            parser_selector: ParserSelector,
+            logger: Logger,
+            voice_provider: VoiceProvider) -> None:
         self._config = config
         self._feed_provider = feed_provider
         self._t2s = t2s
-        self._parser_selector = parser
+        self._parser_selector = parser_selector
         self._logger = logger
         self._voice_provider = voice_provider
 

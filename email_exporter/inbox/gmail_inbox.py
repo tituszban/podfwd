@@ -1,3 +1,5 @@
+from email_exporter.config import Config
+from logging import Logger
 import imaplib
 import email
 import re
@@ -5,7 +7,7 @@ from .inbox_abc import InboxABC
 
 
 class GmailInbox(InboxABC):
-    def __init__(self, config, logger):
+    def __init__(self, config: Config, logger: Logger) -> None:
         self._server = config.get("EMAIL_SERVER")
         self._email_address = config.get("EMAIL_LOGIN")
         self._password = config.get("EMAIL_PASSWORD")

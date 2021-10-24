@@ -1,9 +1,10 @@
+from email_exporter.config import Config
 from google.cloud import storage
 import io
 
 
 class StorageProvider:
-    def __init__(self, config):
+    def __init__(self, config: Config) -> None:
         json = config.get("SA_FILE")
         if json:
             self.storage_client = storage.Client.from_service_account_json(

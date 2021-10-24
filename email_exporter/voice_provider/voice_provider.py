@@ -1,10 +1,18 @@
+from email_exporter.config import Config
+from logging import Logger
+from firebase_admin.firestore import Client as FirestoreClient
+
 VOICE_DEFAULT = "en-US-Wavenet-A"
 GLOBAL_DOCUMENT = "global"
 GLOBAL_DOMAIN = "global"
 
 
 class VoiceProvider:
-    def __init__(self, config, logger, firestore_client):
+    def __init__(
+            self,
+            config: Config,
+            logger: Logger,
+            firestore_client: FirestoreClient) -> None:
         self.collection = config.get("VOICES_COLLECTION")
         self._logger = logger
         self._db = firestore_client
