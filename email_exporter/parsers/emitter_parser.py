@@ -1,6 +1,7 @@
 from .parser_abc import ParserABC
 from functools import reduce
 from ssml_builder.core import Speech
+from .parsed_item import ParsedItem
 
 
 class EmitterParser(ParserABC):
@@ -83,4 +84,4 @@ class EmitterParser(ParserABC):
 
         self._logger.info(f"Created {len(description)} description lines; total length: {sum(map(lambda s: len(s), description))}")
 
-        return ssml, description        # TODO: return object
+        return ParsedItem(ssml, description)

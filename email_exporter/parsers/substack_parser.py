@@ -3,6 +3,7 @@ from .item_emitter import ItemEmitter
 from .content_item import ContentItem
 from ssml_builder.core import Speech
 import re
+from .parsed_item import ParsedItem
 
 
 class SubstackItemEmitter(ItemEmitter):
@@ -172,4 +173,4 @@ class SubstackParser(ParserABC):
 
             ssmls += self._to_ssml(content)
 
-        return ssmls, descriptions
+        return ParsedItem(ssmls, descriptions)

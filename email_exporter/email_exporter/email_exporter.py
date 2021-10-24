@@ -25,14 +25,14 @@ class EmailExporter:
         self._logger.info(f"Feed found: {feed.key}")
 
         parser = self._parser_selector.get_parser(inbox_item)
-        ssml, description = parser.parse(inbox_item)
+        parsed_item = parser.parse(inbox_item)
         voice = self._voice_provider.get_voice(inbox_item)
 
-        sound_data = self._t2s.lines_to_speech(ssml, voice)
+        sound_data = self._t2s.lines_to_speech(parsed_item.ssml, voice)
 
         feed.add_item_bytes(
             title=inbox_item.title,
-            description='\n'.join(description),
+            description=parsed_item.combined_description,
             date=inbox_item.date,
             sender=inbox_item.sender,
             data=sound_data
