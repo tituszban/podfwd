@@ -27,7 +27,7 @@ class VoiceProvider:
             for provider in setting_providers:
                 if key in provider:
                     sources.append(provider[key])
-        
+
         self._logger.info(f"Voice provider sources identified: {[s for source in sources for s in source.keys()]}")
 
         voice = self._match_source(sources, item)

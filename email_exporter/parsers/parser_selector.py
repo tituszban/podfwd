@@ -24,11 +24,13 @@ class ParserSelector:
         sender_domain = sender.split("@")[-1]
 
         if sender_domain in self.emitters_by_domain:
-            self._logger.info(f"Found emitter parser for {sender} ({sender_domain}): {self.emitters_by_domain[sender_domain]}")
+            self._logger.info(
+                f"Found emitter parser for {sender} ({sender_domain}): {self.emitters_by_domain[sender_domain]}")
             return EmitterParser(self._logger, self.emitters_by_domain[sender_domain]())
 
         if sender_domain in self.parsers_by_domain:
-            self._logger.info(f"Found domain parser for {sender} ({sender_domain}): {self.parsers_by_domain[sender_domain]}")
+            self._logger.info(
+                f"Found domain parser for {sender} ({sender_domain}): {self.parsers_by_domain[sender_domain]}")
             return self.parsers_by_domain[sender_domain](self._logger)
 
         self._logger.info(f"No parser found for {sender} ({sender_domain}): General parser is used")

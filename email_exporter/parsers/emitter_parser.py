@@ -82,6 +82,7 @@ class EmitterParser(ParserABC):
 
         description = self._get_description(items, inbox_item)
 
-        self._logger.info(f"Created {len(description)} description lines; total length: {sum(map(lambda s: len(s), description))}")
+        self._logger.info(
+            f"Created {len(description)} description lines; total length: {sum(map(lambda s: len(s), description))}")
 
         return ParsedItem(ssml, description)
