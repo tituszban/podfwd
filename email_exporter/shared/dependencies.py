@@ -1,8 +1,7 @@
 from __future__ import annotations
 from typing import Callable
 from ..email_exporter import EmailExporter
-from ..inbox import Inbox, InboxProcessor
-from ..cloud import TextToSpeech, StorageProvider
+from ..cloud import TextToSpeech
 from ..feed_management import FeedProvider
 from ..parsers import ParserSelector
 from ..config import Config
@@ -59,7 +58,10 @@ class CachedResolver:
     def __init__(self):
         self._cache = {}
 
-    def wrap_resolver(self, base_type: type, resolver: Callable[[Dependencies, type], object]) -> Callable[[Dependencies, type], object]:
+    def wrap_resolver(
+            self,
+            base_type: type,
+            resolver: Callable[[Dependencies, type], object]) -> Callable[[Dependencies, type], object]:
         def wrapped_resolver(*args):
             if base_type in self._cache:
                 return self._cache[base_type]

@@ -1,9 +1,6 @@
-import logging
 from ..email_exporter import EmailExporter
 from ..inbox import InboxProcessor
 from ..shared import Dependencies
-from ..config import Config
-from firebase_admin import firestore
 from ..parsers import ParserSelector, CreatorParserSelector
 from ..voice_provider import VoiceProvider, CreatorVoiceProvider
 
