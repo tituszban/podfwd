@@ -284,8 +284,17 @@ def test_delete_logs_error_if_not_flushed():
 
     feed_name = "feed_name"
 
+    db_document = Mock()
+    db_document.to_dict = MagicMock(return_value={})
+    db_document_client = Mock()
+    db_document_client.get = MagicMock(return_value=db_document)
+    db_client = Mock()
+    db_client.document = MagicMock(return_value=db_document_client)
+    firestore_client = Mock()
+    firestore_client.collection = MagicMock(return_value=db_client)
+
     sut = FeedProvider(
-        Mock(), Mock(),
+        Mock(), firestore_client,
         Mock(), logger
     )
 
