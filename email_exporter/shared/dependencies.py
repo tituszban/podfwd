@@ -1,13 +1,10 @@
-from ..email_exporter import EmailExporter
-from ..inbox import Inbox, InboxProcessor
-from ..cloud import TextToSpeech, StorageProvider
-from ..feed_management import FeedProvider
-from ..parsers import ParserSelector
+from __future__ import annotations
+from typing import Callable
 from ..config import Config
-from ..voice_provider import VoiceProvider
 from firebase_admin import firestore
 from firebase_admin import credentials
 import firebase_admin
+from google.cloud import storage
 import logging
 
 
@@ -16,9 +13,9 @@ def config_resolver(_):
         .add_env_variables("AP_")
 
 
-def logger_resolver(dependencies):
-    config = dependencies.get(Config)
-    logger_name = config.get("LOGGER_NAME", "email_exporter")
+def logger_resolver(context: Context) -> logging.Logger:
+    logger_name = context.config.get("LOGGER_NAME", "email_exporter") if context.parent_type is None else str(
+        context.parent_type.__name__)
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
 
@@ -32,21 +29,9 @@ def logger_resolver(dependencies):
     return logger
 
 
-def email_exporter_resolver(deps):
-    return EmailExporter(
-        deps.get(Config),
-        deps.get(FeedProvider),
-        deps.get(TextToSpeech),
-        deps.get(ParserSelector),
-        deps.get(logging.Logger),
-        deps.get(VoiceProvider)
-    )
-
-
-def firestore_client_resolver(deps):
-    config = deps.get(Config)
-    json = config.get("SA_FILE")
-    project_id = config.get("PROJECT_ID")
+def firestore_client_resolver(context: Context) -> firestore.Client:
+    json = context.config.get("SA_FILE")
+    project_id = context.config.get("PROJECT_ID")
 
     if json:
         cred = credentials.Certificate(json)
@@ -60,46 +45,110 @@ def firestore_client_resolver(deps):
     return firestore.client()
 
 
-def feed_provider_resolver(deps):
-    return FeedProvider(
-        deps.get(Config),
-        deps.get(firestore.Client),
-        deps.get(StorageProvider),
-        deps.get(logging.Logger)
-    )
+def storage_client_resolver(context: Context) -> storage.Client:
+    json = context.config.get("SA_FILE")
+    if json:
+        return storage.Client.from_service_account_json(json)
+    else:
+        return storage.Client()
 
 
-def general_resolver(cls, dep_cls):
-    def resolver(deps):
-        return cls(*[deps.get(c) for c in dep_cls])
-    return resolver
+class CachedResolver:
+    def __init__(self):
+        self._cache = {}
+
+    def wrap_resolver(
+            self,
+            base_type: type,
+            resolver: Callable[[Context], object]) -> Callable[[Context], object]:
+
+        def wrapped_resolver(context):
+            if base_type in self._cache:
+                return self._cache[base_type]
+            instance = resolver(context)
+            self._cache[base_type] = instance
+            return instance
+
+        return wrapped_resolver
+
+
+class Context:
+    def __init__(self, dependencies: Dependencies, parent_type: type = None):
+        self.dependencies = dependencies
+        self.parent_type = parent_type
+
+    def clone_with_parent(self, new_parent_type: type) -> Context:
+        return Context(self.dependencies, new_parent_type)
+
+    @property
+    def config(self):
+        return self.dependencies.get(Config)
 
 
 class Dependencies:
-    def __init__(self, overrides={}):
-        self._resolvers = {
-            Config: config_resolver,
-            logging.Logger: logger_resolver,
-            TextToSpeech: lambda deps: TextToSpeech(deps.get(Config), deps.get(logging.Logger)),
-            StorageProvider: lambda deps: StorageProvider(deps.get(Config)),
-            FeedProvider: general_resolver(FeedProvider, (Config, firestore.Client, StorageProvider, logging.Logger)),
-            Inbox: lambda deps: Inbox(deps.get(Config), deps.get(logging.Logger)),
-            InboxProcessor: general_resolver(InboxProcessor, (Config, logging.Logger, Inbox)),
-            ParserSelector: lambda deps: ParserSelector(deps.get(logging.Logger)),
-            EmailExporter: email_exporter_resolver,
-            firestore.Client: firestore_client_resolver,
-            VoiceProvider: general_resolver(VoiceProvider, (Config, logging.Logger, firestore.Client)),
-            **overrides
-        }
+    def __init__(self, cache_object_by_default=True):
         self._instances = {}
+        self._type_overrides = {}
+        self._resolvers = {}
+        self._type_cache_rule = {}
+        self._resolver_cache = CachedResolver()
+        self._cache_by_default = cache_object_by_default
 
-    def get(self, t):
+    def add_override(self, base_type: type, override_type: type, cached: bool = True) -> Dependencies:
+        self._type_overrides[base_type] = override_type
+        self._type_cache_rule[override_type] = cached
+        return self
+
+    def add_transient(self, base_type: type) -> Dependencies:
+        self._type_cache_rule[base_type] = False
+        return self
+
+    def add_singleton(self, base_type: type) -> Dependencies:
+        self._type_cache_rule[base_type] = True
+        return self
+
+    def add_resolver(self, base_type: type, resolver: Callable[[Context], object]) -> Dependencies:
+        self._resolvers[base_type] = resolver
+        return self
+
+    def add_cached_resolver(self, base_type: type, resolver: Callable[[Context], object]) -> Dependencies:
+        self._resolvers[base_type] = self._resolver_cache.wrap_resolver(base_type, resolver)
+        return self
+
+    @staticmethod
+    def default() -> Dependencies:
+        return Dependencies() \
+            .add_cached_resolver(Config, config_resolver) \
+            .add_resolver(logging.Logger, logger_resolver) \
+            .add_cached_resolver(firestore.Client, firestore_client_resolver) \
+            .add_cached_resolver(storage.Client, storage_client_resolver)
+
+    def get(self, t: type, context: Context = None) -> object:
+        if context is None:
+            context = Context(self, t)
+
+        if t in self._resolvers:
+            return self._resolvers[t](context)
+
+        if t in self._type_overrides:
+            return self.get(self._type_overrides[t], context)
+
         if t in self._instances:
             return self._instances[t]
 
-        if t not in self._resolvers:
-            raise KeyError(f"Could not find resolver for {t}")
+        if not hasattr(t, "__init__"):
+            raise KeyError(f"No init method found on type {t}")
 
-        instance = self._resolvers[t](self)
-        self._instances[t] = instance
+        if len(annotations := t.__init__.__annotations__) == 0:
+            raise KeyError(f"No annotations found on the constructor for type {t}")
+
+        instance = t(**{
+            a_name: self.get(a_type, context.clone_with_parent(t))
+            for a_name, a_type in annotations.items()
+            if a_name != "return"
+        })
+
+        if self._type_cache_rule.get(t, self._cache_by_default):
+            self._instances[t] = instance
+
         return instance

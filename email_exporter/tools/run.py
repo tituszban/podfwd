@@ -7,7 +7,7 @@ import uuid
 
 
 def clone_collection(collection_from_name, collection_to_name):
-    deps = Dependencies()
+    deps = Dependencies.default()
     firestore_client = deps.get(firestore.Client)
 
     collection_from = firestore_client.collection(collection_from_name)
@@ -30,7 +30,7 @@ def create_feed(deps, key, bucket_name, item_lifetime_days=7):
 
 
 def create_creator_feed(email, start_item={}, voice=""):
-    deps = Dependencies()
+    deps = Dependencies.default()
     feed_provider = deps.get(FeedProvider)
 
     try:

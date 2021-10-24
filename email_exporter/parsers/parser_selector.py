@@ -1,3 +1,4 @@
+from logging import Logger
 from .tc_parser import TcParser, TcItemEmitter
 from .substack_parser import SubstackParser, SubstackItemEmitter
 from .general_parser import GeneralParser
@@ -5,7 +6,7 @@ from .emitter_parser import EmitterParser
 
 
 class ParserSelector:
-    def __init__(self, logger):
+    def __init__(self, logger: Logger):
         self._logger = logger
         self.emitters_by_domain = {
             "techcrunch.com": TcItemEmitter,

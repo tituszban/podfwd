@@ -4,7 +4,7 @@ from ..shared import Dependencies
 
 
 def export_inbox():
-    deps = Dependencies()
+    deps = Dependencies.default()
 
     email_exporter = deps.get(EmailExporter)
     inbox = deps.get(InboxProcessor)

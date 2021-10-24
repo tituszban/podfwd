@@ -1,5 +1,7 @@
 from google.cloud import texttospeech
 from functools import reduce
+from email_exporter.config import Config
+from logging import Logger
 # from google.cloud import storage
 # import io
 
@@ -23,7 +25,7 @@ class TextToSpeech:
         "en-GB-Wavenet-F",  # Female
     ]
 
-    def __init__(self, config, logger):
+    def __init__(self, config: Config, logger: Logger) -> None:
         json = config.get("SA_FILE")
         if json:
             self.client = texttospeech.TextToSpeechClient.from_service_account_json(

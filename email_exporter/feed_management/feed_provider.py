@@ -1,9 +1,18 @@
+from email_exporter.config import Config
+from email_exporter.cloud import StorageProvider
+from firebase_admin.firestore import Client as FirestoreClient
+from logging import Logger
 from .feed import Feed
 
 
 class FeedProvider:
 
-    def __init__(self, config, firestore_client, storage_provider, logger):
+    def __init__(
+            self,
+            config: Config,
+            firestore_client: FirestoreClient,
+            storage_provider: StorageProvider,
+            logger: Logger) -> None:
         self.collection = config.get("FEED_COLLECTION")
         self.db = firestore_client
         self.storage_provider = storage_provider
