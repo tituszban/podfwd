@@ -14,8 +14,7 @@ def config_resolver(_):
 
 
 def logger_resolver(context: Context) -> logging.Logger:
-    config = context.dependencies.get(Config)
-    logger_name = config.get("LOGGER_NAME", "email_exporter") if context.parent_type is None else str(
+    logger_name = context.config.get("LOGGER_NAME", "email_exporter") if context.parent_type is None else str(
         context.parent_type.__name__)
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
@@ -31,9 +30,8 @@ def logger_resolver(context: Context) -> logging.Logger:
 
 
 def firestore_client_resolver(context: Context) -> firestore.Client:
-    config = context.dependencies.get(Config)
-    json = config.get("SA_FILE")
-    project_id = config.get("PROJECT_ID")
+    json = context.config.get("SA_FILE")
+    project_id = context.config.get("PROJECT_ID")
 
     if json:
         cred = credentials.Certificate(json)
@@ -48,8 +46,7 @@ def firestore_client_resolver(context: Context) -> firestore.Client:
 
 
 def storage_client_resolver(context: Context) -> storage.Client:
-    config = context.dependencies.get(Config)
-    json = config.get("SA_FILE")
+    json = context.config.get("SA_FILE")
     if json:
         return storage.Client.from_service_account_json(json)
     else:
@@ -64,12 +61,14 @@ class CachedResolver:
             self,
             base_type: type,
             resolver: Callable[[Context], object]) -> Callable[[Context], object]:
-        def wrapped_resolver(*args):
+
+        def wrapped_resolver(context):
             if base_type in self._cache:
                 return self._cache[base_type]
-            instance = resolver(*args)
+            instance = resolver(context)
             self._cache[base_type] = instance
             return instance
+
         return wrapped_resolver
 
 
@@ -81,12 +80,16 @@ class Context:
     def clone_with_parent(self, new_parent_type: type) -> Context:
         return Context(self.dependencies, new_parent_type)
 
+    @property
+    def config(self):
+        return self.dependencies.get(Config)
+
 
 class Dependencies:
     def __init__(self, cache_object_by_default=True):
         self._instances = {}
         self._type_overrides = {}
-        self._type_resolvers = {}
+        self._resolvers = {}
         self._type_cache_rule = {}
         self._resolver_cache = CachedResolver()
         self._cache_by_default = cache_object_by_default
@@ -105,11 +108,11 @@ class Dependencies:
         return self
 
     def add_resolver(self, base_type: type, resolver: Callable[[Context], object]) -> Dependencies:
-        self._type_resolvers[base_type] = resolver
+        self._resolvers[base_type] = resolver
         return self
 
     def add_cached_resolver(self, base_type: type, resolver: Callable[[Context], object]) -> Dependencies:
-        self._type_resolvers[base_type] = self._resolver_cache.wrap_resolver(base_type, resolver)
+        self._resolvers[base_type] = self._resolver_cache.wrap_resolver(base_type, resolver)
         return self
 
     @staticmethod
@@ -124,8 +127,8 @@ class Dependencies:
         if context is None:
             context = Context(self, t)
 
-        if t in self._type_resolvers:
-            return self._type_resolvers[t](context)
+        if t in self._resolvers:
+            return self._resolvers[t](context)
 
         if t in self._type_overrides:
             return self.get(self._type_overrides[t], context)
