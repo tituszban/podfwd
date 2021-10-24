@@ -1,5 +1,6 @@
 from mock import Mock, MagicMock
 from email_exporter.email_exporter import EmailExporter
+from email_exporter.parsers import ParsedItem
 
 
 def test_email_exporter_message_handler_returns_true_if_feed_is_None():
@@ -54,7 +55,7 @@ def test_email_exporter_message_handler_calls_dependencies():
     ssml = "ssml"
     description = ["description1", "description2"]
     parser = Mock()
-    parser.parse = MagicMock(return_value=(ssml, description))
+    parser.parse = MagicMock(return_value=(ParsedItem(ssml, description)))
     parser_selector = Mock()
     parser_selector.get_parser = MagicMock(return_value=parser)
 
