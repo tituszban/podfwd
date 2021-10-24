@@ -26,9 +26,10 @@ class FeedProvider:
             return self._feed_cache[key]
         else:
             self._logger.info(f"Key {key} not found in feed cache. Feching feed")
-            feed = self._get_feed(key)
+            feed, keys = self._get_feed(key)
             if feed is not None:
-                self._feed_cache[key] = feed
+                for c_key in keys:
+                    self._feed_cache[c_key] = feed
             return feed
 
     def _get_feed(self, key):
@@ -39,14 +40,18 @@ class FeedProvider:
 
         data = doc.to_dict()
 
+        keys = [key]
+
         while "alias" in data:
             doc = data["alias"].get()
             if not doc.exists:
-                raise KeyError(f"Feed not found for key: {key}; Invalid alias")
+                raise KeyError(f"Feed not found for key: {key}; Invalid alias for {keys[-1]}")
             key = doc.id
             data = doc.to_dict()
+            self._logger.info(f"Redirected feed {keys[-1]} to {key} via alias")
+            keys.append(key)
 
-        return Feed.from_dict(key, data, self.storage_provider)
+        return Feed.from_dict(key, data, self.storage_provider), keys
 
     def push_feed(self, feed):
         self.db.collection(self.collection).document(feed.key).set(
