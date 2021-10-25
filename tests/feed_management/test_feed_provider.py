@@ -406,3 +406,68 @@ def test_delete_logs_error_if_not_flushed():
     del sut
 
     logger.error.assert_called()
+
+
+def test_add_feed_alias_created():
+    feed_name = "feed_name"
+    alias_name = "alias_name"
+    bucket_name = "bucket_name"
+    feed_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}))
+    alias_doc = _create_document(data=Mock(), exists=False)
+
+    def get_document(key):
+        if key == feed_name:
+            return feed_doc
+        if key == alias_name:
+            return alias_doc
+        raise KeyError()
+
+    db_client = Mock()
+    db_client.document = MagicMock(side_effect=get_document)
+    firestore_client = Mock()
+    firestore_client.collection = MagicMock(return_value=db_client)
+
+    collection_name = "collection_name"
+    config = Mock()
+    config.get = MagicMock(return_value=collection_name)
+
+    sut = FeedProvider(
+        config, firestore_client,
+        Mock(), Mock()
+    )
+
+    sut.add_feed_alias(feed_name, alias_name)
+
+    alias_doc.set.assert_called_once_with({"alias": feed_doc})
+
+
+def test_add_feed_alias_key_exists_throws():
+    feed_name = "feed_name"
+    alias_name = "alias_name"
+    bucket_name = "bucket_name"
+    feed_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}))
+    alias_doc = _create_document(data=Mock(), exists=True)
+
+    def get_document(key):
+        if key == feed_name:
+            return feed_doc
+        if key == alias_name:
+            return alias_doc
+        raise KeyError()
+
+    db_client = Mock()
+    db_client.document = MagicMock(side_effect=get_document)
+    firestore_client = Mock()
+    firestore_client.collection = MagicMock(return_value=db_client)
+
+    collection_name = "collection_name"
+    config = Mock()
+    config.get = MagicMock(return_value=collection_name)
+
+    sut = FeedProvider(
+        config, firestore_client,
+        Mock(), Mock()
+    )
+
+    with pytest.raises(KeyError):
+        sut.add_feed_alias(feed_name, alias_name)
