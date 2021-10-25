@@ -99,9 +99,9 @@ class Feed:
         self.feed_file_name = feed_file_name
 
     @staticmethod
-    def from_dict(email, data, storage_provider):
+    def from_dict(key, data, storage_provider):
         return Feed(
-            key=email,
+            key=key,
             items=list(map(Item.from_dict, data.get("items", []))),
             bucket_name=data["bucket_name"],
             bucket=storage_provider.get_bucket(data["bucket_name"]),
