@@ -4,8 +4,8 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Prune unused docker containers")
 parser.add_argument("project", type=str, help="Name of the project")
-parser.add_argument("service", type=str, help="Name of the service")
-parser.add_argument("region", type=str, help="Name of the region")
+parser.add_argument("services_regions", type=str, help="Names of the services and regions")
+# parser.add_argument("region", type=str, help="Name of the region")
 parser.add_argument("container", type=str, help="Name of the container")
 
 
@@ -42,18 +42,25 @@ def delete_container(container_name, digest):
     return json.loads(stdout)
 
 
-def prune_containers(project, container_name, service, region):
+def prune_containers(project, container_name, services):
     container_name = container_name.split(":")[0]
-    service_info = describe_service(project, service, region)
 
-    active_revisions = [service["revisionName"]
-                        for service in service_info["status"]["traffic"]]
+    revision_containers = []
 
-    revisions = list_revisions(project, service, region)
+    for service, region in services:
+        service_info = describe_service(project, service, region)
 
-    revision_containers = [revision["status"]["imageDigest"]
-                           for revision in revisions
-                           if revision["metadata"]["name"] in active_revisions]
+        active_revisions = [active_revision["revisionName"]
+                            for active_revision in service_info["status"]["traffic"]]
+
+        revisions = list_revisions(project, service, region)
+
+        service_revision_containers = [revision["status"]["imageDigest"]
+                            for revision in revisions
+                            if revision["metadata"]["name"] in active_revisions]
+
+        for container in service_revision_containers:
+            revision_containers.append(container)
 
     invalid_containers = [container
                           for container in revision_containers
@@ -88,7 +95,8 @@ def prune_containers(project, container_name, service, region):
 def main():
     args = parser.parse_args()
 
-    prune_containers(args.project, args.container, args.service, args.region)
+    services = [service_region.split(":") for service_region in args.services_regions.split(",")]
+    prune_containers(args.project, args.container, services)
 
 
 if __name__ == "__main__":
