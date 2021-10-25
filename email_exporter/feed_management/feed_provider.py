@@ -79,7 +79,7 @@ class FeedProvider:
         current_alias = self.db.collection(self.collection).document(alias_key).get()
         if current_alias.exists:
             raise KeyError(f"Cannot create alias {alias_key}; A document with the key already exists")
-        
+
         self.db.collection(self.collection).document(alias_key).set({
             "alias": ref
         })
