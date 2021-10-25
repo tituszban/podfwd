@@ -19,7 +19,7 @@ class FeedProvider:
         self._logger = logger
         self._feed_cache = {}
 
-    def get_feed(self, key):
+    def get_feed(self, key: str) -> Feed:
         self._logger.info(f"Getting feed for key: {key}")
         if key in self._feed_cache:
             self._logger.info(f"Key {key} found in feed cache. Using cached feed")
