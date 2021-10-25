@@ -90,7 +90,7 @@ deploy-feed:
         gcloud run deploy $FEED_CR_SERVICE_NAME
         --image $CONTAINER_NAME
         --region $FEED_CR_REGION --project $PROJECT_ID
-        --no-allow-unauthenticated --update-env-vars FINGERPRINT=$CI_COMMIT_SHORT_SHA
+        --allow-unauthenticated --update-env-vars FINGERPRINT=$CI_COMMIT_SHORT_SHA
 
 verify-exporter:
   image: google/cloud-sdk:latest
