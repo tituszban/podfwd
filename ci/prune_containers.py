@@ -56,8 +56,8 @@ def prune_containers(project, container_name, services):
         revisions = list_revisions(project, service, region)
 
         service_revision_containers = [revision["status"]["imageDigest"]
-                            for revision in revisions
-                            if revision["metadata"]["name"] in active_revisions]
+                                       for revision in revisions
+                                       if revision["metadata"]["name"] in active_revisions]
 
         for container in service_revision_containers:
             revision_containers.append(container)
