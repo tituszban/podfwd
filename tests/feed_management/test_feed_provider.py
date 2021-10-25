@@ -90,6 +90,106 @@ def test_get_feed_called_again_returns_from_cache():
     assert feed2 == feed
 
 
+def _create_document(data, exists=True, id=Mock()):
+    db_document = Mock()
+    db_document.exists = exists
+    db_document.to_dict = data
+    db_document.id = id
+    db_document_snapshot = Mock()
+    db_document_snapshot.id = id
+    db_document_snapshot.get = MagicMock(return_value=db_document)
+    return db_document_snapshot
+
+
+def test_get_feed_alias_redirects_to_document():
+    bucket_name = "bucket_name"
+    root_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}), id="root_doc")
+    alias_doc = _create_document(data=MagicMock(return_value={"alias": root_doc}), id="root_doc")
+
+    db_client = Mock()
+    db_client.document = MagicMock(return_value=alias_doc)
+    firestore_client = Mock()
+    firestore_client.collection = MagicMock(return_value=db_client)
+
+    feed_name = "feed_name"
+    collection_name = "collection_name"
+    config = Mock()
+    config.get = MagicMock(return_value=collection_name)
+
+    sut = FeedProvider(
+        config, firestore_client,
+        Mock(), Mock()
+    )
+
+    feed = sut.get_feed(feed_name)
+
+    assert feed.bucket_name == bucket_name
+    alias_doc.get.assert_called_once()
+
+
+def test_get_feed_nested_alias_redirects_to_document():
+    bucket_name = "bucket_name"
+    root_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}))
+    alias1_doc = _create_document(data=MagicMock(return_value={"alias": root_doc}))
+    alias2_doc = _create_document(data=MagicMock(return_value={"alias": alias1_doc}))
+
+    db_client = Mock()
+    db_client.document = MagicMock(return_value=alias2_doc)
+    firestore_client = Mock()
+    firestore_client.collection = MagicMock(return_value=db_client)
+
+    feed_name = "feed_name"
+    collection_name = "collection_name"
+    config = Mock()
+    config.get = MagicMock(return_value=collection_name)
+
+    sut = FeedProvider(
+        config, firestore_client,
+        Mock(), Mock()
+    )
+
+    feed = sut.get_feed(feed_name)
+
+    assert feed.bucket_name == bucket_name
+    alias2_doc.get.assert_called_once()
+
+
+def test_get_feed_nested_alias_all_cached():
+    bucket_name = "bucket_name"
+    keys = ["root_doc", "alias1_doc", "alias2_doc"]
+    root_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}), id=keys[0])
+    alias1_doc = _create_document(data=MagicMock(return_value={"alias": root_doc}), id=keys[1])
+    alias2_doc = _create_document(data=MagicMock(return_value={"alias": alias1_doc}), id=keys[2])
+
+    db_client = Mock()
+    db_client.document = MagicMock(return_value=alias2_doc)
+    firestore_client = Mock()
+    firestore_client.collection = MagicMock(return_value=db_client)
+
+    collection_name = "collection_name"
+    config = Mock()
+    config.get = MagicMock(return_value=collection_name)
+
+    sut = FeedProvider(
+        config, firestore_client,
+        Mock(), Mock()
+    )
+
+    feed = sut.get_feed(keys[2])
+
+    feed1 = sut.get_feed(keys[2])
+    feed2 = sut.get_feed(keys[1])
+    feed3 = sut.get_feed(keys[0])
+
+    firestore_client.collection.assert_called_once_with(collection_name)
+    db_client.document.assert_called_once_with(keys[2])
+    alias2_doc.get.assert_called_once()
+    assert feed
+    assert feed1 == feed
+    assert feed2 == feed
+    assert feed3 == feed
+
+
 def test_push_feed_calls_collection_set():
     feed_name = "feed_name"
     feed_dict = Mock()
@@ -306,3 +406,68 @@ def test_delete_logs_error_if_not_flushed():
     del sut
 
     logger.error.assert_called()
+
+
+def test_add_feed_alias_created():
+    feed_name = "feed_name"
+    alias_name = "alias_name"
+    bucket_name = "bucket_name"
+    feed_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}))
+    alias_doc = _create_document(data=Mock(), exists=False)
+
+    def get_document(key):
+        if key == feed_name:
+            return feed_doc
+        if key == alias_name:
+            return alias_doc
+        raise KeyError()
+
+    db_client = Mock()
+    db_client.document = MagicMock(side_effect=get_document)
+    firestore_client = Mock()
+    firestore_client.collection = MagicMock(return_value=db_client)
+
+    collection_name = "collection_name"
+    config = Mock()
+    config.get = MagicMock(return_value=collection_name)
+
+    sut = FeedProvider(
+        config, firestore_client,
+        Mock(), Mock()
+    )
+
+    sut.add_feed_alias(feed_name, alias_name)
+
+    alias_doc.set.assert_called_once_with({"alias": feed_doc})
+
+
+def test_add_feed_alias_key_exists_throws():
+    feed_name = "feed_name"
+    alias_name = "alias_name"
+    bucket_name = "bucket_name"
+    feed_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}))
+    alias_doc = _create_document(data=Mock(), exists=True)
+
+    def get_document(key):
+        if key == feed_name:
+            return feed_doc
+        if key == alias_name:
+            return alias_doc
+        raise KeyError()
+
+    db_client = Mock()
+    db_client.document = MagicMock(side_effect=get_document)
+    firestore_client = Mock()
+    firestore_client.collection = MagicMock(return_value=db_client)
+
+    collection_name = "collection_name"
+    config = Mock()
+    config.get = MagicMock(return_value=collection_name)
+
+    sut = FeedProvider(
+        config, firestore_client,
+        Mock(), Mock()
+    )
+
+    with pytest.raises(KeyError):
+        sut.add_feed_alias(feed_name, alias_name)

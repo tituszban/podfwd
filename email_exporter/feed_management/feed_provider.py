@@ -32,24 +32,39 @@ class FeedProvider:
                     self._feed_cache[c_key] = feed
             return feed
 
-    def _get_feed(self, key):
-        doc = self.db.collection(self.collection).document(key).get()
-        if not doc.exists:
+    def _get_feed_doc(self, key):
+        ref = self.db.collection(self.collection).document(key)
+        snapshot = ref.get()
+        if not snapshot.exists:
             # TODO: Signup process to create feed
             raise KeyError(f"Feed not found for key: {key}")
 
-        data = doc.to_dict()
+        data = snapshot.to_dict()
 
         keys = [key]
 
         while "alias" in data:
-            doc = data["alias"].get()
-            if not doc.exists:
+            ref = data["alias"]
+            snapshot = ref.get()
+            if not snapshot.exists:
                 raise KeyError(f"Feed not found for key: {key}; Invalid alias for {keys[-1]}")
-            key = doc.id
-            data = doc.to_dict()
+            key = snapshot.id
+            data = snapshot.to_dict()
             self._logger.info(f"Redirected feed {keys[-1]} to {key} via alias")
             keys.append(key)
+
+        return ref, key, data, keys
+
+    def _get_feed_info(self, key: str):
+        _, key, data, keys = self._get_feed_doc(key)
+        return key, data, keys
+
+    def _get_feed_ref(self, key: str):
+        ref, _, _, _ = self._get_feed_doc(key)
+        return ref
+
+    def _get_feed(self, key):
+        key, data, keys = self._get_feed_info(key)
 
         return Feed.from_dict(key, data, self.storage_provider), keys
 
@@ -57,6 +72,17 @@ class FeedProvider:
         self.db.collection(self.collection).document(feed.key).set(
             feed.to_dict()
         )
+
+    def add_feed_alias(self, key: str, alias_key: str):
+        ref = self._get_feed_ref(key)
+
+        current_alias = self.db.collection(self.collection).document(alias_key).get()
+        if current_alias.exists:
+            raise KeyError(f"Cannot create alias {alias_key}; A document with the key already exists")
+
+        self.db.collection(self.collection).document(alias_key).set({
+            "alias": ref
+        })
 
     def apply_feeds(self, prune=True):
         self._logger.info(f"Applying {len(self._feed_cache)} feeds")

@@ -62,3 +62,11 @@ def test_feed_alias():
     feed_provider = deps.get(FeedProvider)
 
     feed_provider.get_feed("tituszban")
+
+
+def add_feed_alias():
+    deps = Dependencies.default()
+
+    feed_provider = deps.get(FeedProvider)
+
+    feed_provider.add_feed_alias("SYhLtwlSg98XUBhaPUtB", "tituszban")
