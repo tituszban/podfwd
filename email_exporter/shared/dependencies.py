@@ -6,6 +6,19 @@ from firebase_admin import credentials
 import firebase_admin
 from google.cloud import storage
 import logging
+from pythonjsonlogger import jsonlogger
+from datetime import datetime
+
+
+class CloudRunJsonFormatter(jsonlogger.JsonFormatter):
+    def parse(self):
+        return ["name", "message", "filename", "funcName", "lineno"]
+
+    def add_fields(self, log_record, record, message_dict):
+        now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        log_record["timestamp"] = now
+        log_record["severity"] = record.levelname
+        super().add_fields(log_record, record, message_dict)
 
 
 def config_resolver(_):
@@ -14,15 +27,19 @@ def config_resolver(_):
 
 
 def logger_resolver(context: Context) -> logging.Logger:
-    logger_name = context.config.get("LOGGER_NAME", "email_exporter") if context.parent_type is None else str(
-        context.parent_type.__name__)
+    default_logger_name = context.config.get("LOGGER_NAME", "email_exporter")
+    logger_name = default_logger_name if context.parent_type is None else str(context.parent_type.__name__)
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
 
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.INFO)
-    stream_formatter = logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s")
-    stream_handler.setFormatter(stream_formatter)
+
+    if context.config.get_bool("HUMAN_READABLE_LOGS"):
+        stream_formatter = logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s")
+        stream_handler.setFormatter(stream_formatter)
+    else:
+        stream_handler.setFormatter(CloudRunJsonFormatter())
 
     logger.addHandler(stream_handler)
 

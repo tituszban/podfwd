@@ -7,3 +7,4 @@ firebase-admin
 bleach
 Flask
 gunicorn
+python-json-logger
