@@ -21,3 +21,9 @@ def get_feed_name(feed_name):
         return "Feed not found", 404
 
     return Response(rss, mimetype="text/xml")
+
+
+@app.route("/favicon.ico")
+def favicon():
+    redirect_to = os.environ.get("REDIRECT_TO", DEFAULT_REDIRECT)
+    return redirect(f"{redirect_to}/favicon.ico")
