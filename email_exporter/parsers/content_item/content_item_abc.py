@@ -1,5 +1,10 @@
 from abc import ABC, abstractmethod
+from typing import Iterable
+
+from ..description_item import DescriptionItemABC
+from ..speech_item import SpeechItemABC
 from .util import get_text_content
+from bs4.element import PageElement
 
 
 class ContentItemABC(ABC):
@@ -9,16 +14,16 @@ class ContentItemABC(ABC):
         self._to_item = to_item
 
     @abstractmethod
-    def get_ssml(self):
+    def get_ssml(self) -> Iterable[SpeechItemABC]:
         raise NotImplementedError()
 
     @abstractmethod
-    def get_description(self):
+    def get_description(self) -> Iterable[DescriptionItemABC]:
         raise NotImplementedError()
 
     @staticmethod
     @abstractmethod
-    def match_component(component):
+    def match_component(component: PageElement) -> bool:
         raise NotImplementedError()
 
     def _get_text_content(self):
