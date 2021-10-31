@@ -11,6 +11,7 @@ from datetime import datetime
 
 T = TypeVar("T")
 
+
 class CloudRunJsonFormatter(jsonlogger.JsonFormatter):
     def parse(self):
         return ["name", "message", "filename", "funcName", "lineno"]
