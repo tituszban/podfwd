@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable
+from typing import Callable, TypeVar, Type
 from ..config import Config
 from firebase_admin import firestore
 from firebase_admin import credentials
@@ -9,6 +9,7 @@ import logging
 from pythonjsonlogger import jsonlogger
 from datetime import datetime
 
+T = TypeVar("T")
 
 class CloudRunJsonFormatter(jsonlogger.JsonFormatter):
     def parse(self):
@@ -140,7 +141,7 @@ class Dependencies:
             .add_cached_resolver(firestore.Client, firestore_client_resolver) \
             .add_cached_resolver(storage.Client, storage_client_resolver)
 
-    def get(self, t: type, context: Context = None) -> object:
+    def get(self, t: Type[T], context: Context = None) -> T:
         if context is None:
             context = Context(self, t)
 
@@ -163,7 +164,7 @@ class Dependencies:
             a_name: self.get(a_type, context.clone_with_parent(t))
             for a_name, a_type in annotations.items()
             if a_name != "return"
-        })
+        })          # type: ignore
 
         if self._type_cache_rule.get(t, self._cache_by_default):
             self._instances[t] = instance

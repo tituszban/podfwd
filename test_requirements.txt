@@ -1,3 +1,7 @@
 pytest
 mock
 freezegun
+
+types-bleach
+types-requests
+types-setuptools

@@ -28,8 +28,7 @@ class TextToSpeech:
     def __init__(self, config: Config, logger: Logger) -> None:
         json = config.get("SA_FILE")
         if json:
-            self.client = texttospeech.TextToSpeechClient.from_service_account_json(
-                json)
+            self.client = texttospeech.TextToSpeechClient.from_service_account_json(json, *[])
         else:
             self.client = texttospeech.TextToSpeechClient()
         self._logger = logger
