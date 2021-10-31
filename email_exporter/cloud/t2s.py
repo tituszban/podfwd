@@ -2,6 +2,7 @@ from google.cloud import texttospeech
 from functools import reduce
 from email_exporter.config import Config
 from logging import Logger
+from typing import Union, List
 # from google.cloud import storage
 # import io
 
@@ -28,13 +29,12 @@ class TextToSpeech:
     def __init__(self, config: Config, logger: Logger) -> None:
         json = config.get("SA_FILE")
         if json:
-            self.client = texttospeech.TextToSpeechClient.from_service_account_json(
-                json)
+            self.client = texttospeech.TextToSpeechClient.from_service_account_json(json, *[])
         else:
             self.client = texttospeech.TextToSpeechClient()
         self._logger = logger
 
-    def t2s(self, text, voice=None):
+    def t2s(self, text: str, voice: Union[str, None] = None) -> bytes:
         if voice not in self.supported_languages:
             voice = "en-US-Wavenet-A"
 
@@ -58,12 +58,12 @@ class TextToSpeech:
 
         return audio_content
 
-    def f2s(self, path):
+    def f2s(self, path: str):
         self._logger.info(f"Converting file {path} to speech")
         with open(path, encoding="utf-8") as f:
             return self.t2s(f.read())
 
-    def lines_to_speech(self, lines, voice=None):
+    def lines_to_speech(self, lines: List[str], voice: Union[str, None] = None):
         self._logger.info(f"Converting {len(lines)} blocks of text to speech")
         snippets = [self.t2s(line, voice) for line in lines]
         return reduce(lambda a, b: a + b, snippets)

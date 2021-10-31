@@ -1,4 +1,6 @@
+from email.message import Message
 from email_exporter.config import Config
+from typing import Iterator, Tuple, Union
 from logging import Logger
 import imaplib
 import email
@@ -14,11 +16,12 @@ class GmailInbox(InboxABC):
         self._disable_discard = config.get_bool("DISABLE_DISCARDING")
         self._logger = logger
 
-        self._mail = None
+        self._mail: Union[imaplib.IMAP4_SSL, None] = None
 
     def _login(self):
-        self._mail = imaplib.IMAP4_SSL(self._server)
-        self._mail.login(self.email_address, self._password)
+        server = imaplib.IMAP4_SSL(self._server)
+        server.login(self.email_address, self._password)
+        return server
 
     @property
     def email_address(self):
@@ -57,15 +60,15 @@ class GmailInbox(InboxABC):
 
         return all_folder[0][1]
 
-    def get_messages(self):
+    def get_messages(self) -> Iterator[Tuple[int, Message]]:
         if self._mail is None:
-            self._login()
+            self._mail = self._login()
 
         all_folder = self._get_all_mail_folder()
 
         self._ensure_success(self._mail.select(all_folder))
 
-        ids = self._ensure_success(self._mail.uid('search', None, 'UNFLAGGED'))
+        ids = self._ensure_success(self._mail.uid('search', None, 'UNFLAGGED'))  # type: ignore
         ids = ids[0].decode().split()
         for idx in ids:
             messageRaw = self._ensure_success(self._mail.uid('fetch', idx, '(RFC822)'))

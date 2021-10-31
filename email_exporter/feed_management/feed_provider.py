@@ -3,6 +3,7 @@ from email_exporter.cloud import StorageProvider
 from firebase_admin.firestore import Client as FirestoreClient
 from logging import Logger
 from .feed import Feed
+from typing import Dict
 
 
 class FeedProvider:
@@ -17,7 +18,7 @@ class FeedProvider:
         self.db = firestore_client
         self.storage_provider = storage_provider
         self._logger = logger
-        self._feed_cache = {}
+        self._feed_cache: Dict[str, Feed] = {}
 
     def get_feed(self, key: str) -> Feed:
         self._logger.info(f"Getting feed for key: {key}")

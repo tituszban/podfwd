@@ -9,3 +9,4 @@ from .sub import Sub        # noqa: F401
 from .text import Text      # noqa: F401
 from .voice import Voice        # noqa: F401
 from .whisper import Whisper        # noqa: F401
+from .speech_item_abc import SpeechItemABC      # noqa: F401

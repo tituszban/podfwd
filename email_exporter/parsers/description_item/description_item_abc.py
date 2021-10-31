@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
+from typing import Union
 import bs4
 
 
 class DescriptionItemABC(ABC):
     attrs_to_keep = ("alt", "src", "href")
 
-    def __init__(self, content):
+    def __init__(self, content: Union[bs4.element.PageElement, str]):
         self._content = content
 
     def _remove_attrs(self, component, remove_href):
@@ -13,7 +14,7 @@ class DescriptionItemABC(ABC):
         for attr in [attr for attr in component.attrs if attr not in attrs_to_keep]:
             del component[attr]
 
-    def to_text(self, remove_href=False):
+    def to_text(self, remove_href: bool = False) -> str:
         # TODO: this is not great. Replace with building up components, instead of deleting
         if isinstance(self._content, bs4.element.PageElement):
             children = [self._content, *self._content.findChildren(recursive=True)]
@@ -26,5 +27,5 @@ class DescriptionItemABC(ABC):
 
     @property
     @abstractmethod
-    def content_type(self):
+    def content_type(self) -> str:
         raise NotImplementedError()

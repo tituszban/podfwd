@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable
+from typing import Callable, TypeVar, Type
 from ..config import Config
 from firebase_admin import firestore
 from firebase_admin import credentials
@@ -8,6 +8,8 @@ from google.cloud import storage
 import logging
 from pythonjsonlogger import jsonlogger
 from datetime import datetime
+
+T = TypeVar("T")
 
 
 class CloudRunJsonFormatter(jsonlogger.JsonFormatter):
@@ -76,10 +78,10 @@ class CachedResolver:
 
     def wrap_resolver(
             self,
-            base_type: type,
-            resolver: Callable[[Context], object]) -> Callable[[Context], object]:
+            base_type: Type[T],
+            resolver: Callable[[Context], T]) -> Callable[[Context], T]:
 
-        def wrapped_resolver(context):
+        def wrapped_resolver(context: Context):
             if base_type in self._cache:
                 return self._cache[base_type]
             instance = resolver(context)
@@ -98,7 +100,7 @@ class Context:
         return Context(self.dependencies, new_parent_type)
 
     @property
-    def config(self):
+    def config(self) -> Config:
         return self.dependencies.get(Config)
 
 
@@ -124,11 +126,11 @@ class Dependencies:
         self._type_cache_rule[base_type] = True
         return self
 
-    def add_resolver(self, base_type: type, resolver: Callable[[Context], object]) -> Dependencies:
+    def add_resolver(self, base_type: Type[T], resolver: Callable[[Context], T]) -> Dependencies:
         self._resolvers[base_type] = resolver
         return self
 
-    def add_cached_resolver(self, base_type: type, resolver: Callable[[Context], object]) -> Dependencies:
+    def add_cached_resolver(self, base_type: Type[T], resolver: Callable[[Context], T]) -> Dependencies:
         self._resolvers[base_type] = self._resolver_cache.wrap_resolver(base_type, resolver)
         return self
 
@@ -140,7 +142,7 @@ class Dependencies:
             .add_cached_resolver(firestore.Client, firestore_client_resolver) \
             .add_cached_resolver(storage.Client, storage_client_resolver)
 
-    def get(self, t: type, context: Context = None) -> object:
+    def get(self, t: Type[T], context: Context = None) -> T:
         if context is None:
             context = Context(self, t)
 
@@ -163,7 +165,7 @@ class Dependencies:
             a_name: self.get(a_type, context.clone_with_parent(t))
             for a_name, a_type in annotations.items()
             if a_name != "return"
-        })
+        })          # type: ignore
 
         if self._type_cache_rule.get(t, self._cache_by_default):
             self._instances[t] = instance

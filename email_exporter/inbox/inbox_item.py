@@ -1,5 +1,15 @@
+from typing import Tuple, Union
+from bs4 import BeautifulSoup
+
+
 class InboxItem:
-    def __init__(self, subject, date, html, mime, soup, addresses):
+    def __init__(self,
+                 subject: str,
+                 date: str,
+                 html: str,
+                 mime: str,
+                 soup: Union[BeautifulSoup, None],
+                 addresses: Tuple[str, Union[str, None]]):
         self.title = subject
         self.date = date
         self.html = html
