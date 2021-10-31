@@ -4,15 +4,23 @@ from ... import speech_item
 
 class Blockquote(ContentItemABC):
 
-    def get_ssml(self):
-        yield speech_item.Paragraph("Quote.")
-
+    def _get_inner_ssml(self):
         for component in self._component.contents:
             if component == "\n":
                 continue
             yield from self._to_item(component).get_ssml()
 
-        yield speech_item.Paragraph("End quote.")
+    def get_ssml(self):
+        inner_ssml = list(self._get_inner_ssml())
+
+        if len(inner_ssml) <= 0:
+            return []
+
+        return [
+            speech_item.Paragraph("Quote."),
+            *inner_ssml,
+            speech_item.Paragraph("End quote.")
+        ]
 
     def get_description(self):
         for component in self._component.contents:
