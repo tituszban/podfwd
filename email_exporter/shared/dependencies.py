@@ -78,10 +78,10 @@ class CachedResolver:
 
     def wrap_resolver(
             self,
-            base_type: type,
-            resolver: Callable[[Context], object]) -> Callable[[Context], object]:
+            base_type: Type[T],
+            resolver: Callable[[Context], T]) -> Callable[[Context], T]:
 
-        def wrapped_resolver(context):
+        def wrapped_resolver(context: Context):
             if base_type in self._cache:
                 return self._cache[base_type]
             instance = resolver(context)
@@ -100,7 +100,7 @@ class Context:
         return Context(self.dependencies, new_parent_type)
 
     @property
-    def config(self):
+    def config(self) -> Config:
         return self.dependencies.get(Config)
 
 
@@ -126,11 +126,11 @@ class Dependencies:
         self._type_cache_rule[base_type] = True
         return self
 
-    def add_resolver(self, base_type: type, resolver: Callable[[Context], object]) -> Dependencies:
+    def add_resolver(self, base_type: Type[T], resolver: Callable[[Context], T]) -> Dependencies:
         self._resolvers[base_type] = resolver
         return self
 
-    def add_cached_resolver(self, base_type: type, resolver: Callable[[Context], object]) -> Dependencies:
+    def add_cached_resolver(self, base_type: Type[T], resolver: Callable[[Context], T]) -> Dependencies:
         self._resolvers[base_type] = self._resolver_cache.wrap_resolver(base_type, resolver)
         return self
 

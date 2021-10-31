@@ -1,3 +1,4 @@
+from email.message import Message
 from email_exporter.config import Config
 from email_exporter.inbox import Inbox
 from logging import Logger
@@ -5,6 +6,7 @@ import re
 import email
 from bs4 import BeautifulSoup
 from .inbox_item import InboxItem
+from typing import Callable, Tuple
 
 
 class InboxProcessor:
@@ -24,7 +26,7 @@ class InboxProcessor:
                 subject = subject[len(prefix):]
         return subject
 
-    def _get_message_data(self, message):
+    def _get_message_data(self, message: Message) -> Tuple[str, str, str, str]:
         subject = self._remove_fwd(self._decode_header(message["Subject"]))
         sender = self._decode_header(message["From"])
         recipient = self._decode_header(message["To"])
@@ -46,7 +48,7 @@ class InboxProcessor:
 
         return (sender, None)
 
-    def _get_payload(self, message):
+    def _get_payload(self, message: Message):
         if message.is_multipart():
             for m in message.get_payload():
                 yield from self._get_payload(m)
@@ -70,7 +72,7 @@ class InboxProcessor:
         raise UnicodeDecodeError(
             "None of the known encodings were able to decode this payload; {}".format('; '.join(errors)))
 
-    def _process_email(self, message):
+    def _process_email(self, message: Message) -> InboxItem:
         subject, sender, recipient, date = self._get_message_data(message)
         mime = ""
         html = ""
@@ -89,7 +91,7 @@ class InboxProcessor:
 
         return InboxItem(subject, date, html, mime, soup, addresses)
 
-    def process_inbox(self, callback):
+    def process_inbox(self, callback: Callable[[InboxItem], bool]) -> None:
         self._logger.info("Processing inbox")
         for idx, message in self._inbox.get_messages():
             self._logger.info(f"Processing email {idx}")
