@@ -82,8 +82,10 @@ deploy-exporter:
     - >-
         gcloud run deploy $EXPORTER_CR_SERVICE_NAME
         --image $CONTAINER_NAME
-        --region $EXPORTER_CR_REGION --project $PROJECT_ID
-        --no-allow-unauthenticated --update-env-vars FINGERPRINT=$CI_COMMIT_SHORT_SHA
+        --region $EXPORTER_CR_REGION
+        --project $PROJECT_ID
+        --no-allow-unauthenticated
+        --update-env-vars FINGERPRINT=$CI_COMMIT_SHORT_SHA,HEADER_SECRET=$HEADER_SECRET
 
 deploy-feed:
   image: google/cloud-sdk:latest
@@ -98,8 +100,10 @@ deploy-feed:
     - >-
         gcloud run deploy $FEED_CR_SERVICE_NAME
         --image $CONTAINER_NAME
-        --region $FEED_CR_REGION --project $PROJECT_ID
-        --allow-unauthenticated --update-env-vars FINGERPRINT=$CI_COMMIT_SHORT_SHA
+        --region $FEED_CR_REGION
+        --project $PROJECT_ID
+        --allow-unauthenticated
+        --update-env-vars FINGERPRINT=$CI_COMMIT_SHORT_SHA,HEADER_SECRET=$HEADER_SECRET
 
 verify-exporter:
   image: google/cloud-sdk:latest
@@ -111,7 +115,7 @@ verify-exporter:
     # Authenticate with service account
     - gcloud auth activate-service-account $GCP_SA_NAME --key-file sa.json
     # Find run endpoint, call the fingerprint path and check against expected commit signature
-    - "gcloud run services describe $EXPORTER_CR_SERVICE_NAME --region $EXPORTER_CR_REGION --project $PROJECT_ID --format=\"value(status.url)\" | sed 's/$/\\/fingerprint/'| xargs -n 1 curl -H \"Authorization: Bearer $(gcloud auth print-identity-token)\" | grep \"$CI_COMMIT_SHORT_SHA\""
+    - "gcloud run services describe $EXPORTER_CR_SERVICE_NAME --region $EXPORTER_CR_REGION --project $PROJECT_ID --format=\"value(status.url)\" | sed 's/$/\\/fingerprint/'| xargs -n 1 curl -H \"Authorization: Bearer $(gcloud auth print-identity-token)\" -H \"X-API-SECRET: $HEADER_SECRET\" | grep \"$CI_COMMIT_SHORT_SHA\""
 
 verify-feed:
   image: google/cloud-sdk:latest
@@ -123,7 +127,7 @@ verify-feed:
     # Authenticate with service account
     - gcloud auth activate-service-account $GCP_SA_NAME --key-file sa.json
     # Find run endpoint, call the fingerprint path and check against expected commit signature
-    - "gcloud run services describe $FEED_CR_SERVICE_NAME --region $FEED_CR_REGION --project $PROJECT_ID --format=\"value(status.url)\" | sed 's/$/\\/fingerprint/'| xargs -n 1 curl -H \"Authorization: Bearer $(gcloud auth print-identity-token)\" | grep \"$CI_COMMIT_SHORT_SHA\""
+    - "gcloud run services describe $FEED_CR_SERVICE_NAME --region $FEED_CR_REGION --project $PROJECT_ID --format=\"value(status.url)\" | sed 's/$/\\/fingerprint/'| xargs -n 1 curl -H \"Authorization: Bearer $(gcloud auth print-identity-token)\" -H \"X-API-SECRET: $HEADER_SECRET\" | grep \"$CI_COMMIT_SHORT_SHA\""
 
 
 prune_containers:
