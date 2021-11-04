@@ -8,6 +8,7 @@ from google.cloud import storage
 import logging
 from pythonjsonlogger import jsonlogger
 from datetime import datetime
+import typing
 
 T = TypeVar("T")
 
@@ -158,7 +159,7 @@ class Dependencies:
         if not hasattr(t, "__init__"):
             raise KeyError(f"No init method found on type {t}")
 
-        if len(annotations := t.__init__.__annotations__) == 0:
+        if len(annotations := typing.get_type_hints(t.__init__)) == 0:
             raise KeyError(f"No annotations found on the constructor for type {t}")
 
         instance = t(**{
