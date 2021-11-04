@@ -13,4 +13,4 @@ def test_from_client_and_name():
 
     client.get_bucket.assert_called_with(bucket_name)
 
-    assert storage.bucket == bucket
+    assert storage._bucket == bucket

@@ -1,3 +1,4 @@
+from typing import Optional
 from ..shared import Dependencies
 from firebase_admin import firestore
 from ..feed_management import Feed, FeedProvider
@@ -21,10 +22,12 @@ def clone_collection(collection_from_name, collection_to_name):
     return "Success: Clone"
 
 
-def create_feed(deps, key, bucket_name, item_lifetime_days=7):
+def create_feed(
+        deps: Dependencies, key: str, bucket_name: str,
+        item_lifetime_days: int = 7, logging_bucket: Optional[str] = "autopodcast-logs"):
     storage_provider = deps.get(StorageProvider)
 
-    bucket = storage_provider.create_bucket(bucket_name, public=True)
+    bucket = storage_provider.create_bucket(bucket_name, public=True, logging_bucket=logging_bucket)
 
     return Feed(key, [], bucket_name, bucket, item_lifetime_days)
 
