@@ -1,14 +1,16 @@
-from . import app
 import os
-from flask import jsonify
+from flask import jsonify, Blueprint
 
 
-@app.route("/fingerprint")
+fingerprinting_blueprint = Blueprint("fingerprinting", __name__)
+
+
+@fingerprinting_blueprint.route("/fingerprint")
 def get_fingerprint():
     return os.environ.get("FINGERPRINT", "")
 
 
-@app.route("/k")
+@fingerprinting_blueprint.route("/k")
 def get_cloud_run_config():
     return jsonify({
         key: os.environ.get(key, "")

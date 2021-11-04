@@ -1,14 +1,14 @@
+from flask import Blueprint
 from email_exporter.individual import export_inbox
-from . import app
+
+exporter_blueprint = Blueprint("exporter", __name__)
 
 
-@app.route("/", methods=["GET"])
-@app.route("/exporter/run", methods=["GET"])
+@exporter_blueprint.route("/run", methods=["GET"])
 def run_exporter_get():
     return "Email exporter must be invoked with POST"
 
 
-@app.route("/", methods=["POST"])
-@app.route("/exporter/run", methods=["POST"])
+@exporter_blueprint.route("/run", methods=["POST"])
 def run_exporter():
     return export_inbox()

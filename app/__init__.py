@@ -1,11 +1,14 @@
 import os
 from flask import Flask
+from .fingerprinting import fingerprinting_blueprint
+from .exporter import exporter_blueprint
+from .feed import feed_blueprint
 
 app = Flask(__name__)
 
-from .fingerprinting import *       # noqa: F403, F401, E402
+app.register_blueprint(fingerprinting_blueprint)
 
 if os.environ.get("ENABLE_EXPORTER"):
-    from .exporter import *       # noqa: F403, F401
+    app.register_blueprint(exporter_blueprint, url_prefix="/exporter")
 if os.environ.get("ENABLE_FEED"):
-    from .feed import *       # noqa: F403, F401
+    app.register_blueprint(feed_blueprint)
