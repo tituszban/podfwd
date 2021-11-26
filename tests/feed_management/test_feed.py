@@ -636,3 +636,76 @@ def test_prune_skips_removed_files():
         feed.prune()
 
     bucket.delete_blob.assert_not_called()
+
+
+def test_add_item_url_marks_item_as_updated():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    bucket = Mock()
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    item = feed.add_item_url("title", "description", "date", "sender", "item_url")
+
+    assert len(feed.updated_items) == 1
+    assert feed.updated_items[0] == item
+
+
+def test_prune_marks_pruned_item_as_updated():
+    feed_key = "feed_key_value"
+    item_id = 1
+    feed_data = {
+        "items": [
+            {
+                "id": item_id,
+                "date": "Wed, 7 Jul 2021 08:00:00 +0000",
+                "file_info": {
+                    "file_name": "deleted_file_name"
+                }
+            }
+        ],
+        "bucket_name": "bucket_name",
+        "item_lifetime_days": 7
+    }
+
+    bucket = Mock()
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    assert len(feed.items) > 0
+    assert feed.items[0].file_info.is_removed is False
+
+    with freeze_time("2021-07-15"):
+        feed.prune()
+
+    assert len(feed.updated_items) == 1
+    assert feed.updated_items[0].idx == item_id
+
+def test_clear_updated_items_empties_updated_items():
+    feed_key = "feed_key_value"
+    feed_data = {
+        "items": [],
+        "bucket_name": "bucket_name",
+    }
+
+    bucket = Mock()
+    storage_provider = Mock()
+    storage_provider.get_bucket = MagicMock(return_value=bucket)
+
+    feed = Feed.from_dict(feed_key, feed_data, storage_provider)
+
+    feed.add_item_url("title", "description", "date", "sender", "item_url")
+
+    assert len(feed.updated_items) == 1
+    
+    feed.clear_updated_items()
+
+    assert len(feed.updated_items) == 0
