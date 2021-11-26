@@ -689,6 +689,7 @@ def test_prune_marks_pruned_item_as_updated():
     assert len(feed.updated_items) == 1
     assert feed.updated_items[0].idx == item_id
 
+
 def test_clear_updated_items_empties_updated_items():
     feed_key = "feed_key_value"
     feed_data = {
@@ -705,7 +706,7 @@ def test_clear_updated_items_empties_updated_items():
     feed.add_item_url("title", "description", "date", "sender", "item_url")
 
     assert len(feed.updated_items) == 1
-    
+
     feed.clear_updated_items()
 
     assert len(feed.updated_items) == 0

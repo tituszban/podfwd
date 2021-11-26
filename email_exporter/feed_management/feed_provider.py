@@ -80,7 +80,8 @@ class FeedProvider:
             feed.to_dict()
         )
         for updated_item in feed.updated_items:
-            self.db.collection(self.collection).document(feed.key).collection(self._items_collection).document(str(updated_item.idx)).set(updated_item.to_dict())
+            self.db.collection(self.collection).document(feed.key)\
+                .collection(self._items_collection).document(str(updated_item.idx)).set(updated_item.to_dict())
         feed.clear_updated_items()
 
     def add_feed_alias(self, key: str, alias_key: str):
