@@ -19,6 +19,7 @@ class FeedProvider:
         self.storage_provider = storage_provider
         self._logger = logger
         self._feed_cache: Dict[str, Feed] = {}
+        self._items_collection = "items"
 
     def get_feed(self, key: str) -> Feed:
         self._logger.info(f"Getting feed for key: {key}")
@@ -65,14 +66,23 @@ class FeedProvider:
         return ref
 
     def _get_feed(self, key):
-        key, data, keys = self._get_feed_info(key)
+        ref, key, data, keys = self._get_feed_doc(key)
 
-        return Feed.from_dict(key, data, self.storage_provider), keys
+        items = [item.to_dict() for item in ref.collection(self._items_collection).get()]
 
-    def push_feed(self, feed):
+        if not items:
+            items = data.get("items", [])
+
+        return Feed.from_data_and_items(key, data, items, self.storage_provider), keys
+
+    def push_feed(self, feed: Feed):
         self.db.collection(self.collection).document(feed.key).set(
             feed.to_dict()
         )
+        for updated_item in feed.updated_items:
+            self.db.collection(self.collection).document(feed.key)\
+                .collection(self._items_collection).document(str(updated_item.idx)).set(updated_item.to_dict())
+        feed.clear_updated_items()
 
     def add_feed_alias(self, key: str, alias_key: str):
         ref = self._get_feed_ref(key)

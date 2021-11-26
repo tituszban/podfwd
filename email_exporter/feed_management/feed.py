@@ -97,10 +97,23 @@ class Feed:
         self.block = block
         self.branding = branding
         self.feed_file_name = feed_file_name
+        self._updated_items = set({})
 
-    @staticmethod
-    def from_dict(key, data, storage_provider):
-        return Feed(
+    @classmethod
+    def from_data_and_items(cls, key, data, items, storage_provider):
+        return cls(
+            key=key,
+            items=list(map(Item.from_dict, items)),
+            bucket_name=data["bucket_name"],
+            bucket=storage_provider.get_bucket(data["bucket_name"]),
+            item_lifetime_days=data.get("item_lifetime_days", 7),
+            branding=Branding.from_dict(data.get("branding", {})),
+            feed_file_name=data.get("feed_file_name", DEFAULT_FEED_FILE_NAME)
+        )
+
+    @classmethod
+    def from_dict(cls, key, data, storage_provider):
+        return cls(
             key=key,
             items=list(map(Item.from_dict, data.get("items", []))),
             bucket_name=data["bucket_name"],
@@ -112,13 +125,19 @@ class Feed:
 
     def to_dict(self):
         return {
-            "items": [item.to_dict() for item in self.items],
             "bucket_name": self.bucket_name,
             "item_lifetime_days": self.item_lifetime_days,
             "block": self.block,
             "branding": self.branding.to_dict(),
             "feed_file_name": self.feed_file_name
         }
+
+    @property
+    def updated_items(self) -> list[Item]:
+        return list(filter(lambda item: item.idx in self._updated_items, self.items))
+
+    def clear_updated_items(self):
+        self._updated_items = set([])
 
     def add_item_bytes(self, title, description, date, sender, data):
         idx = self.next_id
@@ -131,6 +150,7 @@ class Feed:
         item = Item(title=title, description=description, date=date, idx=idx,
                     sender=sender, file_info=file_info, created_date=now)
         self.items.append(item)
+        self._updated_items.add(item.idx)
         return item
 
     def add_item_url(self, title, description, date, sender, url):
@@ -142,6 +162,7 @@ class Feed:
         item = Item(title=title, description=description, date=date, idx=idx,
                     sender=sender, file_info=file_info, created_date=now)
         self.items.append(item)
+        self._updated_items.add(item.idx)
         return item
 
     def add_item_file_path(self, title, description, date, sender, file_path):
@@ -155,6 +176,7 @@ class Feed:
         item = Item(title=title, description=description, date=date, idx=idx,
                     sender=sender, file_info=file_info, created_date=now)
         self.items.append(item)
+        self._updated_items.add(item.idx)
         return item
 
     def to_rss(self):
@@ -186,3 +208,4 @@ class Feed:
         for item in old_items:
             self.bucket.delete_blob(item.file_info.file_name)
             item.file_info.is_removed = True
+            self._updated_items.add(item.idx)
