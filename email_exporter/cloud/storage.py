@@ -1,12 +1,12 @@
 from __future__ import annotations
 from email_exporter.config import Config
-from google.cloud.storage import Client as StorageClient
+from google.cloud.storage import Client as StorageClient, Bucket
 from typing import Optional
 import io
 
 
 class Storage:
-    def __init__(self, bucket):
+    def __init__(self, bucket: Bucket):
         self._bucket = bucket
 
     @staticmethod
@@ -36,7 +36,8 @@ class Storage:
 
     def delete_blob(self, blob_name: str) -> None:
         blob = self._bucket.blob(blob_name)
-        blob.delete()
+        if blob.exists():
+            blob.delete()
 
 
 class StorageProvider:
