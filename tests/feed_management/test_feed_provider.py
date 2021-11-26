@@ -7,8 +7,11 @@ def test_get_feed_returns_from_collection():
     db_document = Mock()
     db_document.exists = True
     db_document.to_dict = MagicMock()
+    db_item_collection = Mock()
+    db_item_collection.get = MagicMock(return_value=[])
     db_document_client = Mock()
     db_document_client.get = MagicMock(return_value=db_document)
+    db_document_client.collection = MagicMock(return_value=db_item_collection)
     db_client = Mock()
     db_client.document = MagicMock(return_value=db_document_client)
     firestore_client = Mock()
@@ -62,8 +65,11 @@ def test_get_feed_called_again_returns_from_cache():
     db_document = Mock()
     db_document.exists = True
     db_document.to_dict = MagicMock()
+    db_item_collection = Mock()
+    db_item_collection.get = MagicMock(return_value=[])
     db_document_client = Mock()
     db_document_client.get = MagicMock(return_value=db_document)
+    db_document_client.collection = MagicMock(return_value=db_item_collection)
     db_client = Mock()
     db_client.document = MagicMock(return_value=db_document_client)
     firestore_client = Mock()
@@ -95,9 +101,12 @@ def _create_document(data, exists=True, id=Mock()):
     db_document.exists = exists
     db_document.to_dict = data
     db_document.id = id
+    db_item_collection = Mock()
+    db_item_collection.get = MagicMock(return_value=[])
     db_document_snapshot = Mock()
     db_document_snapshot.id = id
     db_document_snapshot.get = MagicMock(return_value=db_document)
+    db_document_snapshot.collection = MagicMock(return_value=db_item_collection)
     return db_document_snapshot
 
 
@@ -196,6 +205,7 @@ def test_push_feed_calls_collection_set():
     feed = Mock()
     feed.to_dict = MagicMock(return_value=feed_dict)
     feed.key = feed_name
+    feed.updated_items = []
 
     db_document_client = Mock()
     db_document_client.set = MagicMock()
@@ -228,8 +238,11 @@ def test_apply_feed_pushes_all_cached_feeds():
         db_document = Mock()
         db_document.exists = True
         db_document.to_dict = MagicMock()
+        db_item_collection = Mock()
+        db_item_collection.get = MagicMock(return_value=[])
         db_document_client = Mock()
         db_document_client.get = MagicMock(return_value=db_document)
+        db_document_client.collection = MagicMock(return_value=db_item_collection)
         documents[feed_name] = db_document_client
         return db_document_client
 
@@ -248,8 +261,9 @@ def test_apply_feed_pushes_all_cached_feeds():
     for feed_name in feed_names:
         feed_mock = Mock()
         feed_mock.key = feed_name
+        feed_mock.updated_items = []
         feeds[feed_name] = feed_mock
-        with patch("email_exporter.feed_management.feed.Feed.from_dict", MagicMock(return_value=feed_mock)):
+        with patch("email_exporter.feed_management.feed.Feed.from_data_and_items", MagicMock(return_value=feed_mock)):
             feed = sut.get_feed(feed_name)
         assert feed == feed_mock
 
@@ -271,8 +285,11 @@ def test_apply_feed_feed_throws_pushes_all_other_feeds():
         db_document = Mock()
         db_document.exists = True
         db_document.to_dict = MagicMock()
+        db_item_collection = Mock()
+        db_item_collection.get = MagicMock(return_value=[])
         db_document_client = Mock()
         db_document_client.get = MagicMock(return_value=db_document)
+        db_document_client.collection = MagicMock(return_value=db_item_collection)
         documents[feed_name] = db_document_client
         return db_document_client
 
@@ -292,10 +309,11 @@ def test_apply_feed_feed_throws_pushes_all_other_feeds():
     for feed_name in feed_names:
         feed_mock = Mock()
         feed_mock.key = feed_name
+        feed_mock.updated_items = []
         feeds[feed_name] = feed_mock
         if feed_name == exception_feed_name:
             feed_mock.update_rss = MagicMock(side_effect=Exception("Test"))
-        with patch("email_exporter.feed_management.feed.Feed.from_dict", MagicMock(return_value=feed_mock)):
+        with patch("email_exporter.feed_management.feed.Feed.from_data_and_items", MagicMock(return_value=feed_mock)):
             feed = sut.get_feed(feed_name)
         assert feed == feed_mock
 
@@ -317,8 +335,11 @@ def test_apply_feed_with_prune_prunes_all_feeds():
     db_document = Mock()
     db_document.exists = True
     db_document.to_dict = MagicMock()
+    db_item_collection = Mock()
+    db_item_collection.get = MagicMock(return_value=[])
     db_document_client = Mock()
     db_document_client.get = MagicMock(return_value=db_document)
+    db_document_client.collection = MagicMock(return_value=db_item_collection)
     db_client = Mock()
     db_client.document = MagicMock(return_value=db_document_client)
     firestore_client = Mock()
@@ -335,7 +356,7 @@ def test_apply_feed_with_prune_prunes_all_feeds():
         feed_mock = Mock()
         feeds[feed_name] = feed_mock
 
-        with patch("email_exporter.feed_management.feed.Feed.from_dict", MagicMock(return_value=feed_mock)):
+        with patch("email_exporter.feed_management.feed.Feed.from_data_and_items", MagicMock(return_value=feed_mock)):
             feed = sut.get_feed(feed_name)
         assert feed == feed_mock
 
@@ -351,8 +372,11 @@ def test_apply_feed_without_prune_doesnt_prune_feeds():
     db_document = Mock()
     db_document.exists = True
     db_document.to_dict = MagicMock()
+    db_item_collection = Mock()
+    db_item_collection.get = MagicMock(return_value=[])
     db_document_client = Mock()
     db_document_client.get = MagicMock(return_value=db_document)
+    db_document_client.collection = MagicMock(return_value=db_item_collection)
     db_client = Mock()
     db_client.document = MagicMock(return_value=db_document_client)
     firestore_client = Mock()
@@ -369,7 +393,7 @@ def test_apply_feed_without_prune_doesnt_prune_feeds():
         feed_mock = Mock()
         feeds[feed_name] = feed_mock
 
-        with patch("email_exporter.feed_management.feed.Feed.from_dict", MagicMock(return_value=feed_mock)):
+        with patch("email_exporter.feed_management.feed.Feed.from_data_and_items", MagicMock(return_value=feed_mock)):
             feed = sut.get_feed(feed_name)
         assert feed == feed_mock
 
@@ -386,8 +410,11 @@ def test_delete_logs_error_if_not_flushed():
 
     db_document = Mock()
     db_document.to_dict = MagicMock(return_value={})
+    db_item_collection = Mock()
+    db_item_collection.get = MagicMock(return_value=[])
     db_document_client = Mock()
     db_document_client.get = MagicMock(return_value=db_document)
+    db_document_client.collection = MagicMock(return_value=db_item_collection)
     db_client = Mock()
     db_client.document = MagicMock(return_value=db_document_client)
     firestore_client = Mock()
@@ -398,7 +425,7 @@ def test_delete_logs_error_if_not_flushed():
         Mock(), logger
     )
 
-    with patch("email_exporter.feed_management.feed.Feed.from_dict", Mock()):
+    with patch("email_exporter.feed_management.feed.Feed.from_data_and_items", Mock()):
         sut.get_feed(feed_name)
 
     logger.error.assert_not_called()

@@ -140,8 +140,6 @@ def test_feed_to_dict_converts_fields():
     sut = Feed.from_dict(feed_key, feed_data, Mock())
     result = sut.to_dict()
 
-    assert "items" in result
-    assert len(result["items"]) == 0
     assert "bucket_name" in result
     assert result["bucket_name"] == bucket_name
     assert "item_lifetime_days" in result
