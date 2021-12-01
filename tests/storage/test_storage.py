@@ -1,4 +1,4 @@
-from mock import Mock, MagicMock
+from mock import Mock
 from email_exporter.cloud.storage import Storage
 
 
