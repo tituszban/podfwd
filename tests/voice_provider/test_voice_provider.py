@@ -15,11 +15,11 @@ def test_get_voice_loads_documents():
     db_client = Mock()
     db_client.document = MagicMock(side_effect=_get_document)
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     owner = "item_owner"
     item = Mock()
@@ -42,11 +42,11 @@ def test_get_voice_no_data_returns_default():
     db_document = Mock()
     db_document.exists = False
     db_document_client = Mock()
-    db_document_client.get = MagicMock(return_value=db_document)
+    db_document_client.get.return_value = db_document
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     item = Mock()
     item.owner = "owner"
@@ -63,15 +63,15 @@ def _mock_firestore_client_with_voice_data(data):
     def _get_document(document):
         db_document = Mock()
         db_document.exists = document in data
-        db_document.to_dict = MagicMock(return_value=data[document] if document in data else {})
+        db_document.to_dict.return_value = data[document] if document in data else {}
         db_document_client = Mock()
-        db_document_client.get = MagicMock(return_value=db_document)
+        db_document_client.get.return_value = db_document
         return db_document_client
 
     db_client = Mock()
     db_client.document = MagicMock(side_effect=_get_document)
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
     return firestore_client
 
 

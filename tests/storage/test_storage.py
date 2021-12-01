@@ -5,7 +5,7 @@ from email_exporter.cloud.storage import Storage
 def test_from_client_and_name():
     bucket = Mock()
     client = Mock()
-    client.get_bucket = MagicMock(return_value=bucket)
+    client.get_bucket.return_value = bucket
 
     bucket_name = "bucket_name"
 
