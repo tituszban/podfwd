@@ -1,4 +1,4 @@
-from mock import Mock, MagicMock
+from mock import Mock
 from email_exporter.email_exporter import EmailExporter
 from email_exporter.parsers import ParsedItem
 
