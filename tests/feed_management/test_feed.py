@@ -184,7 +184,7 @@ def test_add_item_bytes_calls_bucket():
     raw_data = "raw_data_value"
     bucket = Mock()
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -206,9 +206,9 @@ def test_add_item_bytes_uses_bucket_url():
     raw_data = "raw_data_value"
     bucket_url = "bucket_url_value"
     bucket = Mock()
-    bucket.upload_bytes = MagicMock(return_value=bucket_url)
+    bucket.upload_bytes.return_value = bucket_url
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -360,7 +360,7 @@ def test_add_item_file_path_calls_bucket():
     file_path = f"path/to/file/{file_name}"
     bucket = Mock()
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -380,9 +380,9 @@ def test_add_item_file_path_uses_bucket_url():
     file_path = f"path/to/file/{file_name}"
     bucket_url = "bucket_url_value"
     bucket = Mock()
-    bucket.upload_from_file_path = MagicMock(return_value=bucket_url)
+    bucket.upload_from_file_path.return_value = bucket_url
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -478,7 +478,7 @@ def test_update_rss_uploads_to_bucket():
 
     bucket = Mock()
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -500,7 +500,7 @@ def test_update_rss_no_bucket_no_conversion():
     }
 
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=None)
+    storage_provider.get_bucket.return_value = None
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -532,7 +532,7 @@ def test_prune_calls_bucket_delete():
 
     bucket = Mock()
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -561,7 +561,7 @@ def test_prune_skips_files_within_lifetime():
 
     bucket = Mock()
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -593,7 +593,7 @@ def test_prune_skips_external_files():
 
     bucket = Mock()
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -625,7 +625,7 @@ def test_prune_skips_removed_files():
 
     bucket = Mock()
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -647,7 +647,7 @@ def test_add_item_url_marks_item_as_updated():
 
     bucket = Mock()
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -676,7 +676,7 @@ def test_prune_marks_pruned_item_as_updated():
 
     bucket = Mock()
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
@@ -699,7 +699,7 @@ def test_clear_updated_items_empties_updated_items():
 
     bucket = Mock()
     storage_provider = Mock()
-    storage_provider.get_bucket = MagicMock(return_value=bucket)
+    storage_provider.get_bucket.return_value = bucket
 
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 

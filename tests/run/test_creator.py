@@ -17,7 +17,7 @@ def test_export_inbox():
 
     deps = Mock()
     deps.get = MagicMock(side_effect=side_effect)
-    deps.add_override = MagicMock(return_value=deps)
+    deps.add_override.return_value = deps
 
     with patch("email_exporter.creator.run.Dependencies.default", MagicMock(return_value=deps)):
         export_inbox()

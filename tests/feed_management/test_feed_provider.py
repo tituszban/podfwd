@@ -8,19 +8,19 @@ def test_get_feed_returns_from_collection():
     db_document.exists = True
     db_document.to_dict = MagicMock()
     db_item_collection = Mock()
-    db_item_collection.get = MagicMock(return_value=[])
+    db_item_collection.get.return_value = []
     db_document_client = Mock()
-    db_document_client.get = MagicMock(return_value=db_document)
-    db_document_client.collection = MagicMock(return_value=db_item_collection)
+    db_document_client.get.return_value = db_document
+    db_document_client.collection.return_value = db_item_collection
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     feed_name = "feed_name"
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -41,16 +41,16 @@ def test_get_feed_document_doesnt_exist_throws():
     db_document.exists = False
     db_document.to_dict = MagicMock()
     db_document_client = Mock()
-    db_document_client.get = MagicMock(return_value=db_document)
+    db_document_client.get.return_value = db_document
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     feed_name = "feed_name"
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -66,19 +66,19 @@ def test_get_feed_called_again_returns_from_cache():
     db_document.exists = True
     db_document.to_dict = MagicMock()
     db_item_collection = Mock()
-    db_item_collection.get = MagicMock(return_value=[])
+    db_item_collection.get.return_value = []
     db_document_client = Mock()
-    db_document_client.get = MagicMock(return_value=db_document)
-    db_document_client.collection = MagicMock(return_value=db_item_collection)
+    db_document_client.get.return_value = db_document
+    db_document_client.collection.return_value = db_item_collection
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     feed_name = "feed_name"
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -99,31 +99,31 @@ def test_get_feed_called_again_returns_from_cache():
 def _create_document(data, exists=True, id=Mock()):
     db_document = Mock()
     db_document.exists = exists
-    db_document.to_dict = data
+    db_document.to_dict.return_value = data
     db_document.id = id
     db_item_collection = Mock()
-    db_item_collection.get = MagicMock(return_value=[])
+    db_item_collection.get.return_value = []
     db_document_snapshot = Mock()
     db_document_snapshot.id = id
-    db_document_snapshot.get = MagicMock(return_value=db_document)
-    db_document_snapshot.collection = MagicMock(return_value=db_item_collection)
+    db_document_snapshot.get.return_value = db_document
+    db_document_snapshot.collection.return_value = db_item_collection
     return db_document_snapshot
 
 
 def test_get_feed_alias_redirects_to_document():
     bucket_name = "bucket_name"
-    root_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}), id="root_doc")
-    alias_doc = _create_document(data=MagicMock(return_value={"alias": root_doc}), id="root_doc")
+    root_doc = _create_document({"bucket_name": bucket_name}, id="root_doc")
+    alias_doc = _create_document({"alias": root_doc}, id="root_doc")
 
     db_client = Mock()
-    db_client.document = MagicMock(return_value=alias_doc)
+    db_client.document.return_value = alias_doc
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     feed_name = "feed_name"
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -138,19 +138,19 @@ def test_get_feed_alias_redirects_to_document():
 
 def test_get_feed_nested_alias_redirects_to_document():
     bucket_name = "bucket_name"
-    root_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}))
-    alias1_doc = _create_document(data=MagicMock(return_value={"alias": root_doc}))
-    alias2_doc = _create_document(data=MagicMock(return_value={"alias": alias1_doc}))
+    root_doc = _create_document({"bucket_name": bucket_name})
+    alias1_doc = _create_document({"alias": root_doc})
+    alias2_doc = _create_document({"alias": alias1_doc})
 
     db_client = Mock()
-    db_client.document = MagicMock(return_value=alias2_doc)
+    db_client.document.return_value = alias2_doc
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     feed_name = "feed_name"
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -166,18 +166,18 @@ def test_get_feed_nested_alias_redirects_to_document():
 def test_get_feed_nested_alias_all_cached():
     bucket_name = "bucket_name"
     keys = ["root_doc", "alias1_doc", "alias2_doc"]
-    root_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}), id=keys[0])
-    alias1_doc = _create_document(data=MagicMock(return_value={"alias": root_doc}), id=keys[1])
-    alias2_doc = _create_document(data=MagicMock(return_value={"alias": alias1_doc}), id=keys[2])
+    root_doc = _create_document({"bucket_name": bucket_name}, id=keys[0])
+    alias1_doc = _create_document({"alias": root_doc}, id=keys[1])
+    alias2_doc = _create_document({"alias": alias1_doc}, id=keys[2])
 
     db_client = Mock()
-    db_client.document = MagicMock(return_value=alias2_doc)
+    db_client.document.return_value = alias2_doc
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -203,20 +203,20 @@ def test_push_feed_calls_document_set():
     feed_name = "feed_name"
     feed_dict = Mock()
     feed = Mock()
-    feed.to_dict = MagicMock(return_value=feed_dict)
+    feed.to_dict.return_value = feed_dict
     feed.key = feed_name
     feed.updated_items = []
 
     db_document_client = Mock()
     db_document_client.set = MagicMock()
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -235,29 +235,29 @@ def test_push_feed_calls_collection_set_for_updated_items():
     item_dict = {"id": item_id, "data": "hello"}
     item = Mock()
     item.idx = item_id
-    item.to_dict = MagicMock(return_value=item_dict)
+    item.to_dict.return_value = item_dict
 
     feed_name = "feed_name"
     feed_dict = Mock()
     feed = Mock()
-    feed.to_dict = MagicMock(return_value=feed_dict)
+    feed.to_dict.return_value = feed_dict
     feed.key = feed_name
     feed.updated_items = [item]
 
     db_item_document = Mock()
     db_item_collection = Mock()
-    db_item_collection.document = MagicMock(return_value=db_item_document)
+    db_item_collection.document.return_value = db_item_document
     db_document_client = Mock()
     db_document_client.set = MagicMock()
-    db_document_client.collection = MagicMock(return_value=db_item_collection)
+    db_document_client.collection.return_value = db_item_collection
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -280,17 +280,17 @@ def test_apply_feed_pushes_all_cached_feeds():
         db_document.exists = True
         db_document.to_dict = MagicMock()
         db_item_collection = Mock()
-        db_item_collection.get = MagicMock(return_value=[])
+        db_item_collection.get.return_value = []
         db_document_client = Mock()
-        db_document_client.get = MagicMock(return_value=db_document)
-        db_document_client.collection = MagicMock(return_value=db_item_collection)
+        db_document_client.get.return_value = db_document
+        db_document_client.collection.return_value = db_item_collection
         documents[feed_name] = db_document_client
         return db_document_client
 
     db_client = Mock()
     db_client.document = MagicMock(side_effect=document_client_provider)
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     feed_names = ["feed_name_1", "feed_name_2", "feed_name_3"]
 
@@ -327,17 +327,17 @@ def test_apply_feed_feed_throws_pushes_all_other_feeds():
         db_document.exists = True
         db_document.to_dict = MagicMock()
         db_item_collection = Mock()
-        db_item_collection.get = MagicMock(return_value=[])
+        db_item_collection.get.return_value = []
         db_document_client = Mock()
-        db_document_client.get = MagicMock(return_value=db_document)
-        db_document_client.collection = MagicMock(return_value=db_item_collection)
+        db_document_client.get.return_value = db_document
+        db_document_client.collection.return_value = db_item_collection
         documents[feed_name] = db_document_client
         return db_document_client
 
     db_client = Mock()
     db_client.document = MagicMock(side_effect=document_client_provider)
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     exception_feed_name = "exception_feed_name"
     feed_names = ["feed_name_1", exception_feed_name, "feed_name_2", "feed_name_3"]
@@ -377,14 +377,14 @@ def test_apply_feed_with_prune_prunes_all_feeds():
     db_document.exists = True
     db_document.to_dict = MagicMock()
     db_item_collection = Mock()
-    db_item_collection.get = MagicMock(return_value=[])
+    db_item_collection.get.return_value = []
     db_document_client = Mock()
-    db_document_client.get = MagicMock(return_value=db_document)
-    db_document_client.collection = MagicMock(return_value=db_item_collection)
+    db_document_client.get.return_value = db_document
+    db_document_client.collection.return_value = db_item_collection
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     feed_names = ["feed_name_1", "feed_name_2", "feed_name_3"]
 
@@ -414,14 +414,14 @@ def test_apply_feed_without_prune_doesnt_prune_feeds():
     db_document.exists = True
     db_document.to_dict = MagicMock()
     db_item_collection = Mock()
-    db_item_collection.get = MagicMock(return_value=[])
+    db_item_collection.get.return_value = []
     db_document_client = Mock()
-    db_document_client.get = MagicMock(return_value=db_document)
-    db_document_client.collection = MagicMock(return_value=db_item_collection)
+    db_document_client.get.return_value = db_document
+    db_document_client.collection.return_value = db_item_collection
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     feed_names = ["feed_name_1", "feed_name_2", "feed_name_3"]
 
@@ -450,16 +450,16 @@ def test_delete_logs_error_if_not_flushed():
     feed_name = "feed_name"
 
     db_document = Mock()
-    db_document.to_dict = MagicMock(return_value={})
+    db_document.to_dict.return_value = {}
     db_item_collection = Mock()
-    db_item_collection.get = MagicMock(return_value=[])
+    db_item_collection.get.return_value = []
     db_document_client = Mock()
-    db_document_client.get = MagicMock(return_value=db_document)
-    db_document_client.collection = MagicMock(return_value=db_item_collection)
+    db_document_client.get.return_value = db_document
+    db_document_client.collection.return_value = db_item_collection
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     sut = FeedProvider(
         Mock(), firestore_client,
@@ -480,8 +480,8 @@ def test_add_feed_alias_created():
     feed_name = "feed_name"
     alias_name = "alias_name"
     bucket_name = "bucket_name"
-    feed_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}))
-    alias_doc = _create_document(data=Mock(), exists=False)
+    feed_doc = _create_document({"bucket_name": bucket_name})
+    alias_doc = _create_document(None, exists=False)
 
     def get_document(key):
         if key == feed_name:
@@ -493,11 +493,11 @@ def test_add_feed_alias_created():
     db_client = Mock()
     db_client.document = MagicMock(side_effect=get_document)
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -513,8 +513,8 @@ def test_add_feed_alias_key_exists_throws():
     feed_name = "feed_name"
     alias_name = "alias_name"
     bucket_name = "bucket_name"
-    feed_doc = _create_document(data=Mock(return_value={"bucket_name": bucket_name}))
-    alias_doc = _create_document(data=Mock(), exists=True)
+    feed_doc = _create_document({"bucket_name": bucket_name})
+    alias_doc = _create_document(None, exists=True)
 
     def get_document(key):
         if key == feed_name:
@@ -526,11 +526,11 @@ def test_add_feed_alias_key_exists_throws():
     db_client = Mock()
     db_client.document = MagicMock(side_effect=get_document)
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -547,24 +547,24 @@ def test_get_feed_uses_items_if_no_collection():
 
     db_document = Mock()
     db_document.exists = True
-    db_document.to_dict = MagicMock(return_value={
+    db_document.to_dict.return_value = {
         "bucket_name": bucket_name,
         "items": [{"id": item_idx}]
-    })
+    }
     db_item_collection = Mock()
-    db_item_collection.get = MagicMock(return_value=[])
+    db_item_collection.get.return_value = []
     db_document_client = Mock()
-    db_document_client.get = MagicMock(return_value=db_document)
-    db_document_client.collection = MagicMock(return_value=db_item_collection)
+    db_document_client.get.return_value = db_document
+    db_document_client.collection.return_value = db_item_collection
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     feed_name = "feed_name"
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,
@@ -584,21 +584,21 @@ def test_get_feed_uses_collection_for_items():
     db_document.exists = True
     db_document.to_dict = MagicMock()
     db_item = Mock()
-    db_item.to_dict = MagicMock(return_value={"id": item_idx})
+    db_item.to_dict.return_value = {"id": item_idx}
     db_item_collection = Mock()
-    db_item_collection.get = MagicMock(return_value=[db_item])
+    db_item_collection.get.return_value = [db_item]
     db_document_client = Mock()
-    db_document_client.get = MagicMock(return_value=db_document)
-    db_document_client.collection = MagicMock(return_value=db_item_collection)
+    db_document_client.get.return_value = db_document
+    db_document_client.collection.return_value = db_item_collection
     db_client = Mock()
-    db_client.document = MagicMock(return_value=db_document_client)
+    db_client.document.return_value = db_document_client
     firestore_client = Mock()
-    firestore_client.collection = MagicMock(return_value=db_client)
+    firestore_client.collection.return_value = db_client
 
     feed_name = "feed_name"
     collection_name = "collection_name"
     config = Mock()
-    config.get = MagicMock(return_value=collection_name)
+    config.get.return_value = collection_name
 
     sut = FeedProvider(
         config, firestore_client,

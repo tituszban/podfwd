@@ -1,11 +1,11 @@
-from mock import Mock, MagicMock
+from mock import Mock
 from email_exporter.email_exporter import EmailExporter
 from email_exporter.parsers import ParsedItem
 
 
 def test_email_exporter_message_handler_returns_true_if_feed_is_None():
     feed_provider = Mock()
-    feed_provider.get_feed = MagicMock(return_value=None)
+    feed_provider.get_feed.return_value = None
     parser_selector = Mock()
 
     sut = EmailExporter(
@@ -27,7 +27,7 @@ def test_email_exporter_message_handler_returns_false_if_feed_bucket_is_None():
     feed = Mock()
     feed.bucket = None
     feed_provider = Mock()
-    feed_provider.get_feed = MagicMock(return_value=feed)
+    feed_provider.get_feed.return_value = feed
     parser_selector = Mock()
 
     sut = EmailExporter(
@@ -50,22 +50,22 @@ def test_email_exporter_message_handler_calls_dependencies():
     feed.bucket = Mock()
     feed.add_item_bytes = Mock()
     feed_provider = Mock()
-    feed_provider.get_feed = MagicMock(return_value=feed)
+    feed_provider.get_feed.return_value = feed
 
     ssml = "ssml"
     description = ["description1", "description2"]
     parser = Mock()
-    parser.parse = MagicMock(return_value=(ParsedItem(ssml, description)))
+    parser.parse.return_value = (ParsedItem(ssml, description))
     parser_selector = Mock()
-    parser_selector.get_parser = MagicMock(return_value=parser)
+    parser_selector.get_parser.return_value = parser
 
     voice = "voice"
     voice_provider = Mock()
-    voice_provider.get_voice = MagicMock(return_value=voice)
+    voice_provider.get_voice.return_value = voice
 
     sound_data = "sound_data"
     t2s = Mock()
-    t2s.lines_to_speech = MagicMock(return_value=sound_data)
+    t2s.lines_to_speech.return_value = sound_data
 
     sut = EmailExporter(
         Mock(), feed_provider, t2s, parser_selector, Mock(), voice_provider)
