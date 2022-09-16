@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import re
-from typing import NewType, Optional
+from typing import NewType, Optional, Union
 
 SsmlStr = NewType("SsmlStr", str)
 
@@ -12,6 +12,32 @@ class SsmlTagABC(ABC):
     @abstractmethod
     def to_string(self) -> SsmlStr:
         raise NotImplementedError()
+
+    def replace_text(self, text: str, tags: list["SsmlTagABC"]) -> "SsmlTagABC":
+        raise NotImplementedError()
+
+
+class TagArray(SsmlTagABC):
+    def __init__(self, content: list[SsmlTagABC]) -> None:
+        self._content = content
+
+    def to_string(self) -> SsmlStr:
+        return SsmlStr('\n'.join(map(lambda c: c.to_string(), self._content)))
+
+    @classmethod
+    def from_array_or_list(cls, tag_array_or_list: "TagArrayOrList") -> Optional["TagArray"]:
+        if tag_array_or_list is None:
+            return None
+        if isinstance(tag_array_or_list, TagArray):
+            return tag_array_or_list
+        if isinstance(tag_array_or_list, SsmlTagABC):
+            return TagArray([tag_array_or_list])
+        if isinstance(tag_array_or_list, list):
+            return TagArray(tag_array_or_list)
+        raise TypeError(f"Invalid type for tag, array or list: {type(tag_array_or_list)}")
+
+
+TagArrayOrList = Union[Optional[SsmlTagABC], Optional[TagArray], list[SsmlTagABC]]
 
 
 class RawText(SsmlTagABC):
@@ -26,17 +52,17 @@ class RawText(SsmlTagABC):
 
 
 class SsmlTag(SsmlTagABC):
-    def __init__(self, content: list[SsmlTagABC], tag_name: str, tag_args: dict[str, Optional[str]]):
-        self._content = content
+    def __init__(self, content: TagArrayOrList, tag_name: str, tag_args: dict[str, Optional[str]]):
+        self._content = TagArray.from_array_or_list(content)
         self._tag_name = tag_name
         self._tag_args = tag_args
 
     def to_string(self) -> SsmlStr:
-        if len(self._content) > 0:
+        if self._content:
             return SsmlStr("<{tag} {args}>{content}</{tag}".format(
                 tag=self._tag_name,
                 args=' '.join(f'{key}="{value}"' for key, value in self._tag_args.items() if value),
-                content='\n'.join(map(lambda c: c.to_string(), self._content))
+                content=self._content.to_string()
             ))
 
         return SsmlStr("<{tag} {args} />".format(
@@ -46,7 +72,7 @@ class SsmlTag(SsmlTagABC):
 
 
 class Speak(SsmlTag):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "speak", {})
 
 
@@ -81,18 +107,18 @@ class SayAs(SsmlTag):
         "time"
     )
 
-    def __init__(self, content: list[SsmlTagABC], interpret_as: str, addtional_args: dict[str, Optional[str]] = {}):
+    def __init__(self, content: TagArrayOrList, interpret_as: str, addtional_args: dict[str, Optional[str]] = {}):
         assert interpret_as in self.VALID_INTERPRET_AS, "Invalid interpret_as"
         super().__init__(content, "say-as", {"interpret-as": interpret_as, **addtional_args})
 
 
 class SayAsCurrency(SayAs):
-    def __init__(self, content: list[SsmlTagABC], *, language: str):
+    def __init__(self, content: TagArrayOrList, *, language: str):
         super().__init__(content, "currency", {"language": language})
 
 
 class SayAsTelephone(SayAs):
-    def __init__(self, content: list[SsmlTagABC], *, format: Optional[str] = None, style: Optional[str] = None):
+    def __init__(self, content: TagArrayOrList, *, format: Optional[str] = None, style: Optional[str] = None):
         super().__init__(content, "telephone", {
             "format": format,
             "google:style": style,
@@ -100,47 +126,47 @@ class SayAsTelephone(SayAs):
 
 
 class SayAsVerbatim(SayAs):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "verbatim")
 
 
 class SayAsDate(SayAs):
-    def __init__(self, content: list[SsmlTagABC], *, format: str, detail: str):
+    def __init__(self, content: TagArrayOrList, *, format: str, detail: str):
         super().__init__(content, "date", {"format": format, "detail": detail})
 
 
 class SayAsCharacters(SayAs):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "characters")
 
 
 class SayAsCardinal(SayAs):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "cardinal")
 
 
 class SayAsOrdinal(SayAs):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "ordinal")
 
 
 class SayAsFraction(SayAs):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "fraction")
 
 
 class SayAsExpletive(SayAs):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "expletive")
 
 
 class SayAsUnit(SayAs):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "unit")
 
 
 class SayAsTime(SayAs):
-    def __init__(self, content: list[SsmlTagABC], *, format: str):
+    def __init__(self, content: TagArrayOrList, *, format: str):
         super().__init__(content, "time", {"format": format})
 
 
@@ -175,17 +201,17 @@ class Audio(SsmlTag):
 
 
 class P(SsmlTag):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "p", {})
 
 
 class S(SsmlTag):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "s", {})
 
 
 class Sub(SsmlTag):
-    def __init__(self, content: list[SsmlTagABC], *, alias: str):
+    def __init__(self, content: TagArrayOrList, *, alias: str):
         super().__init__(content, "sub", {"alias": alias})
 
 
@@ -202,7 +228,7 @@ class Prosody(SsmlTag):
     }
 
     def __init__(self,
-                 content: list[SsmlTagABC],
+                 content: TagArrayOrList,
                  *,
                  rate: Optional[str] = None,
                  volume: Optional[str] = None,
@@ -231,7 +257,7 @@ class Emphasis(SsmlTag):
         "strong", "moderate", "none", "reduced"
     ]
 
-    def __init__(self, content: list[SsmlTagABC], *, level: str):
+    def __init__(self, content: TagArrayOrList, *, level: str):
         if level not in self.VALID_EMPHASIS_ATTRIBUTES:
             raise ValueError("Invalid emphasis level")
 
@@ -239,12 +265,12 @@ class Emphasis(SsmlTag):
 
 
 class Par(SsmlTag):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "par", {})
 
 
 class Seq(SsmlTag):
-    def __init__(self, content: list[SsmlTagABC]):
+    def __init__(self, content: TagArrayOrList):
         super().__init__(content, "seq", {})
 
 
@@ -277,7 +303,7 @@ class Media(SsmlTag):
 class Phoneme(SsmlTag):
     SUPPORTED_PHONETIC_ALPHABETS = ["ipa", "x-sampa"]
 
-    def __init__(self, content: list[SsmlTagABC], *, alphabet: str, ph: str):
+    def __init__(self, content: TagArrayOrList, *, alphabet: str, ph: str):
         assert alphabet in self.SUPPORTED_PHONETIC_ALPHABETS, "Unsupported phonetic alphabet"
         super().__init__(content, "phoneme", {
             "alphabet": alphabet,
@@ -287,7 +313,7 @@ class Phoneme(SsmlTag):
 
 class Voice(SsmlTag):
     def __init__(self,
-                 content: list[SsmlTagABC],
+                 content: TagArrayOrList,
                  *,
                  name: Optional[str] = None,
                  language: Optional[str] = None,
@@ -312,7 +338,7 @@ class Voice(SsmlTag):
 
 
 class Lang(SsmlTag):
-    def __init__(self, content: list[SsmlTagABC], *, lang: str):
+    def __init__(self, content: TagArrayOrList, *, lang: str):
         # TODO: assert lang is BCP-47 lang
         super().__init__(content, "lang", {
             "xml:lang": lang
@@ -320,20 +346,20 @@ class Lang(SsmlTag):
 
 
 class PS(P):
-    def __init__(self, content: list[SsmlTagABC]):
-        super().__init__([S(content)])
+    def __init__(self, content: TagArrayOrList):
+        super().__init__(S(content))
 
 
 class PSText(PS):
     def __init__(self, content: str):
-        super().__init__([RawText(content)])
+        super().__init__(RawText(content))
 
 
 class PText(P):
     def __init__(self, content: str):
-        super().__init__([RawText(content)])
+        super().__init__(RawText(content))
 
 
 class SText(S):
     def __init__(self, content: str):
-        super().__init__([RawText(content)])
+        super().__init__(RawText(content))
