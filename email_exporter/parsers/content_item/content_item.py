@@ -1,10 +1,12 @@
+from email_exporter.inbox import InboxItem
+from .content_item_abc import ContentItemABC
 from . import generic
 from . import substack
 from . import tc
 
 
 class ContentItem:
-    content_items = [
+    content_items: list[type[ContentItemABC]] = [
         *tc.items,
         *substack.items,
         *generic.items
@@ -19,5 +21,5 @@ class ContentItem:
 
     class Special:
         @staticmethod
-        def to_tc_header(component, inbox_item):
+        def to_tc_header(component, inbox_item: InboxItem):
             return tc.Header(component, ContentItem.to_item, inbox_item)

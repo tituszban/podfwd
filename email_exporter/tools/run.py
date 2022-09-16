@@ -2,7 +2,7 @@ from typing import Optional
 from ..shared import Dependencies
 from firebase_admin import firestore
 from ..feed_management import Feed, FeedProvider
-from ..cloud import StorageProvider
+from ..cloud import StorageProvider, TextToSpeech
 
 import uuid
 
@@ -73,3 +73,37 @@ def add_feed_alias():
     feed_provider = deps.get(FeedProvider)
 
     feed_provider.add_feed_alias("SYhLtwlSg98XUBhaPUtB", "tituszban")
+
+
+def pronounce():
+    text = """
+<speak>
+    <break time="750ms"></break>
+    <p>
+        <s>What is Data Engineering? Part 1.</s>
+    </p>
+    <break time="500ms"></break>
+    <p>
+        <s>A broad overview of the data engineering field by former Facebook data engineer Benjamin Rogojan. Part 1.</s>
+    </p>
+    <p>
+        <phoneme alphabet="x-sampa" ph="gergeI">Gergely</phoneme>
+        <phoneme alphabet="x-sampa" ph="Or\\:\\os">Orosz</phoneme> Sep 13</p>
+    <break time="500ms"></break>
+    <p>
+        👋 Hi, this is <phoneme alphabet="x-sampa" ph="gergeI">Gergely</phoneme> with a free issue
+        of the Pragmatic Engineer Newsletter.
+        Today we cover Part 1 of \'What is Data Engineering.\' To get a similarly in-depth article every week,
+        subscribe here 👇
+    </p>
+</speak>
+    """.replace("    ", "").replace("\n", "")
+
+    deps = Dependencies.default()
+
+    t2s = deps.get(TextToSpeech)
+
+    sound_bytes = t2s.t2s(text, voice="en-GB-Wavenet-B")
+
+    with open("sample.mp3", "wb") as f:
+        f.write(sound_bytes)

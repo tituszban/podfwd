@@ -1,5 +1,5 @@
 from ..content_item_abc import ContentItemABC
-from ... import speech_item
+from ssml import tags
 from ... import description_item
 
 
@@ -14,9 +14,9 @@ class Header(ContentItemABC):
     def get_ssml(self):
 
         return [
-            speech_item.Paragraph(self._title),
-            speech_item.Paragraph(self._author),
-            speech_item.Pause("750ms")
+            tags.PText(self._title),
+            tags.PText(self._author),
+            tags.Break(time="750ms")
         ]
 
     def get_description(self):

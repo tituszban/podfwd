@@ -8,7 +8,7 @@ class InboxItem:
                  date: str,
                  html: str,
                  mime: str,
-                 soup: Union[BeautifulSoup, None],
+                 soup: BeautifulSoup,
                  addresses: Tuple[str, Union[str, None]]):
         self.title = subject
         self.date = date
@@ -16,7 +16,7 @@ class InboxItem:
         self.mime = mime
         self.soup = soup
         self.owner = addresses[0]
-        self.sender = addresses[1]
+        self.sender: str = addresses[1] or ""
 
     def __repr__(self):
         return f"InboxItem({self.title}, {self.date}, from={self.sender}, to={self.owner})"

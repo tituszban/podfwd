@@ -1,1 +1,2 @@
-from .content_item import ContentItem           # noqa: F401
+from .content_item import ContentItem
+from .content_item_abc import ContentItemABC

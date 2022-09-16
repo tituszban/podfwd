@@ -1,6 +1,6 @@
 from .parser_abc import ParserABC
 # from .content_item import ContentItem
-from ssml_builder.core import Speech
+from ssml import SpeechBuilder
 # import bleach
 # from bs4 import BeautifulSoup
 from functools import reduce
@@ -43,7 +43,7 @@ class GeneralParser(ParserABC):
 
     def _to_ssms(self, lines, headers):
         def build_speech(_lines):
-            speech = Speech()
+            speech = SpeechBuilder()
             for line in _lines:
                 if line in headers:
                     speech.pause(time="1.5s")
@@ -54,14 +54,14 @@ class GeneralParser(ParserABC):
 
         last_built = 0
         for i, line in enumerate(lines):
-            speech = build_speech(lines[last_built:i+1])
+            speech = build_speech(lines[last_built:i + 1])
             if len(speech.speak()) > self.speech_limit:
                 if last_built == i - 1:
                     raise Exception("Single section too long")
 
-                yield build_speech(lines[last_built:i]).speak()
+                yield build_speech(lines[last_built:i]).speak().to_string()
                 last_built = i
-        yield build_speech(lines[last_built:]).speak()
+        yield build_speech(lines[last_built:]).speak().to_string()
 
     def parse(self, content_item):
         assert content_item.soup is not None

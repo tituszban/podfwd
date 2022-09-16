@@ -1,5 +1,5 @@
 from ..content_item_abc import ContentItemABC
-from ... import speech_item
+from ssml import tags
 from ..util import get_text_content
 from ... import description_item
 
@@ -8,7 +8,7 @@ class List(ContentItemABC):
 
     def get_ssml(self):
         return [
-            speech_item.Paragraph(get_text_content(component))
+            tags.PText(get_text_content(component))
             for component in self._component.contents
             if component != "\n"
         ]

@@ -1,6 +1,7 @@
 from email_exporter.config import Config
 from email_exporter.feed_management import FeedProvider
 from email_exporter.cloud import TextToSpeech
+from email_exporter.inbox import InboxItem
 from email_exporter.parsers import ParserSelector
 from email_exporter.voice_provider import VoiceProvider
 from logging import Logger
@@ -22,7 +23,7 @@ class EmailExporter:
         self._logger = logger
         self._voice_provider = voice_provider
 
-    def message_handler(self, inbox_item):
+    def message_handler(self, inbox_item: InboxItem):
         self._logger.info(f"Handling message: {inbox_item}")
         feed = self._feed_provider.get_feed(inbox_item.owner)
 

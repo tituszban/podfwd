@@ -50,7 +50,9 @@ pytest-coverage:
     - coverage xml
   artifacts:
     reports:
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
   allow_failure: true
 
 build:

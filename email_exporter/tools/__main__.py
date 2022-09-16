@@ -1,4 +1,4 @@
-from . import add_feed_alias
+from . import pronounce
 
 if __name__ == "__main__":
-    add_feed_alias()
+    pronounce()

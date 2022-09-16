@@ -1,6 +1,6 @@
 from ..content_item_abc import ContentItemABC
 import re
-from ... import speech_item
+from ssml import tags
 from ... import description_item
 
 
@@ -8,8 +8,8 @@ class Author(ContentItemABC):
 
     def get_ssml(self):
         return [
-            speech_item.Paragraph(self._get_text_content()),
-            speech_item.Pause("500ms")
+            tags.PText(self._get_text_content()),
+            tags.Break(time="500ms")
         ]
 
     def get_description(self):
