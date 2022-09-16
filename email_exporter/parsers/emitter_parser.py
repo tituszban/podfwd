@@ -1,3 +1,7 @@
+from email_exporter.inbox import InboxItem
+from .speech_item import SpeechItemABC
+from .content_item import ContentItemABC
+from .item_emitter import ItemEmitter
 from .parser_abc import ParserABC
 from functools import reduce
 from ssml_builder.core import Speech
@@ -5,16 +9,17 @@ from .parsed_item import ParsedItem
 
 
 class EmitterParser(ParserABC):
-    def __init__(self, logger, emitter):
+    def __init__(self, logger, emitter: ItemEmitter):
         self._logger = logger
         self._emitter = emitter
         self.speech_limit = 5000
-        self.description_limit = 4000
+        self.description_limit = 400000
 
-    def _speech_items_to_ssml(self, content_items):
-        speech_items = reduce(lambda arr, item: [*arr, *item.get_ssml()], content_items, [])
+    def _speech_items_to_ssml(self, content_items: list[ContentItemABC]):
+        speech_items: list[SpeechItemABC] = reduce(
+            lambda arr, item: [*arr, *item.get_ssml()], content_items, [])
 
-        def convert(_speech_items):
+        def convert(_speech_items: list[SpeechItemABC]):
             speech = Speech()
             for item in _speech_items:
                 item.add_to_speech(speech)
@@ -30,7 +35,7 @@ class EmitterParser(ParserABC):
             yield convert(speech_items[i:j-1])
             i = j-1
 
-    def _content_items_to_description(self, content_items, content_type_to_remove):
+    def _content_items_to_description(self, content_items: list[ContentItemABC], content_type_to_remove: set[str]):
         return [
             description
             for item in content_items
@@ -67,7 +72,7 @@ class EmitterParser(ParserABC):
 
         return [title]
 
-    def parse(self, inbox_item):
+    def parse(self, inbox_item: InboxItem):
         assert inbox_item.soup is not None, "Soup not provided"
 
         self._logger.info(f"Getting items for {inbox_item}")

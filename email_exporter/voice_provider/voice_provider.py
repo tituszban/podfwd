@@ -2,6 +2,8 @@ from email_exporter.config import Config
 from logging import Logger
 from firebase_admin.firestore import Client as FirestoreClient
 
+from email_exporter.inbox import InboxItem
+
 VOICE_DEFAULT = "en-US-Wavenet-A"
 GLOBAL_DOCUMENT = "global"
 GLOBAL_DOMAIN = "global"
@@ -17,7 +19,7 @@ class VoiceProvider:
         self._logger = logger
         self._db = firestore_client
 
-    def get_voice(self, item):
+    def get_voice(self, item: InboxItem):
         self._logger.info(f"Selecting voide for {item}")
         owner = item.owner
         sender = item.sender
@@ -44,33 +46,33 @@ class VoiceProvider:
 
         return voice
 
-    def _match_source(self, sources, item, default=VOICE_DEFAULT):
+    def _match_source(self, sources: list[dict[str, list[dict]]], item: InboxItem, default: str = VOICE_DEFAULT) -> str:
         for source in sources:
             for voice, criteria in source.items():
                 if self._match_criteria(criteria, item):
                     return voice
         return default
 
-    def _match_criteria(self, criteria, item):
+    def _match_criteria(self, criteria: list[dict], item: InboxItem):
         for rule in criteria:
             if all([self._match_rule(key, value, item) for key, value in rule.items()]):
                 return True
         return False
 
-    def _match_rule(self, key, value, item):
-        def rule_always(value, _item):
+    def _match_rule(self, key: str, value: str, item: InboxItem):
+        def rule_always(value: str, _item: InboxItem):
             return bool(value)
 
-        def rule_sender(value, _item):
+        def rule_sender(value: str, _item: InboxItem):
             return _item.sender.split("@")[0] == value
 
-        def rule_sender_contains(value, _item):
+        def rule_sender_contains(value: str, _item: InboxItem):
             return value in _item.sender.split("@")[0]
 
-        def rule_subject_contains(value, _item):
+        def rule_subject_contains(value: str, _item: InboxItem):
             return value in _item.title.lower()
 
-        def rule_default(value, _item):
+        def rule_default(value: str, _item: InboxItem):
             self._logger.error(f"Unknown voice provider rule: '{value}'")
             return False
 

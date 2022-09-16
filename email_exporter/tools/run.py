@@ -2,7 +2,7 @@ from typing import Optional
 from ..shared import Dependencies
 from firebase_admin import firestore
 from ..feed_management import Feed, FeedProvider
-from ..cloud import StorageProvider
+from ..cloud import StorageProvider, TextToSpeech
 
 import uuid
 
@@ -73,3 +73,21 @@ def add_feed_alias():
     feed_provider = deps.get(FeedProvider)
 
     feed_provider.add_feed_alias("SYhLtwlSg98XUBhaPUtB", "tituszban")
+
+
+def pronounce():
+    text = """
+<speak>
+    <phoneme alphabet=\"x-samba\" ph=\"gergeI\">Gergely</phoneme>
+    <phoneme alphabet=\"x-samba\" ph=\"Or\\:\\os\">Orosz</phoneme>
+</speak>
+    """
+
+    deps = Dependencies.default()
+
+    t2s = deps.get(TextToSpeech)
+
+    sound_bytes = t2s.t2s(text)
+
+    with open("sample.mp3", "wb") as f:
+        f.write(sound_bytes)

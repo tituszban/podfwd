@@ -1,1 +1,1 @@
-from .tc_parser import TcParser, TcItemEmitter      # noqa: F401
+from .tc_parser import TcItemEmitter      # noqa: F401
