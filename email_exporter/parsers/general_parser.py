@@ -1,6 +1,6 @@
 from .parser_abc import ParserABC
 # from .content_item import ContentItem
-from ssml_builder import SpeechBuilder
+from ssml import SpeechBuilder
 # import bleach
 # from bs4 import BeautifulSoup
 from functools import reduce

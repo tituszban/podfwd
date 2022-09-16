@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ssml_builder import SpeechBuilder
+from ssml import SpeechBuilder
 
 
 class SpeechItemABC(ABC):

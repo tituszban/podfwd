@@ -45,17 +45,17 @@ class SsmlTag(SsmlTagABC):
         )
 
 
-class SpeakTag(SsmlTag):
+class Speak(SsmlTag):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "speak", {})
 
 
-class EmptyTag(SsmlTag):
+class Empty(SsmlTag):
     def __init__(self, tag_name: str, tag_args: dict[str, str]):
         super().__init__([], tag_name, tag_args)
 
 
-class BreakTag(EmptyTag):
+class Break(Empty):
     def __init__(self, time: Optional[str] = None, strength: Optional[str] = None):
         assert time or strength, "Either time or strength must be set"
         super().__init__("break", {
@@ -64,7 +64,7 @@ class BreakTag(EmptyTag):
         })
 
 
-class SayAsTag(SsmlTag):
+class SayAs(SsmlTag):
     VALID_INTERPRET_AS = (
         "currency",
         "telephone",
@@ -86,12 +86,12 @@ class SayAsTag(SsmlTag):
         super().__init__(content, "say-as", {"interpret-as": interpret_as, **addtional_args})
 
 
-class SayAsCurrency(SayAsTag):
+class SayAsCurrency(SayAs):
     def __init__(self, content: list[SsmlTagABC], language: str):
         super().__init__(content, "currency", {"language": language})
 
 
-class SayAsTelephone(SayAsTag):
+class SayAsTelephone(SayAs):
     def __init__(self, content: list[SsmlTagABC], format: Optional[str] = None, style: Optional[str] = None):
         super().__init__(content, "telephone", {
             "format": format,
@@ -99,52 +99,52 @@ class SayAsTelephone(SayAsTag):
         })
 
 
-class SayAsVerbatim(SayAsTag):
+class SayAsVerbatim(SayAs):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "verbatim")
 
 
-class SayAsDate(SayAsTag):
+class SayAsDate(SayAs):
     def __init__(self, content: list[SsmlTagABC], format: str, detail: str):
         super().__init__(content, "date", {"format": format, "detail": detail})
 
 
-class SayAsCharacters(SayAsTag):
+class SayAsCharacters(SayAs):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "characters")
 
 
-class SayAsCardinal(SayAsTag):
+class SayAsCardinal(SayAs):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "cardinal")
 
 
-class SayAsOrdinal(SayAsTag):
+class SayAsOrdinal(SayAs):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "ordinal")
 
 
-class SayAsFraction(SayAsTag):
+class SayAsFraction(SayAs):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "fraction")
 
 
-class SayAsExpletive(SayAsTag):
+class SayAsExpletive(SayAs):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "expletive")
 
 
-class SayAsUnit(SayAsTag):
+class SayAsUnit(SayAs):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "unit")
 
 
-class SayAsTime(SayAsTag):
+class SayAsTime(SayAs):
     def __init__(self, content: list[SsmlTagABC], format: str):
         super().__init__(content, "time", {"format": format})
 
 
-class AudioTag(SsmlTag):
+class Audio(SsmlTag):
     def __init__(self,
                  src: str,
                  description: Optional[str] = None,
@@ -173,27 +173,27 @@ class AudioTag(SsmlTag):
         )
 
 
-class PTag(SsmlTag):
+class P(SsmlTag):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "p", {})
 
 
-class STag(SsmlTag):
+class S(SsmlTag):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "s", {})
 
 
-class SubTag(SsmlTag):
+class Sub(SsmlTag):
     def __init__(self, content: list[SsmlTagABC], alias: str):
         super().__init__(content, "sub", {"alias": alias})
 
 
-class MarkTag(EmptyTag):
+class Mark(Empty):
     def __init__(self, name: str):
         super().__init__("mark", {"name": name})
 
 
-class ProsodyTag(SsmlTag):
+class Prosody(SsmlTag):
     VALID_PROSODY_ATTRIBUTES = {
         'rate': ('x-slow', 'slow', 'medium', 'fast', 'x-fast'),
         'pitch': ('x-low', 'low', 'medium', 'high', 'x-high'),
@@ -220,7 +220,7 @@ class ProsodyTag(SsmlTag):
         })
 
 
-class EmphasisTag(SsmlTag):
+class Emphasis(SsmlTag):
     VALID_EMPHASIS_ATTRIBUTES = [
         "strong", "moderate", "none", "reduced"
     ]
@@ -232,17 +232,17 @@ class EmphasisTag(SsmlTag):
         super().__init__(content, "emphasis", {"level": level})
 
 
-class ParTag(SsmlTag):
+class Par(SsmlTag):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "par", {})
 
 
-class SeqTag(SsmlTag):
+class Seq(SsmlTag):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__(content, "seq", {})
 
 
-class MediaTag(SsmlTag):
+class Media(SsmlTag):
     def __init__(self,
                  media_content: SsmlTagABC,
                  xml_id: Optional[str] = None,
@@ -253,8 +253,8 @@ class MediaTag(SsmlTag):
                  sound_level: Optional[str] = None,
                  fade_in_dur: Optional[str] = None,
                  fade_out_dur: Optional[str] = None):
-        assert isinstance(media_content, AudioTag) or isinstance(
-            media_content, SpeakTag), "Only audio and speak tags are allowed in media"
+        assert isinstance(media_content, Audio) or isinstance(
+            media_content, Speak), "Only audio and speak tags are allowed in media"
         super().__init__([media_content], "media", {
             "xml:id": xml_id,
             "begin": begin,
@@ -267,7 +267,7 @@ class MediaTag(SsmlTag):
         })
 
 
-class PhonemeTag(SsmlTag):
+class Phoneme(SsmlTag):
     SUPPORTED_PHONETIC_ALPHABETS = ["ipa", "x-sampa"]
 
     def __init__(self, content: list[SsmlTagABC], alphabet: str, ph: str):
@@ -278,7 +278,7 @@ class PhonemeTag(SsmlTag):
         })
 
 
-class VoiceTag(SsmlTag):
+class Voice(SsmlTag):
     def __init__(self,
                  content: list[SsmlTagABC],
                  name: Optional[str] = None,
@@ -303,7 +303,7 @@ class VoiceTag(SsmlTag):
         return []       # TODO: add supported names for various cloud providers
 
 
-class LangTag(SsmlTag):
+class Lang(SsmlTag):
     def __init__(self, content: list[SsmlTagABC], lang: str):
         # TODO: assert lang is BCP-47 lang
         super().__init__(content, "lang", {

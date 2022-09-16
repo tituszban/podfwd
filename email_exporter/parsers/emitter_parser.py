@@ -4,7 +4,7 @@ from .content_item import ContentItemABC
 from .item_emitter import ItemEmitter
 from .parser_abc import ParserABC
 from functools import reduce
-from ssml_builder import SpeechBuilder
+from ssml import SpeechBuilder
 from .parsed_item import ParsedItem
 
 
