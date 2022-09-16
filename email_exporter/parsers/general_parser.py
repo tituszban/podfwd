@@ -1,6 +1,6 @@
 from .parser_abc import ParserABC
 # from .content_item import ContentItem
-from ssml_builder.core import Speech
+from ssml_builder import SpeechBuilder
 # import bleach
 # from bs4 import BeautifulSoup
 from functools import reduce
@@ -43,7 +43,7 @@ class GeneralParser(ParserABC):
 
     def _to_ssms(self, lines, headers):
         def build_speech(_lines):
-            speech = Speech()
+            speech = SpeechBuilder()
             for line in _lines:
                 if line in headers:
                     speech.pause(time="1.5s")

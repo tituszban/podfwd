@@ -4,7 +4,7 @@ from .content_item import ContentItemABC
 from .item_emitter import ItemEmitter
 from .parser_abc import ParserABC
 from functools import reduce
-from ssml_builder.core import Speech
+from ssml_builder import SpeechBuilder
 from .parsed_item import ParsedItem
 
 
@@ -20,7 +20,7 @@ class EmitterParser(ParserABC):
             lambda arr, item: [*arr, *item.get_ssml()], content_items, [])
 
         def convert(_speech_items: list[SpeechItemABC]):
-            speech = Speech()
+            speech = SpeechBuilder()
             for item in _speech_items:
                 item.add_to_speech(speech)
             return speech.speak()
