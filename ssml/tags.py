@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import re
-from typing import NewType, Optional, Union
+from typing import Callable, Generator, NewType, Optional, Union
 
 SsmlStr = NewType("SsmlStr", str)
 
@@ -13,7 +13,12 @@ class SsmlTagABC(ABC):
     def to_string(self) -> SsmlStr:
         raise NotImplementedError()
 
-    def replace_text(self, text: str, tags: list["SsmlTagABC"]) -> "SsmlTagABC":
+    @abstractmethod
+    def replace_text(self, text: str, replacer: Callable[[str], "SsmlTagABC"], *, ignore_case: bool = False) -> "SsmlTagABC":
+        raise NotImplementedError()
+
+    @abstractmethod
+    def is_tag(self, tag_name: str):
         raise NotImplementedError()
 
 
@@ -21,8 +26,12 @@ class TagArray(SsmlTagABC):
     def __init__(self, content: list[SsmlTagABC]) -> None:
         self._content = content
 
+    @property
+    def content(self):
+        return self._content
+
     def to_string(self) -> SsmlStr:
-        return SsmlStr('\n'.join(map(lambda c: c.to_string(), self._content)))
+        return SsmlStr(''.join(map(lambda c: c.to_string(), self._content)))
 
     @classmethod
     def from_array_or_list(cls, tag_array_or_list: "TagArrayOrList") -> Optional["TagArray"]:
@@ -35,6 +44,15 @@ class TagArray(SsmlTagABC):
         if isinstance(tag_array_or_list, list):
             return TagArray(tag_array_or_list)
         raise TypeError(f"Invalid type for tag, array or list: {type(tag_array_or_list)}")
+
+    def replace_text(self, text: str, replacer: Callable[[str], "SsmlTagABC"], *, ignore_case: bool = False) -> "SsmlTagABC":
+        return [
+            tag.replace_text(text, replacer, ignore_case=ignore_case)
+            for tag in self._content
+        ]
+
+    def is_tag(self, tag_name: str):
+        return False
 
 
 TagArrayOrList = Union[Optional[SsmlTagABC], Optional[TagArray], list[SsmlTagABC]]
@@ -50,6 +68,37 @@ class RawText(SsmlTagABC):
     def to_string(self) -> SsmlStr:
         return self._santise(self._text)
 
+    def replace_text(self, text: str, replacer: Callable[[str], "SsmlTagABC"], *, ignore_case: bool = False) -> "SsmlTagABC":
+        # TODO: support replace_re
+        def _split(spliter: str, original_text: str) -> Generator[tuple[str, bool], None, None]:
+            spliter = spliter.lower() if ignore_case else spliter
+            search_text = original_text.lower() if ignore_case else original_text
+
+            while (i := search_text.find(spliter)) != -1:
+                if i == 0:
+                    yield (original_text[:len(spliter)], True)
+                    original_text = original_text[len(spliter):]
+                    search_text = search_text[len(spliter):]
+                else:
+                    yield (original_text[:i], False)
+                    original_text = original_text[i:]
+                    search_text = search_text[i:]
+            yield (search_text, False)
+
+        if (splt := list(_split(text, self._text))) == 0:
+            return self
+
+        replaced_content: list[SsmlTagABC] = []
+        for text, is_match in splt:
+            if not is_match:
+                replaced_content.append(RawText(text))
+            else:
+                replaced_content.append(replacer(text))
+        return TagArray(replaced_content)
+
+    def is_tag(self, tag_name: str):
+        return False
+
 
 class SsmlTag(SsmlTagABC):
     def __init__(self, content: TagArrayOrList, tag_name: str, tag_args: dict[str, Optional[str]]):
@@ -58,17 +107,32 @@ class SsmlTag(SsmlTagABC):
         self._tag_args = tag_args
 
     def to_string(self) -> SsmlStr:
+        args_to_str = ' '.join(["", *[f'{key}="{value}"' for key, value in self._tag_args.items() if value]])
+
         if self._content:
-            return SsmlStr("<{tag} {args}>{content}</{tag}".format(
+            return SsmlStr("<{tag}{args}>{content}</{tag}>".format(
                 tag=self._tag_name,
-                args=' '.join(f'{key}="{value}"' for key, value in self._tag_args.items() if value),
+                args=args_to_str,
                 content=self._content.to_string()
             ))
 
-        return SsmlStr("<{tag} {args} />".format(
+        return SsmlStr("<{tag}{args} />".format(
             tag=self._tag_name,
-            args=' '.join(f'{key}="{value}"' for key, value in self._tag_args.items() if value),
+            args=args_to_str,
         ))
+
+    def replace_text(self, text: str, replacer: Callable[[str], "SsmlTagABC"], *, ignore_case: bool = False) -> "SsmlTagABC":
+        if not self._content:
+            return self
+
+        return SsmlTag(
+            self._content.replace_text(text, replacer, ignore_case=ignore_case),
+            self._tag_name,
+            self._tag_args
+        )
+
+    def is_tag(self, tag_name: str):
+        return self._tag_name == tag_name
 
 
 class Speak(SsmlTag):
@@ -286,8 +350,9 @@ class Media(SsmlTag):
                  sound_level: Optional[str] = None,
                  fade_in_dur: Optional[str] = None,
                  fade_out_dur: Optional[str] = None):
-        assert isinstance(media_content, Audio) or isinstance(
-            media_content, Speak), "Only audio and speak tags are allowed in media"
+        assert media_content.is_tag("audio") or media_content.is_tag(
+            "speak"), "Only audio and speak tags are allowed in media"
+
         super().__init__([media_content], "media", {
             "xml:id": xml_id,
             "begin": begin,
