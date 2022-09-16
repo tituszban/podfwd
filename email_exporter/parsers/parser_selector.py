@@ -6,7 +6,6 @@ from .tc_parser import TcItemEmitter
 from .substack_parser import SubstackItemEmitter
 from .general_parser import GeneralParser
 from .emitter_parser import EmitterParser
-from typing import Optional
 
 
 class ParserSelector:

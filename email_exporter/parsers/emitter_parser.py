@@ -32,8 +32,8 @@ class EmitterParser(ParserABC):
                 j += 1
             if i == j:
                 raise Exception("speech item is too long")
-            yield convert(ssml_tags[i:j-1])
-            i = j-1
+            yield convert(ssml_tags[i:j - 1])
+            i = j - 1
 
     def _content_items_to_description(self, content_items: list[ContentItemABC], content_type_to_remove: set[str]):
         return [

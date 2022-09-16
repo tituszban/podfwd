@@ -43,9 +43,9 @@ class Footer(NullComponent):
             div = component if component.name == "div" else component.div
 
             return tuple([c.name for c in div.contents]) in [
-                    ("p", "span", "span"),
-                    ("p", "span"),
-                    ("p",)
+                ("p", "span", "span"),
+                ("p", "span"),
+                ("p",)
             ] and len(div.p.contents) == 1
         except AttributeError:
             return False
@@ -320,7 +320,7 @@ class Tweet(ContentItemABC):
                 footer,
                 RegularTweet(
                     tweet_components[i],
-                    tweet_components[i+1:],
+                    tweet_components[i + 1:],
                     None
                 )
             )

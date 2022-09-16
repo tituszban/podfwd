@@ -1,5 +1,5 @@
 class ParsedItem:
-    def __init__(self, ssml: list[str], description: list[str]=[]):
+    def __init__(self, ssml: list[str], description: list[str] = []):
         self._ssml = ssml
         self._description = description
 

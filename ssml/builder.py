@@ -92,8 +92,6 @@ class SpeechBuilder:
 
         self._content.append(tags.Break(time=time))
 
-        ssml = '<break time="{}"/>'.format(time)
-
         return self
 
     def whisper(self, value):

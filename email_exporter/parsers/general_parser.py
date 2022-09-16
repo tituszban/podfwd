@@ -54,7 +54,7 @@ class GeneralParser(ParserABC):
 
         last_built = 0
         for i, line in enumerate(lines):
-            speech = build_speech(lines[last_built:i+1])
+            speech = build_speech(lines[last_built:i + 1])
             if len(speech.speak()) > self.speech_limit:
                 if last_built == i - 1:
                     raise Exception("Single section too long")

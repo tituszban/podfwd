@@ -201,7 +201,12 @@ class Prosody(SsmlTag):
         'volume': ('silent', 'x-soft', 'soft', 'medium', 'loud', 'x-loud')
     }
 
-    def __init__(self, content: list[SsmlTagABC], *, rate: Optional[str] = None, volume: Optional[str] = None, pitch: Optional[str] = None):
+    def __init__(self,
+                 content: list[SsmlTagABC],
+                 *,
+                 rate: Optional[str] = None,
+                 volume: Optional[str] = None,
+                 pitch: Optional[str] = None):
         if rate and rate not in self.VALID_PROSODY_ATTRIBUTES['rate']:
             if re.match(r'^\d+%$', rate) is None:
                 raise ValueError('The rate provided to prosody is not valid')
