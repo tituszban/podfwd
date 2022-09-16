@@ -19,30 +19,30 @@ class RawText(SsmlTagABC):
         self._text = text
 
     def _santise(self, text: str) -> SsmlStr:
-        return text     # TODO: sanitise user text
+        return SsmlStr(text)     # TODO: sanitise user text
 
     def to_string(self) -> SsmlStr:
         return self._santise(self._text)
 
 
 class SsmlTag(SsmlTagABC):
-    def __init__(self, content: list[SsmlTagABC], tag_name: str, tag_args: dict[str, str]):
+    def __init__(self, content: list[SsmlTagABC], tag_name: str, tag_args: dict[str, Optional[str]]):
         self._content = content
         self._tag_name = tag_name
         self._tag_args = tag_args
 
     def to_string(self) -> SsmlStr:
         if len(self._content) > 0:
-            return "<{tag} {args}>{content}</{tag}".format(
+            return SsmlStr("<{tag} {args}>{content}</{tag}".format(
                 tag=self._tag_name,
-                tag_args=' '.join(f'{key}="{value}"' for key, value in self._tag_args.items() if value),
+                args=' '.join(f'{key}="{value}"' for key, value in self._tag_args.items() if value),
                 content='\n'.join(map(lambda c: c.to_string(), self._content))
-            )
+            ))
 
-        return "<{tag} {args} />".format(
+        return SsmlStr("<{tag} {args} />".format(
             tag=self._tag_name,
-            tag_args=' '.join(f'{key}="{value}"' for key, value in self._tag_args.items() if value),
-        )
+            args=' '.join(f'{key}="{value}"' for key, value in self._tag_args.items() if value),
+        ))
 
 
 class Speak(SsmlTag):
@@ -51,7 +51,7 @@ class Speak(SsmlTag):
 
 
 class Empty(SsmlTag):
-    def __init__(self, tag_name: str, tag_args: dict[str, str]):
+    def __init__(self, tag_name: str, tag_args: dict[str, Optional[str]]):
         super().__init__([], tag_name, tag_args)
 
 
@@ -81,7 +81,7 @@ class SayAs(SsmlTag):
         "time"
     )
 
-    def __init__(self, content: list[SsmlTagABC], interpret_as: str, addtional_args: dict[str, str] = {}):
+    def __init__(self, content: list[SsmlTagABC], interpret_as: str, addtional_args: dict[str, Optional[str]] = {}):
         assert interpret_as in self.VALID_INTERPRET_AS, "Invalid interpret_as"
         super().__init__(content, "say-as", {"interpret-as": interpret_as, **addtional_args})
 
@@ -157,7 +157,7 @@ class Audio(SsmlTag):
                  sound_level: Optional[str] = None):
         super().__init__(
             [
-                *([SsmlTag(RawText(description), "desc", {})] if description else []),
+                *([SsmlTag([RawText(description)], "desc", {})] if description else []),
                 *([RawText(alt)] if alt else [])
             ],
             "audio",
@@ -210,7 +210,7 @@ class Prosody(SsmlTag):
                 raise ValueError('The pitch provided to prosody is not valid')
 
         if volume and volume not in self.VALID_PROSODY_ATTRIBUTES['volume']:
-            if re.match(r'^(\+|\-)+\d+(\.\d)?dB$') is None:
+            if re.match(r'^(\+|\-)+\d+(\.\d)?dB$', volume) is None:
                 raise ValueError('The volume provided to prosody is not valid')
 
         super().__init__(content, "prosody", {
@@ -309,3 +309,8 @@ class Lang(SsmlTag):
         super().__init__(content, "lang", {
             "xml:lang": lang
         })
+
+
+class PS(P):
+    def __init__(self, content: list[SsmlTagABC]):
+        super().__init__([S(content)])
