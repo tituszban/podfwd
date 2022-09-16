@@ -1,20 +1,20 @@
 from abc import ABC, abstractmethod
-from typing import Iterable
+from typing import Any, Callable, Iterable
 
 from ..description_item import DescriptionItemABC
-from ..speech_item import SpeechItemABC
+from ssml import SsmlTagABC
 from .util import get_text_content
 from bs4.element import PageElement
 
 
 class ContentItemABC(ABC):
 
-    def __init__(self, component, to_item):
+    def __init__(self, component, to_item: Callable[[Any], "ContentItemABC"]):
         self._component = component
         self._to_item = to_item
 
     @abstractmethod
-    def get_ssml(self) -> Iterable[SpeechItemABC]:
+    def get_ssml(self) -> Iterable[SsmlTagABC]:
         raise NotImplementedError()
 
     @abstractmethod

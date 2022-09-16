@@ -1,5 +1,5 @@
 from ..content_item_abc import ContentItemABC
-from ... import speech_item
+from ssml import tags
 
 
 class Blockquote(ContentItemABC):
@@ -17,9 +17,9 @@ class Blockquote(ContentItemABC):
             return []
 
         return [
-            speech_item.Paragraph("Quote."),
+            tags.P("Quote."),
             *inner_ssml,
-            speech_item.Paragraph("End quote.")
+            tags.P("End quote.")
         ]
 
     def get_description(self):

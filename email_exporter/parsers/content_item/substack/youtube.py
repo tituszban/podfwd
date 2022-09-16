@@ -1,6 +1,6 @@
 from ..content_item_abc import ContentItemABC
 import requests
-from ... import speech_item
+from ssml import tags
 from ... import description_item
 
 
@@ -19,7 +19,7 @@ class Youtube(ContentItemABC):
             info = self._get_youtube_video_info(video_id)
 
             return [
-                speech_item.Paragraph(f"YouTube video {info['title']} by {info['author_name']}.")
+                tags.PText(f"YouTube video {info['title']} by {info['author_name']}.")
             ]
 
         except:     # noqa: E722

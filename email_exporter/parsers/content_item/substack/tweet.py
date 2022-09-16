@@ -1,5 +1,5 @@
 from ..content_item_abc import ContentItemABC
-from ... import speech_item
+from ssml import tags
 from abc import ABC, abstractmethod
 from ..util import get_text_content
 import re
@@ -162,19 +162,19 @@ class RegularTweet:
         text = re.sub(r"https://t.co/\w+", "", text)
 
         if text:
-            yield speech_item.Paragraph(text)
+            yield tags.PText(text)
 
         if len(embeds := [item for item in self._contents if isinstance(item, Embed)]) > 0:
             for embed in embeds:
                 if (title := embed.title):
-                    yield speech_item.Paragraph(f"Linking to: {title}.")
+                    yield tags.PText(f"Linking to: {title}.")
 
     def to_ssml(self):
         return [
-            speech_item.Pause("500ms"),
-            speech_item.Paragraph(f"Tweet by {self.username}:"),
+            tags.Break(time="500ms"),
+            tags.PSText(f"Tweet by {self.username}:"),
             *list(self._content_to_ssml()),
-            speech_item.Pause("500ms"),
+            tags.Break(time="500ms"),
         ]
 
     @property
@@ -233,12 +233,12 @@ class QuoteTweet(RegularTweet):
 
     def to_ssml(self):
         return [
-            speech_item.Pause("500ms"),
-            speech_item.Paragraph(f"Tweet by {self._quoted_tweet.username}:"),
+            tags.Break(time="500ms"),
+            tags.PSText(f"Tweet by {self._quoted_tweet.username}:"),
             *list(self._quoted_tweet._content_to_ssml()),
-            speech_item.Paragraph(f"To which {self.username} replied:"),
+            tags.PSText(f"To which {self.username} replied:"),
             *list(self._content_to_ssml()),
-            speech_item.Pause("500ms"),
+            tags.Break(time="500ms"),
         ]
 
 

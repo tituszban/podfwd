@@ -56,7 +56,7 @@ class Empty(SsmlTag):
 
 
 class Break(Empty):
-    def __init__(self, time: Optional[str] = None, strength: Optional[str] = None):
+    def __init__(self, *, time: Optional[str] = None, strength: Optional[str] = None):
         assert time or strength, "Either time or strength must be set"
         super().__init__("break", {
             "time": time,
@@ -87,12 +87,12 @@ class SayAs(SsmlTag):
 
 
 class SayAsCurrency(SayAs):
-    def __init__(self, content: list[SsmlTagABC], language: str):
+    def __init__(self, content: list[SsmlTagABC], *, language: str):
         super().__init__(content, "currency", {"language": language})
 
 
 class SayAsTelephone(SayAs):
-    def __init__(self, content: list[SsmlTagABC], format: Optional[str] = None, style: Optional[str] = None):
+    def __init__(self, content: list[SsmlTagABC], *, format: Optional[str] = None, style: Optional[str] = None):
         super().__init__(content, "telephone", {
             "format": format,
             "google:style": style,
@@ -105,7 +105,7 @@ class SayAsVerbatim(SayAs):
 
 
 class SayAsDate(SayAs):
-    def __init__(self, content: list[SsmlTagABC], format: str, detail: str):
+    def __init__(self, content: list[SsmlTagABC], *, format: str, detail: str):
         super().__init__(content, "date", {"format": format, "detail": detail})
 
 
@@ -140,13 +140,14 @@ class SayAsUnit(SayAs):
 
 
 class SayAsTime(SayAs):
-    def __init__(self, content: list[SsmlTagABC], format: str):
+    def __init__(self, content: list[SsmlTagABC], *, format: str):
         super().__init__(content, "time", {"format": format})
 
 
 class Audio(SsmlTag):
     def __init__(self,
                  src: str,
+                 *,
                  description: Optional[str] = None,
                  alt: Optional[str] = None,
                  clip_begin: Optional[str] = None,
@@ -184,7 +185,7 @@ class S(SsmlTag):
 
 
 class Sub(SsmlTag):
-    def __init__(self, content: list[SsmlTagABC], alias: str):
+    def __init__(self, content: list[SsmlTagABC], *, alias: str):
         super().__init__(content, "sub", {"alias": alias})
 
 
@@ -200,7 +201,7 @@ class Prosody(SsmlTag):
         'volume': ('silent', 'x-soft', 'soft', 'medium', 'loud', 'x-loud')
     }
 
-    def __init__(self, content: list[SsmlTagABC], rate: Optional[str] = None, volume: Optional[str] = None, pitch: Optional[str] = None):
+    def __init__(self, content: list[SsmlTagABC], *, rate: Optional[str] = None, volume: Optional[str] = None, pitch: Optional[str] = None):
         if rate and rate not in self.VALID_PROSODY_ATTRIBUTES['rate']:
             if re.match(r'^\d+%$', rate) is None:
                 raise ValueError('The rate provided to prosody is not valid')
@@ -225,7 +226,7 @@ class Emphasis(SsmlTag):
         "strong", "moderate", "none", "reduced"
     ]
 
-    def __init__(self, content: list[SsmlTagABC], level: str):
+    def __init__(self, content: list[SsmlTagABC], *, level: str):
         if level not in self.VALID_EMPHASIS_ATTRIBUTES:
             raise ValueError("Invalid emphasis level")
 
@@ -245,6 +246,7 @@ class Seq(SsmlTag):
 class Media(SsmlTag):
     def __init__(self,
                  media_content: SsmlTagABC,
+                 *,
                  xml_id: Optional[str] = None,
                  begin: Optional[str] = None,
                  end: Optional[str] = None,
@@ -270,7 +272,7 @@ class Media(SsmlTag):
 class Phoneme(SsmlTag):
     SUPPORTED_PHONETIC_ALPHABETS = ["ipa", "x-sampa"]
 
-    def __init__(self, content: list[SsmlTagABC], alphabet: str, ph: str):
+    def __init__(self, content: list[SsmlTagABC], *, alphabet: str, ph: str):
         assert alphabet in self.SUPPORTED_PHONETIC_ALPHABETS, "Unsupported phonetic alphabet"
         super().__init__(content, "phoneme", {
             "alphabet": alphabet,
@@ -281,6 +283,7 @@ class Phoneme(SsmlTag):
 class Voice(SsmlTag):
     def __init__(self,
                  content: list[SsmlTagABC],
+                 *,
                  name: Optional[str] = None,
                  language: Optional[str] = None,
                  gender: Optional[str] = None,
@@ -304,7 +307,7 @@ class Voice(SsmlTag):
 
 
 class Lang(SsmlTag):
-    def __init__(self, content: list[SsmlTagABC], lang: str):
+    def __init__(self, content: list[SsmlTagABC], *, lang: str):
         # TODO: assert lang is BCP-47 lang
         super().__init__(content, "lang", {
             "xml:lang": lang
@@ -314,3 +317,18 @@ class Lang(SsmlTag):
 class PS(P):
     def __init__(self, content: list[SsmlTagABC]):
         super().__init__([S(content)])
+
+
+class PSText(PS):
+    def __init__(self, content: str):
+        super().__init__([RawText(content)])
+
+
+class PText(P):
+    def __init__(self, content: str):
+        super().__init__([RawText(content)])
+
+
+class SText(S):
+    def __init__(self, content: str):
+        super().__init__([RawText(content)])
