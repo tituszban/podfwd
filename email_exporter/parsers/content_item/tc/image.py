@@ -15,4 +15,5 @@ class Image(ContentItemABC):
     def match_component(component):
         contents_without_nl = [content for content in component.contents if content != "\n"]
         return component.name == "div" and \
+            len(contents_without_nl) > 0 and \
             contents_without_nl[0].name == "img"

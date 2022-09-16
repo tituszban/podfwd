@@ -14,7 +14,10 @@ class SsmlTagABC(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def replace_text(self, text: str, replacer: Callable[[str], "SsmlTagABC"], *, ignore_case: bool = False) -> "SsmlTagABC":
+    def replace_text(self,
+                     text: str,
+                     replacer: Callable[[str], "SsmlTagABC"],
+                     *, ignore_case: bool = False) -> "SsmlTagABC":
         raise NotImplementedError()
 
     @abstractmethod
@@ -45,11 +48,14 @@ class TagArray(SsmlTagABC):
             return TagArray(tag_array_or_list)
         raise TypeError(f"Invalid type for tag, array or list: {type(tag_array_or_list)}")
 
-    def replace_text(self, text: str, replacer: Callable[[str], "SsmlTagABC"], *, ignore_case: bool = False) -> "SsmlTagABC":
-        return [
+    def replace_text(self,
+                     text: str,
+                     replacer: Callable[[str], "SsmlTagABC"],
+                     *, ignore_case: bool = False) -> "SsmlTagABC":
+        return TagArray([
             tag.replace_text(text, replacer, ignore_case=ignore_case)
             for tag in self._content
-        ]
+        ])
 
     def is_tag(self, tag_name: str):
         return False
@@ -68,7 +74,10 @@ class RawText(SsmlTagABC):
     def to_string(self) -> SsmlStr:
         return self._santise(self._text)
 
-    def replace_text(self, text: str, replacer: Callable[[str], "SsmlTagABC"], *, ignore_case: bool = False) -> "SsmlTagABC":
+    def replace_text(self,
+                     text: str,
+                     replacer: Callable[[str], "SsmlTagABC"],
+                     *, ignore_case: bool = False) -> "SsmlTagABC":
         # TODO: support replace_re
         def _split(spliter: str, original_text: str) -> Generator[tuple[str, bool], None, None]:
             spliter = spliter.lower() if ignore_case else spliter
@@ -83,7 +92,7 @@ class RawText(SsmlTagABC):
                     yield (original_text[:i], False)
                     original_text = original_text[i:]
                     search_text = search_text[i:]
-            yield (search_text, False)
+            yield (original_text, False)
 
         if (splt := list(_split(text, self._text))) == 0:
             return self
@@ -121,7 +130,10 @@ class SsmlTag(SsmlTagABC):
             args=args_to_str,
         ))
 
-    def replace_text(self, text: str, replacer: Callable[[str], "SsmlTagABC"], *, ignore_case: bool = False) -> "SsmlTagABC":
+    def replace_text(self,
+                     text: str,
+                     replacer: Callable[[str], "SsmlTagABC"],
+                     *, ignore_case: bool = False) -> "SsmlTagABC":
         if not self._content:
             return self
 

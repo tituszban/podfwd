@@ -78,16 +78,32 @@ def add_feed_alias():
 def pronounce():
     text = """
 <speak>
-    <phoneme alphabet=\"x-samba\" ph=\"gergeI\">Gergely</phoneme>
-    <phoneme alphabet=\"x-samba\" ph=\"Or\\:\\os\">Orosz</phoneme>
+    <break time="750ms"></break>
+    <p>
+        <s>What is Data Engineering? Part 1.</s>
+    </p>
+    <break time="500ms"></break>
+    <p>
+        <s>A broad overview of the data engineering field by former Facebook data engineer Benjamin Rogojan. Part 1.</s>
+    </p>
+    <p>
+        <phoneme alphabet="x-sampa" ph="gergeI">Gergely</phoneme>
+        <phoneme alphabet="x-sampa" ph="Or\\:\\os">Orosz</phoneme> Sep 13</p>
+    <break time="500ms"></break>
+    <p>
+        👋 Hi, this is <phoneme alphabet="x-sampa" ph="gergeI">Gergely</phoneme> with a free issue
+        of the Pragmatic Engineer Newsletter.
+        Today we cover Part 1 of \'What is Data Engineering.\' To get a similarly in-depth article every week,
+        subscribe here 👇
+    </p>
 </speak>
-    """
+    """.replace("    ", "").replace("\n", "")
 
     deps = Dependencies.default()
 
     t2s = deps.get(TextToSpeech)
 
-    sound_bytes = t2s.t2s(text)
+    sound_bytes = t2s.t2s(text, voice="en-GB-Wavenet-B")
 
     with open("sample.mp3", "wb") as f:
         f.write(sound_bytes)

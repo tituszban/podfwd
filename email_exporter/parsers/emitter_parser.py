@@ -1,17 +1,29 @@
 from email_exporter.inbox import InboxItem
-from ssml import SsmlTagABC
 from .content_item import ContentItemABC
 from .item_emitter import ItemEmitter
 from .parser_abc import ParserABC
 from functools import reduce
-from ssml import SpeechBuilder
+from ssml import SpeechBuilder, tags, SsmlTagABC, RawText
 from .parsed_item import ParsedItem
+
+
+class PronunciationGuide:
+    pronunciation_replacements = [
+        ("gergely", True, lambda s: tags.Phoneme(RawText(s), alphabet="x-sampa", ph="gergeI")),
+        ("orosz", True, lambda s: tags.Phoneme(RawText(s), alphabet="x-sampa", ph="Or\\:\\os"))
+    ]
+
+    def force_pronunciation(self, ssml: SsmlTagABC):
+        for text, ignore_case, replacer in self.pronunciation_replacements:
+            ssml = ssml.replace_text(text, replacer, ignore_case=ignore_case)
+        return ssml
 
 
 class EmitterParser(ParserABC):
     def __init__(self, logger, emitter: ItemEmitter):
         self._logger = logger
         self._emitter = emitter
+        self._pronunciation_guide = PronunciationGuide()
         self.speech_limit = 5000
         self.description_limit = 400000
 
@@ -23,7 +35,9 @@ class EmitterParser(ParserABC):
             speech = SpeechBuilder()
             for item in _ssml_tags:
                 speech.add_tag(item)
-            return speech.speak()
+            ssml = speech.speak()
+            ssml = self._pronunciation_guide.force_pronunciation(ssml)
+            return ssml.to_string()
 
         i = 0
         while i < len(ssml_tags):
@@ -78,6 +92,10 @@ class EmitterParser(ParserABC):
         self._logger.info(f"Getting items for {inbox_item}")
 
         items = list(self._emitter.get_items(inbox_item))
+
+        if len(items) == 0:
+            # TODO: investigate why this happens
+            raise Exception("No items were generated from inbox_item")
 
         self._logger.info(f"Created {len(items)} content items")
 

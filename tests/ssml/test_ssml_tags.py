@@ -16,7 +16,8 @@ def test_replace():
     replaced = speech.replace_text("world", lambda t: tags.Emphasis(RawText(t), level="strong"))
 
     assert replaced is not None
-    assert replaced.to_string() == '<speak><p><s>Hello <emphasis level="strong">world</emphasis>!</s></p>Hello? World?<emphasis level="strong">world</emphasis><emphasis level="strong">world</emphasis></speak>'
+    assert replaced.to_string() == '<speak><p><s>Hello <emphasis level="strong">world</emphasis>!</s></p>Hello? World?<emphasis level="strong">world</emphasis><emphasis level="strong">world</emphasis></speak>'       # noqa: E501
+
 
 def test_replace_ignore_case():
     speech = tags.Speak([
@@ -33,4 +34,4 @@ def test_replace_ignore_case():
     replaced = speech.replace_text("world", lambda t: tags.Emphasis(RawText(t), level="strong"), ignore_case=True)
 
     assert replaced is not None
-    assert replaced.to_string() == '<speak><p><s>Hello <emphasis level="strong">world</emphasis>!</s></p>Hello? <emphasis level="strong">World</emphasis>?<emphasis level="strong">world</emphasis><emphasis level="strong">world</emphasis></speak>'
+    assert replaced.to_string() == '<speak><p><s>Hello <emphasis level="strong">world</emphasis>!</s></p>Hello? <emphasis level="strong">World</emphasis>?<emphasis level="strong">world</emphasis><emphasis level="strong">world</emphasis></speak>'       # noqa: E501

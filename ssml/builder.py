@@ -15,7 +15,7 @@ class SpeechBuilder:
         <speak>
         :return:
         """
-        return tags.Speak(self._content).to_string()
+        return tags.Speak(self._content)
 
     def add_text(self, value: str):
         """

@@ -17,9 +17,9 @@ class Blockquote(ContentItemABC):
             return []
 
         return [
-            tags.P("Quote."),
+            tags.PText("Quote."),
             *inner_ssml,
-            tags.P("End quote.")
+            tags.PText("End quote.")
         ]
 
     def get_description(self):

@@ -59,9 +59,9 @@ class GeneralParser(ParserABC):
                 if last_built == i - 1:
                     raise Exception("Single section too long")
 
-                yield build_speech(lines[last_built:i]).speak()
+                yield build_speech(lines[last_built:i]).speak().to_string()
                 last_built = i
-        yield build_speech(lines[last_built:]).speak()
+        yield build_speech(lines[last_built:]).speak().to_string()
 
     def parse(self, content_item):
         assert content_item.soup is not None
