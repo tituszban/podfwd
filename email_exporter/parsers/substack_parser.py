@@ -15,12 +15,12 @@ class SubstackItemEmitter(ItemEmitter):
             for component in post_component.div.children:
                 item_count += 1
                 yield ContentItem.to_item(component)
-        
+
         if item_count > 0:
             return
 
         post_components = inbox_item.soup.find_all(
-            "div", 
+            "div",
             style=re.compile(r"font-size:\s?16px;.*line-height:\s?26px"))
 
         for post_component in post_components:
