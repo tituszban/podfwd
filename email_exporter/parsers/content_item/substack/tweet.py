@@ -342,6 +342,9 @@ class Tweet(ContentItemABC):
 
     @staticmethod
     def match_component(component):
+        if not hasattr(component, "attrs"):
+            return False
+
         if "class" in component.attrs and "tweet" in component["class"]:    # Directly received
             return True
 

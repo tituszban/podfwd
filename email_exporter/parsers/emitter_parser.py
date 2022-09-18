@@ -101,11 +101,11 @@ class EmitterParser(ParserABC):
 
         ssml = list(self._content_items_to_ssml(items))
 
-        self._logger.info(f"Created {len(ssml)} SSML lines; total length: {sum(map(lambda s: len(s), ssml))}")
+        self._logger.info(f"Created {len(ssml)} SSML lines; total length: {sum(map(len, ssml))}")
 
         description = self._get_description(items, inbox_item)
 
         self._logger.info(
-            f"Created {len(description)} description lines; total length: {sum(map(lambda s: len(s), description))}")
+            f"Created {len(description)} description lines; total length: {sum(map(len, description))}")
 
         return ParsedItem(ssml, description)
