@@ -18,6 +18,8 @@ class Tweet(ContentItemABC):
 
     @staticmethod
     def match_component(component):
+        if not hasattr(component, "find_all"):
+            return False
         if len(component.find_all("blockquote", class_=re.compile("twitter-tweet$"))) != 0:
             return True
 

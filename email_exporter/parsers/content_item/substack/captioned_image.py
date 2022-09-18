@@ -15,6 +15,8 @@ class CaptionedImage(ContentItemABC):
 
     @staticmethod
     def match_component(component):
+        if not hasattr(component, "attrs"):
+            return False
         # Directly received
         if "class" in component.attrs and "captioned-image-container-static" in component["class"]:
             return True

@@ -13,6 +13,8 @@ class Image(ContentItemABC):
 
     @staticmethod
     def match_component(component):
+        if not hasattr(component, "contents"):
+            return False
         contents_without_nl = [content for content in component.contents if content != "\n"]
         return component.name == "div" and \
             len(contents_without_nl) > 0 and \

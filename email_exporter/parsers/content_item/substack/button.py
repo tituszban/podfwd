@@ -7,6 +7,9 @@ class Button(NullContentItem):
 
     @staticmethod
     def match_component(component):
+        if not hasattr(component, "find_all"):
+            return False
+
         if len(component.find_all("a", class_=re.compile(r"button$"))) != 0:
             return True
 

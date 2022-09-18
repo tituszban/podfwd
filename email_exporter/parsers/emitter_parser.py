@@ -1,3 +1,4 @@
+from typing import Optional
 from email_exporter.inbox import InboxItem
 from .content_item import ContentItemABC
 from .item_emitter import ItemEmitter
@@ -25,7 +26,7 @@ class EmitterParser(ParserABC):
         self._emitter = emitter
         self._pronunciation_guide = PronunciationGuide()
         self.speech_limit = 5000
-        self.description_limit = 400000
+        self.description_limit: Optional[int] = None
 
     def _content_items_to_ssml(self, content_items: list[ContentItemABC]):
         ssml_tags: list[SsmlTagABC] = reduce(
@@ -67,7 +68,7 @@ class EmitterParser(ParserABC):
         while len(descriptions := self._content_items_to_description(content_items, content_type_to_remove)) > 0:
             desc_text = [d.to_text(remove_href) for d in descriptions]
 
-            if len('\n'.join([title, *desc_text])) <= self.description_limit:
+            if not self.description_limit or len('\n'.join([title, *desc_text])) <= self.description_limit:
                 return desc_text
 
             remove_href = not remove_href
@@ -101,11 +102,11 @@ class EmitterParser(ParserABC):
 
         ssml = list(self._content_items_to_ssml(items))
 
-        self._logger.info(f"Created {len(ssml)} SSML lines; total length: {sum(map(lambda s: len(s), ssml))}")
+        self._logger.info(f"Created {len(ssml)} SSML lines; total length: {sum(map(len, ssml))}")
 
         description = self._get_description(items, inbox_item)
 
         self._logger.info(
-            f"Created {len(description)} description lines; total length: {sum(map(lambda s: len(s), description))}")
+            f"Created {len(description)} description lines; total length: {sum(map(len, description))}")
 
         return ParsedItem(ssml, description)
