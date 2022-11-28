@@ -22,7 +22,7 @@ class ParserSelector:
     def _get_parser(self, sender: str) -> ParserABC:
         self._logger.info(f"Selecting parser for {sender}")
 
-        sender_domain = sender.split("@")[-1]
+        sender_domain = sender.split("@")[-1].rstrip(">")
 
         if sender_domain in self.emitters_by_domain:
             self._logger.info(

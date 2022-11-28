@@ -332,8 +332,14 @@ class Tweet(ContentItemABC):
         )
 
     def get_ssml(self):
-        tweet = Tweet.to_tweet(self._component)
-        return tweet.to_ssml()
+        try:
+            tweet = Tweet.to_tweet(self._component)
+            return tweet.to_ssml()
+        except RuntimeError:
+            return [
+                tags.Break(time="500ms"),
+                tags.PSText(f"Broken tweet: Fix me.")
+            ]
 
     def get_description(self):
         return [
