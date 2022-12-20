@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, TypeVar, Type
+from typing import Callable, Optional, TypeVar, Type
 from ..config import Config
 from firebase_admin import firestore
 from firebase_admin import credentials
@@ -93,7 +93,7 @@ class CachedResolver:
 
 
 class Context:
-    def __init__(self, dependencies: Dependencies, parent_type: type = None):
+    def __init__(self, dependencies: Dependencies, parent_type: Optional[type] = None):
         self.dependencies = dependencies
         self.parent_type = parent_type
 
@@ -143,7 +143,7 @@ class Dependencies:
             .add_cached_resolver(firestore.Client, firestore_client_resolver) \
             .add_cached_resolver(storage.Client, storage_client_resolver)
 
-    def get(self, t: Type[T], context: Context = None) -> T:
+    def get(self, t: Type[T], context: Optional[Context] = None) -> T:
         if context is None:
             context = Context(self, t)
 

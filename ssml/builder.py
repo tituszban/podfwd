@@ -3,7 +3,7 @@ from . import tags
 
 class SpeechBuilder:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._content: list[tags.SsmlTagABC] = []
 
     @property
