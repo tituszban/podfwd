@@ -10,7 +10,7 @@ from .parsed_item import ParsedItem
 class GeneralParser(ParserABC):
     def __init__(self, logger):
         self._logger = logger
-        self.speech_limit = 5000
+        self.speech_limit = 4500
 
     def _sanitise(self, text):
         return reduce(

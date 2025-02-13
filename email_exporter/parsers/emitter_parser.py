@@ -25,7 +25,7 @@ class EmitterParser(ParserABC):
         self._logger = logger
         self._emitter = emitter
         self._pronunciation_guide = PronunciationGuide()
-        self.speech_limit = 5000
+        self.speech_limit = 4500
         self.description_limit: Optional[int] = None
 
     def _content_items_to_ssml(self, content_items: list[ContentItemABC]):
