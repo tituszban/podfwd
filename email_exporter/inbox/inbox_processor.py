@@ -19,7 +19,7 @@ class InboxProcessor:
         default_charset = "utf-8"
         dh = email.header.decode_header(header)
         return ''.join(
-            str(t.decode(encoding or default_charset)) if type(t) == bytes else str(t)
+            str(t.decode(encoding or default_charset)) if t is bytes else str(t)
             for t, encoding in dh
         )
 
@@ -55,9 +55,9 @@ class InboxProcessor:
     def _get_payload(self, message: Message) -> Iterator[bytes]:
         if message.is_multipart():
             for m in message.get_payload():
-                yield from self._get_payload(m)
+                yield from self._get_payload(m)     # noqa
         else:
-            yield message.get_payload(decode=True)
+            yield message.get_payload(decode=True)  # noqa
 
     def _to_soup(self, raw: str) -> Union[BeautifulSoup, None]:
         soup = BeautifulSoup(raw, 'html.parser')
@@ -80,7 +80,7 @@ class InboxProcessor:
         subject, sender, recipient, date = self._get_message_data(message)
         mime = ""
         html = ""
-        soup = None
+        soup: BeautifulSoup = None
 
         for i, payload in enumerate(self._get_payload(message)):
             decode, _ = self._try_decode(payload)
