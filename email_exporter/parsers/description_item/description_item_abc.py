@@ -17,7 +17,7 @@ class DescriptionItemABC(ABC):
     def to_text(self, remove_href: bool = False) -> str:
         # TODO: this is not great. Replace with building up components, instead of deleting
         if isinstance(self._content, bs4.element.PageElement):
-            children = [self._content, *self._content.findChildren(recursive=True)]     # noqa
+            children = [self._content, *self._content.findChildren(recursive=True)]     # type: ignore
             for child in children:
                 self._remove_attrs(child, remove_href)
             return str(self._content)

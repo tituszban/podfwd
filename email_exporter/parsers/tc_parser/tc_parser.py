@@ -5,9 +5,9 @@ from .tc_table import TcTable
 
 class TcItemEmitter(ItemEmitter):
     def get_items(self, inbox_item: InboxItem):
-        trs = inbox_item.soup.table.find_all("tr", recursive=False)         # noqa
+        trs = inbox_item.soup.table.find_all("tr", recursive=False)         # type: ignore
 
-        tables = [TcTable.get_table(tr.td.table, inbox_item) for tr in trs]     # noqa
+        tables = [TcTable.get_table(tr.td.table, inbox_item) for tr in trs]     # type: ignore
 
         for table in tables:
             for item in table.get_items():

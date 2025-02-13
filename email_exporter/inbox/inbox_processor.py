@@ -55,9 +55,9 @@ class InboxProcessor:
     def _get_payload(self, message: Message) -> Iterator[bytes]:
         if message.is_multipart():
             for m in message.get_payload():
-                yield from self._get_payload(m)     # noqa
+                yield from self._get_payload(m)     # type: ignore
         else:
-            yield message.get_payload(decode=True)  # noqa
+            yield message.get_payload(decode=True)  # type: ignore
 
     def _to_soup(self, raw: str) -> Union[BeautifulSoup, None]:
         soup = BeautifulSoup(raw, 'html.parser')
@@ -80,7 +80,7 @@ class InboxProcessor:
         subject, sender, recipient, date = self._get_message_data(message)
         mime = ""
         html = ""
-        soup: BeautifulSoup = None
+        soup: BeautifulSoup = None      # type: ignore
 
         for i, payload in enumerate(self._get_payload(message)):
             decode, _ = self._try_decode(payload)
