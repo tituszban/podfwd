@@ -19,7 +19,7 @@ class InboxProcessor:
         default_charset = "utf-8"
         dh = email.header.decode_header(header)
         return ''.join(
-            str(t.decode(encoding or default_charset)) if t is bytes else str(t)
+            str(t.decode(encoding or default_charset)) if isinstance(t, bytes) else str(t)
             for t, encoding in dh
         )
 
