@@ -56,7 +56,7 @@ pytest-coverage:
   allow_failure: true
 
 build:
-  image: docker:latest
+  image: google/cloud-sdk:latest
   only:
     refs:
       - master
