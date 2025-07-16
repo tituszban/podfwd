@@ -171,9 +171,9 @@ class TextToSpeech:
                 ),
             )
         )
-        data = response.candidates[0].content.parts[0].inline_data.data
+        data = response.candidates[0].content.parts[0].inline_data.data     # type: ignore
 
-        return WaveT2SOutput(data)
+        return WaveT2SOutput(data)         # type: ignore
 
     def f2s(self, path: str):
         self._logger.info(f"Converting file {path} to speech")
