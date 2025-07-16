@@ -99,7 +99,7 @@ class Feed:
         self.block = block
         self.branding = branding
         self.feed_file_name = feed_file_name
-        self._updated_items = set()
+        self._updated_items: set[int] = set()
 
     @classmethod
     def from_data_and_items(cls, key: str, data: dict, items: list, storage_provider: StorageProvider):

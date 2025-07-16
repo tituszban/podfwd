@@ -9,6 +9,7 @@ from google.genai import types
 import wave
 import io
 
+
 class T2SOutput(ABC):
     def __init__(self, extension: str):
         self.extension = extension
@@ -17,11 +18,11 @@ class T2SOutput(ABC):
     @abstractmethod
     def audio_content(self) -> bytes:
         raise NotImplementedError
-        
 
     @abstractmethod
     def __add__(self, other: 'T2SOutput') -> 'T2SOutput':
         raise NotImplementedError
+
 
 class Mp3T2SOutput(T2SOutput):
     def __init__(self, audio_content: bytes):
@@ -31,11 +32,12 @@ class Mp3T2SOutput(T2SOutput):
     @property
     def audio_content(self) -> bytes:
         return self._audio_content
-    
+
     def __add__(self, other: 'T2SOutput') -> 'T2SOutput':
         if not isinstance(other, Mp3T2SOutput):
             raise TypeError("Can only add Mp3T2SOutput instances")
         return Mp3T2SOutput(self._audio_content + other.audio_content)
+
 
 class WaveT2SOutput(T2SOutput):
     def __init__(self, audio_content: bytes):
@@ -51,7 +53,7 @@ class WaveT2SOutput(T2SOutput):
             wf.setframerate(24000)
             wf.writeframes(self._raw_audio)
         return buffer.getvalue()
-    
+
     def __add__(self, other: 'T2SOutput') -> 'T2SOutput':
         if not isinstance(other, WaveT2SOutput):
             raise TypeError("Can only add WaveT2SOutput instances")
@@ -128,7 +130,8 @@ class TextToSpeech:
         elif voice in self.gemini_voices:
             return self._gemini_t2s(text, voice)
         else:
-            raise ValueError(f"Voice {voice} is not supported by TTS. Supported voices: {self.classic_voices + self.gemini_voices}")
+            raise ValueError(
+                f"Voice {voice} is not supported by TTS. Supported voices: {self.classic_voices + self.gemini_voices}")
 
     def _classical_t2s(self, text: str, voice: str) -> T2SOutput:
         assert voice in self.classic_voices, f"Voice {voice} is not supported by TTS"

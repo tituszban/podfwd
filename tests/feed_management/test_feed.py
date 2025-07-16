@@ -2,7 +2,6 @@ from mock import Mock, MagicMock, patch
 from freezegun import freeze_time
 import datetime
 from email_exporter.feed_management.feed import Feed, Branding, Logo
-from email_exporter.feed_management.item import Item
 
 
 def test_branding_from_dict_loads_fields():

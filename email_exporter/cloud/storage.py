@@ -44,13 +44,13 @@ class StorageProvider:
     def __init__(self, config: Config, storage_client: StorageClient) -> None:
         self._storage_client = storage_client
 
-    def get_bucket(self, bucket_name: str) -> Optional[Storage]:
+    def get_bucket(self, bucket_name: str) -> Storage:
         if not bucket_name:
             raise KeyError("Bucket name is missing")
         if not self._storage_client.bucket(bucket_name).exists():
             # TODO: self.create_bucket(bucket_name, true)
             # https://cloud.google.com/storage/docs/access-control/lists#predefined-acl
-            return None
+            raise KeyError(f"Bucket {bucket_name} does not exist")
         return Storage.from_client_and_name(self._storage_client, bucket_name)
 
     def create_bucket(self, bucket_name: str, public: bool = False, logging_bucket: Optional[str] = None) -> Storage:

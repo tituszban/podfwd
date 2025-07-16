@@ -1,6 +1,6 @@
 from mock import Mock, MagicMock
 from email_exporter.voice_provider import VoiceProvider
-from email_exporter.voice_provider.voice_provider import GLOBAL_DOCUMENT, GLOBAL_DOMAIN, VOICE_DEFAULT
+from email_exporter.voice_provider.voice_provider import GLOBAL_DOCUMENT, VOICE_DEFAULT
 
 
 def test_get_voice_loads_documents():

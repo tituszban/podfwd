@@ -83,17 +83,17 @@ def test_voice_provider():
     voice_provider = deps.get(VoiceProvider)
 
     item = InboxItem(
-        subject="", 
-        date="", 
-        html="", 
-        mime="", 
-        soup=None, 
+        subject="",
+        date="",
+        html="",
+        mime="",
+        soup=None,
         addresses=(
             "tituszban@gmail.com",
             # "alexwrites@substack.com"
             "pragmaticengineer+deepdives@substack.com"
         ))
-    
+
     print(voice_provider.get_voice(item))
 
 
