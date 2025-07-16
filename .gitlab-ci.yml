@@ -5,7 +5,7 @@ stages:
   - cleanup
 
 variables:
-  CONTAINER_NAME: gcr.io/$PROJECT_ID/$EXPORTER_CR_SERVICE_NAME/$CI_COMMIT_BRANCH/$IMAGE_NAME:latest
+  CONTAINER_NAME: europe-west2-docker.pkg.dev/autopodcast/autopodcast/$EXPORTER_CR_SERVICE_NAME/$CI_COMMIT_BRANCH/$IMAGE_NAME:latest
 
 
 before_script:
@@ -66,7 +66,9 @@ build:
   stage: build
   script:
     # Login to Google Container Registry
-    - cat sa.json | docker login -u _json_key --password-stdin https://gcr.io
+    # - cat sa.json | docker login -u _json_key --password-stdin https://gcr.io
+    - gcloud auth activate-service-account $GCP_SA_NAME --key-file sa.json
+    - gcloud auth configure-docker europe-west2-docker.pkg.dev
     # Build and tag image for both GCR and Gitlab registries
     - docker build --cache-from $CONTAINER_NAME -t $CONTAINER_NAME -t $IMAGE_NAME:latest .
     # Push image to GCR
