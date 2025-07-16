@@ -1,4 +1,6 @@
 from typing import Optional
+from email_exporter.inbox.inbox_item import InboxItem
+from email_exporter.voice_provider.voice_provider import VoiceProvider
 from ..shared import Dependencies
 from firebase_admin import firestore
 from ..feed_management import Feed, FeedProvider
@@ -75,6 +77,26 @@ def add_feed_alias():
     feed_provider.add_feed_alias("SYhLtwlSg98XUBhaPUtB", "tituszban")
 
 
+def test_voice_provider():
+    deps = Dependencies.default()
+
+    voice_provider = deps.get(VoiceProvider)
+
+    item = InboxItem(
+        subject="", 
+        date="", 
+        html="", 
+        mime="", 
+        soup=None, 
+        addresses=(
+            "tituszban@gmail.com",
+            # "alexwrites@substack.com"
+            "pragmaticengineer+deepdives@substack.com"
+        ))
+    
+    print(voice_provider.get_voice(item))
+
+
 def pronounce():
     text = """
 <speak>
@@ -97,13 +119,13 @@ def pronounce():
         subscribe here 👇
     </p>
 </speak>
-    """.replace("    ", "").replace("\n", "")
+    """.strip().replace("    ", "").replace("\n", "")
 
     deps = Dependencies.default()
 
     t2s = deps.get(TextToSpeech)
 
-    sound_bytes = t2s.t2s(text, voice="en-GB-Wavenet-B")
+    sound_bytes = t2s.t2s(text, "Charon")
 
-    with open("sample.mp3", "wb") as f:
-        f.write(sound_bytes)
+    with open(f"Voices/sample.{sound_bytes.extension}", "wb") as f:
+        f.write(sound_bytes.audio_content)

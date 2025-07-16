@@ -24,7 +24,7 @@ def test_get_voice_loads_documents():
     owner = "item_owner"
     item = Mock()
     item.owner = owner
-    item.sender = "sender"
+    item.sender = "sender@domain"
 
     sut = VoiceProvider(config, Mock(), firestore_client)
 
@@ -50,7 +50,7 @@ def test_get_voice_no_data_returns_default():
 
     item = Mock()
     item.owner = "owner"
-    item.sender = "sender"
+    item.sender = "sender@domain"
 
     sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
@@ -79,18 +79,14 @@ def test_get_voice_falls_back_to_global_document_domain():
     voice = "voice_name"
     data = {
         GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                voice: [
-                    {"always": True}
-                ]
-            }
+            "*@*": voice
         }
     }
     firestore_client = _mock_firestore_client_with_voice_data(data)
 
     item = Mock()
     item.owner = "owner"
-    item.sender = "sender"
+    item.sender = "sender@domain"
 
     sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
@@ -104,25 +100,17 @@ def test_get_voice_finds_global_domain_in_owner_document():
     owner = "owner_value"
     data = {
         GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            }
+            "*@*": "other_voice"
         },
         owner: {
-            GLOBAL_DOMAIN: {
-                voice: [
-                    {"always": True}
-                ]
-            }
+            "*@*": voice
         }
     }
     firestore_client = _mock_firestore_client_with_voice_data(data)
 
     item = Mock()
     item.owner = owner
-    item.sender = "sender"
+    item.sender = "sender@domain"
 
     sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
@@ -136,49 +124,8 @@ def test_get_voice_global_document_sender_domain_always():
     sender_domain = "sender_domain"
     data = {
         GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            },
-            sender_domain: {
-                voice: [
-                    {"always": True}
-                ]
-            }
-        }
-    }
-    firestore_client = _mock_firestore_client_with_voice_data(data)
-
-    item = Mock()
-    item.owner = "owner"
-    item.sender = f"sender@{sender_domain}"
-
-    sut = VoiceProvider(Mock(), Mock(), firestore_client)
-
-    result = sut.get_voice(item)
-
-    assert result == voice
-
-
-def test_get_voice_global_document_sender_domain_ignore_always_false():
-    voice = "voice_name"
-    sender_domain = "sender_domain"
-    data = {
-        GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            },
-            sender_domain: {
-                "false_voice": [
-                    {"always": False}
-                ],
-                voice: [
-                    {"always": True}
-                ]
-            }
+            "*@*": "other_voice",
+            f"*@{sender_domain}": voice
         }
     }
     firestore_client = _mock_firestore_client_with_voice_data(data)
@@ -200,16 +147,8 @@ def test_get_voice_global_document_rule_sender():
     sender_name = "sender_name"
     data = {
         GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            },
-            sender_domain: {
-                voice: [
-                    {"sender": sender_name}
-                ]
-            }
+            "*@*": "other_voice",
+            f"{sender_name}@{sender_domain}": voice
         }
     }
     firestore_client = _mock_firestore_client_with_voice_data(data)
@@ -217,135 +156,6 @@ def test_get_voice_global_document_rule_sender():
     item = Mock()
     item.owner = "owner"
     item.sender = f"{sender_name}@{sender_domain}"
-
-    sut = VoiceProvider(Mock(), Mock(), firestore_client)
-
-    result = sut.get_voice(item)
-
-    assert result == voice
-
-
-def test_get_voice_global_document_rule_sender_contains():
-    voice = "voice_name"
-    sender_domain = "sender_domain"
-    sender_name = "sender_name"
-    data = {
-        GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            },
-            sender_domain: {
-                voice: [
-                    {"sender_contains": sender_name[3:8]}
-                ]
-            }
-        }
-    }
-    firestore_client = _mock_firestore_client_with_voice_data(data)
-
-    item = Mock()
-    item.owner = "owner"
-    item.sender = f"{sender_name}@{sender_domain}"
-
-    sut = VoiceProvider(Mock(), Mock(), firestore_client)
-
-    result = sut.get_voice(item)
-
-    assert result == voice
-
-
-def test_get_voice_global_document_rule_subject_contains():
-    voice = "voice_name"
-    sender_domain = "sender_domain"
-    subject = "item_subject_value"
-    data = {
-        GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            },
-            sender_domain: {
-                voice: [
-                    {"subject_contains": subject[3:8]}
-                ]
-            }
-        }
-    }
-    firestore_client = _mock_firestore_client_with_voice_data(data)
-
-    item = Mock()
-    item.owner = "owner"
-    item.sender = f"sender@{sender_domain}"
-    item.title = subject
-
-    sut = VoiceProvider(Mock(), Mock(), firestore_client)
-
-    result = sut.get_voice(item)
-
-    assert result == voice
-
-
-def test_get_voice_global_document_rule_object_is_and():
-    voice = "voice_name"
-    sender_domain = "sender_domain"
-    subject = "item_subject_value"
-    data = {
-        GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            },
-            sender_domain: {
-                "other_voice": [
-                    {"subject_contains": subject[3:8], "always": False}
-                ],
-                voice: [
-                    {"subject_contains": subject[3:8], "always": True}
-                ]
-            }
-        }
-    }
-    firestore_client = _mock_firestore_client_with_voice_data(data)
-
-    item = Mock()
-    item.owner = "owner"
-    item.sender = f"sender@{sender_domain}"
-    item.title = subject
-
-    sut = VoiceProvider(Mock(), Mock(), firestore_client)
-
-    result = sut.get_voice(item)
-
-    assert result == voice
-
-
-def test_get_voice_global_document_rule_collection_is_or():
-    voice = "voice_name"
-    sender_domain = "sender_domain"
-    data = {
-        GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            },
-            sender_domain: {
-                voice: [
-                    {"always": False},
-                    {"always": True}
-                ]
-            }
-        }
-    }
-    firestore_client = _mock_firestore_client_with_voice_data(data)
-
-    item = Mock()
-    item.owner = "owner"
-    item.sender = f"sender@{sender_domain}"
 
     sut = VoiceProvider(Mock(), Mock(), firestore_client)
 
@@ -361,28 +171,12 @@ def test_get_voice_owner_document_rule_sender():
     sender_name = "sender_name"
     data = {
         GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            },
-            sender_domain: {
-                "other_voice": [
-                    {"sender": sender_name}
-                ]
-            }
+            "*@*": "other_voice",
+            f"{sender_name}@{sender_domain}": "other_voice"
         },
         owner: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            },
-            sender_domain: {
-                voice: [
-                    {"sender": sender_name}
-                ]
-            }
+            "*@*": "other_voice",
+            f"{sender_name}@{sender_domain}": voice
         }
     }
     firestore_client = _mock_firestore_client_with_voice_data(data)
@@ -390,39 +184,6 @@ def test_get_voice_owner_document_rule_sender():
     item = Mock()
     item.owner = owner
     item.sender = f"{sender_name}@{sender_domain}"
-
-    sut = VoiceProvider(Mock(), Mock(), firestore_client)
-
-    result = sut.get_voice(item)
-
-    assert result == voice
-
-
-def test_get_voice_global_document_default_rule_is_false():
-    voice = "voice_name"
-    sender_domain = "sender_domain"
-    data = {
-        GLOBAL_DOCUMENT: {
-            GLOBAL_DOMAIN: {
-                "other_voice": [
-                    {"always": True}
-                ]
-            },
-            sender_domain: {
-                "other_voice": [
-                    {"bad_rule_name": True}
-                ],
-                voice: [
-                    {"always": True}
-                ]
-            }
-        }
-    }
-    firestore_client = _mock_firestore_client_with_voice_data(data)
-
-    item = Mock()
-    item.owner = "owner"
-    item.sender = f"sender@{sender_domain}"
 
     sut = VoiceProvider(Mock(), Mock(), firestore_client)
 

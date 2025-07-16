@@ -12,14 +12,14 @@ before_script:
   - echo $GCP_SA_KEY | base64 -d > sa.json
 
 flake8:
-  image: python:3.9
+  image: python:3.12
   stage: test
   script:
     - pip3 install flake8
     - python -m flake8
 
 mypy:
-  image: python:3.9
+  image: python:3.12
   stage: test
   script:
     - pip install -r requirements.txt
@@ -29,7 +29,7 @@ mypy:
 
 pytest:
   stage: test
-  image: python:3.9
+  image: python:3.12
   script:
     - pip install -r requirements.txt
     - pip install -r test_requirements.txt
@@ -41,7 +41,7 @@ pytest:
 
 pytest-coverage:
   stage: test
-  image: python:3.9
+  image: python:3.12
   script:
     - pip install -r requirements.txt
     - pip install -r test_requirements.txt

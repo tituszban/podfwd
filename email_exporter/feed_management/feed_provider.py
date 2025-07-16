@@ -1,6 +1,6 @@
 from email_exporter.config import Config
 from email_exporter.cloud import StorageProvider
-from firebase_admin.firestore import Client as FirestoreClient
+from google.cloud.firestore import Client as FirestoreClient
 from logging import Logger
 from .feed import Feed
 from typing import Dict
@@ -34,7 +34,7 @@ class FeedProvider:
                     self._feed_cache[c_key] = feed
             return feed
 
-    def _get_feed_doc(self, key):
+    def _get_feed_doc(self, key: str):
         ref = self.db.collection(self.collection).document(key)
         snapshot = ref.get()
         if not snapshot.exists:
@@ -65,7 +65,7 @@ class FeedProvider:
         ref, _, _, _ = self._get_feed_doc(key)
         return ref
 
-    def _get_feed(self, key):
+    def _get_feed(self, key: str):
         ref, key, data, keys = self._get_feed_doc(key)
 
         items = [item.to_dict() for item in ref.collection(self._items_collection).get()]

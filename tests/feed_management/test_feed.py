@@ -189,9 +189,9 @@ def test_add_item_bytes_calls_bucket():
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
     next_idx = feed.next_id
-    file_name = Item.filename_from_id(next_idx)
+    file_name = f"{next_idx}.mp3"
 
-    feed.add_item_bytes("title", "description", "date", "sender", raw_data)
+    feed.add_item_bytes("title", "description", "date", "sender", raw_data, "mp3")
 
     bucket.upload_bytes.assert_called_once_with(file_name, raw_data)
 
@@ -213,9 +213,9 @@ def test_add_item_bytes_uses_bucket_url():
     feed = Feed.from_dict(feed_key, feed_data, storage_provider)
 
     next_idx = feed.next_id
-    file_name = Item.filename_from_id(next_idx)
+    file_name = f"{next_idx}.mp3"
 
-    item = feed.add_item_bytes("title", "description", "date", "sender", raw_data)
+    item = feed.add_item_bytes("title", "description", "date", "sender", raw_data, "mp3")
 
     assert item.file_info.url == bucket_url
     assert item.file_info.file_name == file_name
@@ -236,7 +236,7 @@ def test_add_item_bytes_uses_passed_in_values():
     date = "date_value"
     sender = "sender_value"
 
-    item = feed.add_item_bytes(title, description, date, sender, "raw_data_value")
+    item = feed.add_item_bytes(title, description, date, sender, "raw_data_value", "mp3")
 
     assert item.title == title
     assert item.description == description
@@ -255,7 +255,7 @@ def test_add_item_bytes_created_date_is_now():
 
     date_now = datetime.datetime(2021, 7, 1)
     with freeze_time(date_now):
-        item = feed.add_item_bytes("title", "description", "date", "sender", "raw_data_value")
+        item = feed.add_item_bytes("title", "description", "date", "sender", "raw_data_value", "mp3")
 
     assert item.created_date == date_now
 
@@ -271,7 +271,7 @@ def test_add_item_bytes_item_added_to_items():
 
     next_idx = feed.next_id
 
-    item = feed.add_item_bytes("title", "description", "date", "sender", "raw_data_value")
+    item = feed.add_item_bytes("title", "description", "date", "sender", "raw_data_value", "mp3")
 
     assert item.idx == next_idx
     assert item in feed.items

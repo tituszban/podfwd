@@ -63,9 +63,11 @@ def test_email_exporter_message_handler_calls_dependencies():
     voice_provider = Mock()
     voice_provider.get_voice.return_value = voice
 
-    sound_data = "sound_data"
+    t2s_output = Mock()
+    t2s_output.audio_content.return_value = "sound_data"
+    t2s_output.extension = "mp3"
     t2s = Mock()
-    t2s.lines_to_speech.return_value = sound_data
+    t2s.lines_to_speech.return_value = t2s_output
 
     sut = EmailExporter(
         Mock(), feed_provider, t2s, parser_selector, Mock(), voice_provider)
@@ -89,7 +91,8 @@ def test_email_exporter_message_handler_calls_dependencies():
         description='\n'.join(description),
         date=content_item.date,
         sender=content_item.sender,
-        data=sound_data
+        data=t2s_output.audio_content,
+        extension=t2s_output.extension,
     )
 
     assert result is True

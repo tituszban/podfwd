@@ -50,10 +50,6 @@ class Item:
             "file_info": FileInfo.from_dict(d.get("file_info", {}))
         })
 
-    @staticmethod
-    def filename_from_id(idx):
-        return f"{idx}.mp3"
-
     def to_dict(self):
         return {
             "title": self.title,

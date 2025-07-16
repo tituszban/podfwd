@@ -2,6 +2,7 @@ beautifulsoup4
 lxml
 google-cloud-texttospeech
 google-cloud-storage
+google-genai
 firebase-admin
 bleach
 Flask

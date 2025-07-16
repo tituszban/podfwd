@@ -2,6 +2,8 @@ from . import rss_gen
 from .item import Item, FileInfo
 import datetime
 import os
+from email_exporter.cloud import StorageProvider
+from email_exporter.cloud.storage import Storage
 
 
 DEFAULT_FEED_FILE_NAME = "feed.xml"
@@ -79,14 +81,14 @@ class Branding:
 class Feed:
     def __init__(
         self,
-        key,
-        items,
-        bucket_name,
-        bucket,
-        item_lifetime_days,
-        block=True,
-        branding=Branding(),
-        feed_file_name=DEFAULT_FEED_FILE_NAME,
+        key: str,
+        items: list[Item],
+        bucket_name: str,
+        bucket: Storage,
+        item_lifetime_days: int,
+        block: bool = True,
+        branding: Branding = Branding(),
+        feed_file_name: str = DEFAULT_FEED_FILE_NAME,
         **_
     ):
         self.key = key
@@ -97,10 +99,10 @@ class Feed:
         self.block = block
         self.branding = branding
         self.feed_file_name = feed_file_name
-        self._updated_items = set({})
+        self._updated_items = set()
 
     @classmethod
-    def from_data_and_items(cls, key, data, items, storage_provider):
+    def from_data_and_items(cls, key: str, data: dict, items: list, storage_provider: StorageProvider):
         return cls(
             key=key,
             items=list(map(Item.from_dict, items)),
@@ -112,7 +114,7 @@ class Feed:
         )
 
     @classmethod
-    def from_dict(cls, key, data, storage_provider):
+    def from_dict(cls, key: str, data: dict, storage_provider: StorageProvider):
         return cls(
             key=key,
             items=list(map(Item.from_dict, data.get("items", []))),
@@ -137,13 +139,13 @@ class Feed:
         return list(filter(lambda item: item.idx in self._updated_items, self.items))
 
     def clear_updated_items(self):
-        self._updated_items = set([])
+        self._updated_items = set()
 
-    def add_item_bytes(self, title, description, date, sender, data):
+    def add_item_bytes(self, title: str, description: str, date: str, sender: str, data: bytes, extension: str):
         idx = self.next_id
         now = datetime.datetime.now()
 
-        file_name = Item.filename_from_id(idx)
+        file_name = f"{idx}.{extension}"
         url = self.bucket.upload_bytes(file_name, data)
         file_info = FileInfo(url=url, file_name=file_name)
 
@@ -195,7 +197,7 @@ class Feed:
         return max([item.idx for item in self.items]) + 1
 
     def prune(self):
-        old_items = set()
+        old_items: set[Item] = set()
         now = datetime.datetime.now()
         for item in self.items:
             if item.file_info.is_removed or item.file_info.is_external:
