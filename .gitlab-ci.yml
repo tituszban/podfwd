@@ -5,7 +5,7 @@ stages:
   - cleanup
 
 variables:
-  CONTAINER_NAME: europe-west2-docker.pkg.dev/autopodcast/autopodcast/$EXPORTER_CR_SERVICE_NAME/$CI_COMMIT_BRANCH/$IMAGE_NAME:latest
+  CONTAINER_NAME: europe-west2-docker.pkg.dev/autopodcast/autopodcast/$CI_COMMIT_BRANCH/$IMAGE_NAME:latest
 
 
 before_script:
@@ -56,7 +56,7 @@ pytest-coverage:
   allow_failure: true
 
 build:
-  image: google/cloud-sdk:latest
+  image: docker:latest
   only:
     refs:
       - master
@@ -65,13 +65,11 @@ build:
     - docker:dind
   stage: build
   script:
-    # Login to Google Container Registry
-    # - cat sa.json | docker login -u _json_key --password-stdin https://gcr.io
-    - gcloud auth activate-service-account $GCP_SA_NAME --key-file sa.json
-    - gcloud auth configure-docker europe-west2-docker.pkg.dev
-    # Build and tag image for both GCR and Gitlab registries
+    # Login to Google Artifact Registry
+    - cat sa.json | docker login -u _json_key --password-stdin https://europe-west2-docker.pkg.dev
+    # Build and tag image for Artifact Registry
     - docker build --cache-from $CONTAINER_NAME -t $CONTAINER_NAME -t $IMAGE_NAME:latest .
-    # Push image to GCR
+    # Push image to Artifact Registry
     - docker push $CONTAINER_NAME
 
 deploy-exporter:
@@ -151,4 +149,3 @@ prune_containers:
     - gcloud auth activate-service-account $GCP_SA_NAME --key-file sa.json
     # Delete older containers
     - python3 ci/prune_containers.py $PROJECT_ID "$EXPORTER_CR_SERVICE_NAME:$EXPORTER_CR_REGION,$FEED_CR_SERVICE_NAME:$FEED_CR_REGION" $CONTAINER_NAME
-  
