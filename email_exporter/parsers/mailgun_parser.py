@@ -5,7 +5,7 @@ from .content_item import ContentItem
 class MailgunItemEmitter(ItemEmitter):
     """
     Item emitter for mailgun-based newsletters like Cautious Optimism.
-    
+
     The email structure typically has:
     - A main table with nested tables for layout
     - A td with class "post-content" containing the article content

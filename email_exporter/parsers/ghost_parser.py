@@ -5,13 +5,13 @@ from .content_item import ContentItem
 class GhostItemEmitter(ItemEmitter):
     """
     Item emitter for Ghost-based newsletters like Platformer.
-    
+
     The email structure typically has:
     - A header table with site-info, post-title, feature-image
     - A main content area in a td with class "post-content-sans-serif"
     - Content marked with <!-- POST CONTENT START --> and <!-- POST CONTENT END --> comments
     - Footer with feedback buttons, footer text, and "Powered by Ghost" badge
-    
+
     Elements to filter out:
     - kg-visibility-wrapper: promotional content wrappers
     - kg-cta-card: call-to-action cards with upgrade buttons

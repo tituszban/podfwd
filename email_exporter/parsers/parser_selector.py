@@ -1,4 +1,5 @@
 from logging import Logger
+from typing import Type
 
 from email_exporter.inbox import InboxItem
 from email_exporter.parsers.parser_abc import ParserABC
@@ -8,12 +9,13 @@ from .mailgun_parser import MailgunItemEmitter
 from .ghost_parser import GhostItemEmitter
 from .general_parser import GeneralParser
 from .emitter_parser import EmitterParser
+from .item_emitter import ItemEmitter
 
 
 class ParserSelector:
     def __init__(self, logger: Logger):
         self._logger = logger
-        self.emitters_by_domain = {
+        self.emitters_by_domain: dict[str, Type[ItemEmitter]] = {
             "techcrunch.com": TcItemEmitter,
             "substack.com": SubstackItemEmitter,
             "cautiousoptimism.news": MailgunItemEmitter,
