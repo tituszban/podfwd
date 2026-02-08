@@ -4,6 +4,8 @@ from email_exporter.inbox import InboxItem
 from email_exporter.parsers.parser_abc import ParserABC
 from .tc_parser import TcItemEmitter
 from .substack_parser import SubstackItemEmitter
+from .mailgun_parser import MailgunItemEmitter
+from .ghost_parser import GhostItemEmitter
 from .general_parser import GeneralParser
 from .emitter_parser import EmitterParser
 
@@ -13,7 +15,9 @@ class ParserSelector:
         self._logger = logger
         self.emitters_by_domain = {
             "techcrunch.com": TcItemEmitter,
-            "substack.com": SubstackItemEmitter
+            "substack.com": SubstackItemEmitter,
+            "cautiousoptimism.news": MailgunItemEmitter,
+            "platformer.news": GhostItemEmitter,
         }
 
     def get_parser(self, content_item: InboxItem) -> ParserABC:

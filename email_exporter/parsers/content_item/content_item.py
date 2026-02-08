@@ -3,12 +3,16 @@ from .content_item_abc import ContentItemABC
 from . import generic
 from . import substack
 from . import tc
+from . import mailgun
+from . import ghost
 
 
 class ContentItem:
     content_items: list[type[ContentItemABC]] = [
         *tc.items,
         *substack.items,
+        *mailgun.items,
+        *ghost.items,
         *generic.items
     ]
 
