@@ -1,0 +1,274 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    branches: [main, master]
+
+env:
+  IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+  CONTAINER_NAME: europe-west2-docker.pkg.dev/autopodcast/autopodcast/${{ github.ref_name }}/${{ vars.IMAGE_NAME }}:latest
+
+jobs:
+  # ============== TEST STAGE ==============
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install flake8
+        run: pip install flake8
+      
+      - name: Run flake8
+        run: python -m flake8
+
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r test_requirements.txt
+          pip install mypy
+      
+      - name: Run mypy
+        run: mypy email_exporter
+
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r test_requirements.txt
+      
+      - name: Run pytest
+        run: pytest --junitxml=report.xml
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: report.xml
+
+  pytest-coverage:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r test_requirements.txt
+          pip install pytest-cov
+      
+      - name: Run pytest with coverage
+        run: pytest --cov=email_exporter/ tests/ --cov-fail-under=${{ vars.MIN_TEST_COVERAGE }}
+      
+      - name: Generate coverage XML
+        run: coverage xml
+      
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # ============== BUILD STAGE ==============
+  build:
+    runs-on: ubuntu-latest
+    needs: [flake8, mypy, pytest]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker europe-west2-docker.pkg.dev --quiet
+      
+      - name: Build Docker image
+        run: |
+          docker build \
+            --cache-from ${{ env.CONTAINER_NAME }} \
+            -t ${{ env.CONTAINER_NAME }} \
+            -t ${{ env.IMAGE_NAME }}:latest \
+            . || docker build \
+            -t ${{ env.CONTAINER_NAME }} \
+            -t ${{ env.IMAGE_NAME }}:latest \
+            .
+      
+      - name: Push Docker image
+        run: docker push ${{ env.CONTAINER_NAME }}
+
+  # ============== DEPLOY STAGE ==============
+  deploy-exporter:
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ vars.EXPORTER_CR_SERVICE_NAME }} \
+            --image ${{ env.CONTAINER_NAME }} \
+            --region ${{ vars.EXPORTER_CR_REGION }} \
+            --project ${{ vars.PROJECT_ID }} \
+            --no-allow-unauthenticated \
+            --update-env-vars FINGERPRINT=${{ github.sha }},HEADER_SECRET=${{ secrets.HEADER_SECRET }}
+
+  deploy-feed:
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ vars.FEED_CR_SERVICE_NAME }} \
+            --image ${{ env.CONTAINER_NAME }} \
+            --region ${{ vars.FEED_CR_REGION }} \
+            --project ${{ vars.PROJECT_ID }} \
+            --allow-unauthenticated \
+            --update-env-vars FINGERPRINT=${{ github.sha }},HEADER_SECRET=${{ secrets.HEADER_SECRET }}
+
+  # ============== CLEANUP/VERIFY STAGE ==============
+  verify-exporter:
+    runs-on: ubuntu-latest
+    needs: [deploy-exporter]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Verify deployment
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ vars.EXPORTER_CR_SERVICE_NAME }} \
+            --region ${{ vars.EXPORTER_CR_REGION }} \
+            --project ${{ vars.PROJECT_ID }} \
+            --format="value(status.url)")
+          
+          TOKEN=$(gcloud auth print-identity-token)
+          
+          RESPONSE=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            -H "X-API-SECRET: ${{ secrets.HEADER_SECRET }}" \
+            "${SERVICE_URL}/fingerprint")
+          
+          echo "Response: $RESPONSE"
+          echo "$RESPONSE" | grep "${{ github.sha }}"
+
+  verify-feed:
+    runs-on: ubuntu-latest
+    needs: [deploy-feed]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Verify deployment
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ vars.FEED_CR_SERVICE_NAME }} \
+            --region ${{ vars.FEED_CR_REGION }} \
+            --project ${{ vars.PROJECT_ID }} \
+            --format="value(status.url)")
+          
+          TOKEN=$(gcloud auth print-identity-token)
+          
+          RESPONSE=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            -H "X-API-SECRET: ${{ secrets.HEADER_SECRET }}" \
+            "${SERVICE_URL}/fingerprint")
+          
+          echo "Response: $RESPONSE"
+          echo "$RESPONSE" | grep "${{ github.sha }}"
+
+  prune-containers:
+    runs-on: ubuntu-latest
+    needs: [verify-exporter, verify-feed]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Prune old containers
+        run: |
+          python ci/prune_containers.py \
+            ${{ vars.PROJECT_ID }} \
+            "${{ vars.EXPORTER_CR_SERVICE_NAME }}:${{ vars.EXPORTER_CR_REGION }},${{ vars.FEED_CR_SERVICE_NAME }}:${{ vars.FEED_CR_REGION }}" \
+            ${{ env.CONTAINER_NAME }}
