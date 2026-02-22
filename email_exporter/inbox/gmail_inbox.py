@@ -60,7 +60,7 @@ class GmailInbox(InboxABC):
 
         return all_folder[0][1]
 
-    def get_messages(self) -> Iterator[Tuple[int, Message]]:
+    def get_messages(self, search_criteria: str = 'UNFLAGGED') -> Iterator[Tuple[int, Message]]:
         if self._mail is None:
             self._mail = self._login()
 
@@ -68,7 +68,7 @@ class GmailInbox(InboxABC):
 
         self._ensure_success(self._mail.select(all_folder))
 
-        ids = self._ensure_success(self._mail.uid('search', None, 'UNFLAGGED'))  # type: ignore
+        ids = self._ensure_success(self._mail.uid('search', None, search_criteria))  # type: ignore
         ids = ids[0].decode().split()
         for idx in ids:
             messageRaw = self._ensure_success(self._mail.uid('fetch', idx, '(RFC822)'))

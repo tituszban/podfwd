@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom styles for email HTML rendering */
+.email-content {
+  @apply bg-white text-black rounded-md overflow-hidden;
+}
+
+.email-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Removed section placeholder */
+.removed-section {
+  @apply bg-zinc-800 border-2 border-dashed border-zinc-600 rounded-md p-4 text-zinc-400 text-sm;
+}
+
+/* SSML code display */
+.ssml-content {
+  @apply font-mono text-sm bg-zinc-900 rounded-md p-4 overflow-x-auto;
+}
+
+.ssml-content pre {
+  @apply whitespace-pre-wrap;
+}
+
+/* Debug info styling */
+.debug-info {
+  @apply text-xs text-zinc-500 bg-zinc-900/50 rounded px-2 py-1;
+}

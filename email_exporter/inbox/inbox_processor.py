@@ -76,7 +76,7 @@ class InboxProcessor:
         raise RuntimeError(
             "None of the known encodings were able to decode this payload; {}".format('; '.join(errors)))
 
-    def _process_email(self, message: Message) -> InboxItem:
+    def process_email(self, message: Message) -> InboxItem:
         subject, sender, recipient, date = self._get_message_data(message)
         mime = ""
         html = ""
@@ -99,7 +99,7 @@ class InboxProcessor:
         self._logger.info("Processing inbox")
         for idx, message in self._inbox.get_messages():
             self._logger.info(f"Processing email {idx}")
-            inbox_item = self._process_email(message)
+            inbox_item = self.process_email(message)
             self._logger.info(f"Email {idx} processed: {inbox_item}")
 
             discard_message = False

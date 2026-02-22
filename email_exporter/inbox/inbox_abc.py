@@ -6,7 +6,7 @@ from typing import Iterator, Tuple
 class InboxABC(ABC):
 
     @abstractmethod
-    def get_messages(self) -> Iterator[Tuple[int, Message]]:
+    def get_messages(self, search_criteria: str = 'UNFLAGGED') -> Iterator[Tuple[int, Message]]:
         raise NotImplementedError()
 
     @abstractmethod

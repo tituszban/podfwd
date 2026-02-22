@@ -148,3 +148,4 @@ Pipfile
 debug/**
 Voices
 sources/**
+dev_data/**
